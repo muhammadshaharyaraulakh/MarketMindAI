@@ -1,0 +1,79 @@
+@import url('https://fonts.cdnfonts.com/css/mona-sans');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-brand-red: #FF2D20;
+  --color-brand-red-hover: #E5261A;
+  --color-brand-red-light: #FFF1F0;
+  --color-brand-red-border: #FECACA;
+  
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+  --color-text-dark: #F8FAFC;
+  
+  --color-bg-light: #FFFFFF;
+  --color-bg-alt: #F8FAFC;
+  --color-bg-dark: #0F172A;
+  --color-card-alt: #F1F5F9;
+  
+  --font-mona: 'Mona Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-poppins: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background-color: #FFFFFF;
+    color: #0F172A;
+    font-family: 'Mona Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Responsive font scaling with clamp() */
+  h1 {
+    font-size: clamp(40px, 6vw, 72px);
+  }
+  h2 {
+    font-size: clamp(28px, 4vw, 48px);
+  }
+  .body-large {
+    font-size: clamp(15px, 1.5vw, 18px);
+  }
+}
+
+/* Infinite marquee animation */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee 25s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* Custom Selection style */
+::selection {
+  background-color: #FFF1F0;
+  color: #FF2D20;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
