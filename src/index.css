@@ -9,8 +9,8 @@
   --color-brand-red-border: #FECACA;
   
   --color-text-primary: #0F172A;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94A3B8;
+  --color-text-secondary: #334155;
+  --color-text-muted: #475569;
   --color-text-dark: #F8FAFC;
   
   --color-bg-light: #FFFFFF;
@@ -65,6 +65,23 @@
 ::selection {
   background-color: #FFF1F0;
   color: #FF2D20;
+}
+
+/* Darker default text for light UI controls */
+[class*="text-[#475569]"] {
+  color: #1F2937 !important;
+}
+[class*="text-[#64748B]"] {
+  color: #334155 !important;
+}
+[class*="text-[#94A3B8]"] {
+  color: #475569 !important;
+}
+[class*="text-slate-500"] {
+  color: #334155 !important;
+}
+[class*="text-slate-400"] {
+  color: #475569 !important;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
