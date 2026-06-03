@@ -30,9 +30,16 @@
   body {
     background-color: #FFFFFF;
     color: #0F172A;
-    font-family: 'Mona Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 300;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Apply light attractive font globally as requested */
+  h1, h2, h3, h4, h5, h6, p, a, span, div, button, input, li, ul {
+    font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-weight: 300 !important;
   }
   
   /* Responsive font scaling with clamp() */

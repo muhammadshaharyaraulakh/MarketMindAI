@@ -923,60 +923,60 @@ function AnalyticsVisual() {
   )
 }
 
-// Feature Block 3 Visual (Dark AI Content Generator Bubble Panel)
+// Feature Block 3 Visual (Light AI Content Generator Bubble Panel)
 function ContentVisual() {
   return (
-    <div className="bg-[#0F172A] rounded-2xl p-6 border border-[#1E293B] w-full text-left">
-      <div className="flex items-center justify-between border-b border-[#1E293B] pb-3.5 mb-5">
+    <div className="bg-white rounded-2xl p-6 border border-[#E2E8F0] shadow-sm w-full text-left">
+      <div className="flex items-center justify-between border-b border-[#F1F5F9] pb-3.5 mb-5">
         <div className="flex items-center gap-2">
           <SparklesIcon className="w-5 h-5 text-[#FF2D20]" />
-          <span className="text-white font-semibold text-sm">AI Content Generator</span>
+          <span className="text-[#0F172A] font-semibold text-sm">AI Content Generator</span>
         </div>
-        <span className="bg-[#1E293B] text-[#94A3B8] text-[10px] font-bold px-2 py-0.5 rounded tracking-wide">
+        <span className="bg-[#F8FAFC] border border-[#E2E8F0] text-[#94A3B8] text-[10px] font-bold px-2 py-0.5 rounded tracking-wide">
           Gemini
         </span>
       </div>
 
       <div className="space-y-4">
         {/* Output Bubble 1 */}
-        <div className="bg-[#1E293B] rounded-xl p-3.5 text-[13px] text-white leading-relaxed border border-[#2D3748]">
+        <div className="bg-[#F8FAFC] rounded-xl p-3.5 text-[13px] text-[#475569] leading-relaxed border border-[#E2E8F0]">
           <div className="flex items-center justify-between mb-2">
-            <span className="flex items-center gap-1.5 font-bold text-amber-400 text-xs">
+            <span className="flex items-center gap-1.5 font-bold text-amber-500 text-xs">
               <BoltIconSolid className="w-3.5 h-3.5" />
               Campaign Hook
             </span>
-            <span className="text-[10px] text-blue-300 bg-blue-900/50 px-2 py-0.5 rounded-full font-bold">Meta Ads</span>
+            <span className="text-[10px] text-blue-700 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full font-bold">Meta Ads</span>
           </div>
           "Stop scrolling: your store is losing $4,200 every day to campaigns that should be working."
         </div>
 
         {/* Output Bubble 2 */}
-        <div className="bg-[#1E293B] rounded-xl p-3.5 text-[13px] text-white leading-relaxed border border-[#2D3748]">
+        <div className="bg-[#F8FAFC] rounded-xl p-3.5 text-[13px] text-[#475569] leading-relaxed border border-[#E2E8F0]">
           <div className="flex items-center justify-between mb-2">
-            <span className="flex items-center gap-1.5 font-bold text-green-400 text-xs">
+            <span className="flex items-center gap-1.5 font-bold text-green-600 text-xs">
               <CameraIcon className="w-3.5 h-3.5" />
               Creative Caption
             </span>
-            <span className="text-[10px] text-purple-300 bg-purple-900/50 px-2 py-0.5 rounded-full font-bold">Instagram</span>
+            <span className="text-[10px] text-purple-700 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-full font-bold">Instagram</span>
           </div>
           "Your product. Their problem. One powerful solution. Tap the link to see why 14,000+ customers switched."
         </div>
 
         {/* Output Bubble 3 */}
-        <div className="bg-[#1E293B] rounded-xl p-3.5 text-[13px] text-white leading-relaxed border border-[#2D3748]">
+        <div className="bg-[#F8FAFC] rounded-xl p-3.5 text-[13px] text-[#475569] leading-relaxed border border-[#E2E8F0]">
           <div className="flex items-center justify-between mb-2">
-            <span className="flex items-center gap-1.5 font-bold text-red-400 text-xs">
+            <span className="flex items-center gap-1.5 font-bold text-red-500 text-xs">
               <PlayCircleIcon className="w-3.5 h-3.5" />
               Video Hook Script
             </span>
-            <span className="text-[10px] text-slate-300 bg-slate-800 px-2 py-0.5 rounded-full font-bold">TikTok Ads</span>
+            <span className="text-[10px] text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full font-bold">TikTok Ads</span>
           </div>
           "In the next 47 seconds, I'll show you the exact 3-word CTA that doubled our client's ROAS overnight."
         </div>
       </div>
 
-      <div className="flex items-center justify-end mt-5 border-t border-[#1E293B] pt-3.5">
-        <button className="flex items-center gap-1 text-[#94A3B8] hover:text-white text-xs font-semibold cursor-pointer transition-colors duration-150">
+      <div className="flex items-center justify-end mt-5 border-t border-[#F1F5F9] pt-3.5">
+        <button className="flex items-center gap-1 text-[#94A3B8] hover:text-[#0F172A] text-xs font-semibold cursor-pointer transition-colors duration-150">
           <ArrowPathIcon className="w-3.5 h-3.5" />
           Regenerate Variations
         </button>
@@ -1637,11 +1637,12 @@ function SecuritySection() {
 
               {/* Google SSO Button */}
               <button className="w-full bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] hover:border-[#CBD5E1] text-[#374151] py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.05)] cursor-pointer transition-all">
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-.1.14-.95 2.11v2.54h3.05c1.78-1.63 2.95-4.05 2.95-6.5z"/>
-                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.05-2.54c-.84.57-1.92.91-3.13.91-2.4 0-4.43-1.63-5.16-3.82H5.43v2.62C7.39 21.93 9.47 24 12 24z"/>
-                  <path fill="#FBBC05" d="M6.84 15.64A7.12 7.12 0 0 1 6.5 12c0-.64.11-1.27.31-1.87V7.51H1.56A11.94 11.94 0 0 0 0 12c0 1.62.32 3.16.89 4.58l5.95-2.94z"/>
-                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43A11.96 11.96 0 0 0 12 0C9.47 0 7.39 2.07 5.43 5.92l5.95 2.94c.73-2.19 2.76-3.82 5.16-3.82z"/>
+                <svg className="w-5 h-5" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  <path fill="none" d="M0 0h48v48H0z"/>
                 </svg>
                 Continue with Google
               </button>
@@ -2207,48 +2208,53 @@ export default function App() {
   const [viewProfile, setViewProfile] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
-  if (isLoggedIn) {
-    return <Dashboard onLogout={() => setIsLoggedIn(false)} />
-  }
-
   return (
-    <main className="overflow-x-hidden w-full relative bg-white select-none">
-      <Navbar 
-        onSignIn={() => setAuthView('login')} 
-        onSignUp={() => setAuthView('signup')} 
-        onShowDashboard={() => setIsLoggedIn(true)}
-      />
-      <Hero onGetStarted={() => setAuthView('signup')} />
-      <LogoStrip />
-      <ProblemSection />
-      <FeaturesSection />
-      <DashboardSection />
-      <SecuritySection />
-      <PricingSection />
-      <TestimonialsSection />
-      <FAQSection />
-      <CTASection onGetStarted={() => setAuthView('signup')} />
-      <Footer />
-
-      <AnimatePresence>
-        {authView && (
-          <AuthSystem
-            initialView={authView}
-            onClose={(result) => {
-              setAuthView(null)
-              if (result?.loggedIn) {
-                setIsLoggedIn(true)
-              }
-            }}
+    <>
+      {isLoggedIn ? (
+        <Dashboard 
+          onLogout={() => setIsLoggedIn(false)} 
+          onOpenProfile={() => setViewProfile(true)} 
+        />
+      ) : (
+        <main className="overflow-x-hidden w-full relative bg-white select-none">
+          <Navbar 
+            onSignIn={() => setAuthView('login')} 
+            onSignUp={() => setAuthView('signup')} 
+            onShowDashboard={() => setIsLoggedIn(true)}
           />
-        )}
-      </AnimatePresence>
+          <Hero onGetStarted={() => setAuthView('signup')} />
+          <LogoStrip />
+          <ProblemSection />
+          <FeaturesSection />
+          <DashboardSection />
+          <SecuritySection />
+          <PricingSection />
+          <TestimonialsSection />
+          <FAQSection />
+          <CTASection onGetStarted={() => setAuthView('signup')} />
+          <Footer />
+
+          <AnimatePresence>
+            {authView && (
+              <AuthSystem
+                initialView={authView}
+                onClose={(result) => {
+                  setAuthView(null)
+                  if (result?.loggedIn) {
+                    setIsLoggedIn(true)
+                  }
+                }}
+              />
+            )}
+          </AnimatePresence>
+        </main>
+      )}
 
       <AnimatePresence>
         {viewProfile && (
           <ProfilePage onClose={() => setViewProfile(false)} />
         )}
       </AnimatePresence>
-    </main>
+    </>
   )
 }

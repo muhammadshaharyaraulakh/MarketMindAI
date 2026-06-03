@@ -282,7 +282,7 @@ const KPICard = ({ title, value, change, isPositive, suffix = '', prefix = '', i
 // MAIN DASHBOARD COMPONENT
 // ==========================================
 
-export default function Dashboard({ onLogout }) {
+export default function Dashboard({ onLogout, onOpenProfile }) {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
   const [showRevenue, setShowRevenue] = useState(true)
   const [editingCampaign, setEditingCampaign] = useState(null)
@@ -745,9 +745,13 @@ export default function Dashboard({ onLogout }) {
               <span className="text-xs font-semibold text-[#0F172A]">Rashid (FYP Marketer)</span>
               <span className="text-[9px] font-bold text-[#FF2D20] uppercase tracking-widest mt-0.5">Enterprise Admin</span>
             </div>
-            <div className="w-8 h-8 rounded-full bg-[#FFF1F0] border border-[#FECACA] flex items-center justify-center font-bold text-xs text-[#FF2D20]">
+            <button 
+              onClick={onOpenProfile}
+              title="Open Profile"
+              className="w-8 h-8 rounded-full bg-[#FFF1F0] border border-[#FECACA] flex items-center justify-center font-bold text-xs text-[#FF2D20] hover:bg-[#FF2D20] hover:text-white transition-colors cursor-pointer"
+            >
               R
-            </div>
+            </button>
           </div>
         </header>
 
