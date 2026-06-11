@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import {
@@ -2207,6 +2208,63 @@ export default function App() {
   const [authView, setAuthView] = useState(null)
   const [viewProfile, setViewProfile] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [verifyingEmail, setVerifyingEmail] = useState(false)
+
+  useEffect(() => {
+    const checkEmailVerification = async () => {
+      const path = window.location.pathname;
+      if (path.startsWith('/verify-email')) {
+        setVerifyingEmail(true);
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const backendUrl = params.get('verify_url');
+          
+          if (!backendUrl) {
+            throw new Error('Verification URL missing');
+          }
+          
+          const response = await axios.get(backendUrl, {
+            headers: { 'Accept': 'application/json' }
+          });
+          
+          if (response.data && response.data.token) {
+            // Save token
+            localStorage.setItem('auth_token', response.data.token);
+            // Setup default axios header
+            axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+            setIsLoggedIn(true);
+          }
+        } catch (error) {
+          console.error('Email verification failed:', error);
+          alert('Email verification failed or link expired. Please try again.');
+        } finally {
+          setVerifyingEmail(false);
+          // Clean up URL without reloading
+          window.history.replaceState({}, document.title, '/');
+        }
+      } else {
+        // Check if token exists in local storage
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          setIsLoggedIn(true);
+        }
+      }
+    };
+    
+    checkEmailVerification();
+  }, []);
+
+  if (verifyingEmail) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[#FF2D20] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[#0F172A] font-bold text-lg">Verifying your email...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

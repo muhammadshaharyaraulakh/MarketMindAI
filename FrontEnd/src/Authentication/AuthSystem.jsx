@@ -7,6 +7,7 @@ import SignupForm from './views/SignupForm'
 import PasswordResetFlow from './views/PasswordResetFlow'
 import AccountRecoveryFlow from './views/AccountRecoveryFlow'
 import SuccessScreen from './views/SuccessScreen'
+import TwoFactorChallengeForm from './views/TwoFactorChallengeForm'
 
 export default function AuthSystem({ onClose, initialView = 'login' }) {
   const [view, setView] = useState(initialView)
@@ -74,6 +75,13 @@ export default function AuthSystem({ onClose, initialView = 'login' }) {
           )}
           {view === 'account-recovery' && (
             <AccountRecoveryFlow 
+              onSwitchView={setView} 
+              onSuccess={handleSuccess} 
+              pageVariants={pageVariants} 
+            />
+          )}
+          {view === 'two-factor-challenge' && (
+            <TwoFactorChallengeForm 
               onSwitchView={setView} 
               onSuccess={handleSuccess} 
               pageVariants={pageVariants} 

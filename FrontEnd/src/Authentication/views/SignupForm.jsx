@@ -11,32 +11,58 @@ import {
 } from '@heroicons/react/24/outline'
 import SocialLogins from '../components/SocialLogins'
 import FeedbackAlert from '../components/FeedbackAlert'
+import axios from 'axios'
 
 export default function SignupForm({ onSwitchView, onSuccess, pageVariants }) {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg('')
-    if (!fullName || !email || !password) {
+    if (!fullName || !email || !password || !passwordConfirmation) {
       setErrorMsg('Please fill in all required fields.')
       return
     }
     setLoading(true)
-    setTimeout(() => {
+    
+    try {
+      const response = await axios.post('http://localhost:8000/api/register', {
+        name: fullName,
+        email: email,
+        password: password,
+        password_confirmation: passwordConfirmation
+      }, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+      
       setLoading(false)
+      // On success (201 Created), notify the user to check their email
       onSuccess({
         title: 'Registration Successful!',
-        subtitle: `Welcome, ${fullName}. Your MarketMind AI engine account is fully set up. Get ready to turn marketing data into revenue.`,
-        actionText: 'Access Workspace',
-        actionView: 'dashboard'
+        subtitle: `Welcome, ${fullName}. Please check your email inbox for a verification link to activate your workspace.`,
+        actionText: 'Return to Homepage',
+        actionView: 'close' 
       })
-    }, 1500)
+    } catch (error) {
+      setLoading(false)
+      if (error.response && error.response.status === 422) {
+        // Validation failed
+        const errors = error.response.data.errors;
+        const firstErrorMsg = Object.values(errors)[0][0];
+        setErrorMsg(firstErrorMsg);
+      } else {
+        setErrorMsg('An error occurred during registration. Please try again.');
+      }
+    }
   }
 
   return (
@@ -104,6 +130,21 @@ export default function SignupForm({ onSwitchView, onSuccess, pageVariants }) {
             >
               {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
             </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs font-bold text-[#475569] uppercase tracking-wider block mb-1 font-poppins">Confirm Password</label>
+          <div className="relative">
+            <LockClosedIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              required
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              placeholder="••••••••"
+              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-10 py-2.5 font-semibold transition-all duration-150"
+            />
           </div>
         </div>
 

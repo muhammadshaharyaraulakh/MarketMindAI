@@ -31,6 +31,8 @@ export default function SuccessScreen({ context, onClose, onSwitchView, pageVari
         onClick={() => {
           if (context.actionView === 'dashboard') {
             onClose({ loggedIn: true })
+          } else if (context.actionView === 'close') {
+            onClose()
           } else {
             onSwitchView(context.actionView)
           }

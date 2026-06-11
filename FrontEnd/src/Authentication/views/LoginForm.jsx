@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline'
 import SocialLogins from '../components/SocialLogins'
 import FeedbackAlert from '../components/FeedbackAlert'
+import axios from 'axios'
 
 export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
   const [email, setEmail] = useState('')
@@ -18,7 +19,7 @@ export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg('')
     if (!email || !password) {
@@ -26,10 +27,37 @@ export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
       return
     }
     setLoading(true)
-    setTimeout(() => {
+    
+    try {
+      const response = await axios.post('http://localhost:8000/api/login', {
+        email,
+        password
+      }, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+      
       setLoading(false)
-      onSuccess() // logs in
-    }, 1200)
+      if (response.data.two_factor) {
+        onSwitchView('two-factor-challenge')
+      } else {
+        if (response.data.token) {
+          localStorage.setItem('auth_token', response.data.token);
+        }
+        onSuccess() 
+      }
+    } catch (error) {
+      setLoading(false)
+      if (error.response && error.response.status === 422) {
+        const errors = error.response.data.errors;
+        const firstErrorMsg = errors ? Object.values(errors)[0][0] : error.response.data.message;
+        setErrorMsg(firstErrorMsg || 'Invalid credentials');
+      } else {
+        setErrorMsg('An error occurred during login. Please try again.');
+      }
+    }
   }
 
   return (
