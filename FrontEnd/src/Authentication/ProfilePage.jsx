@@ -24,8 +24,9 @@ import {
   ArrowRightIcon
 } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid'
+import axios from 'axios'
 
-export default function ProfilePage({ onClose }) {
+export default function ProfilePage({ onClose, user }) {
   const [activeTab, setActiveTab] = useState('profile') // 'profile', 'password', 'recovery', '2fa', 'activity'
   
   // Feedback alerts
@@ -35,14 +36,8 @@ export default function ProfilePage({ onClose }) {
   const [isSyncingSessions, setIsSyncingSessions] = useState(false)
 
   // Profile data state
-  const [fullName, setFullName] = useState('Rashid Mahmood')
-  const [email, setEmail] = useState('rashid@company.com')
-  const [role, setRole] = useState('Enterprise Growth Architect')
-  const [department, setDepartment] = useState('Campaign Operations')
-  const [avatar, setAvatar] = useState('') 
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef(null)
-
+  const [fullName, setFullName] = useState(user && user.name ? user.name : 'Rashid Mahmood')
+  const [email, setEmail] = useState(user && user.email ? user.email : 'rashid@company.com')
   // Password fields
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -50,12 +45,18 @@ export default function ProfilePage({ onClose }) {
   const [showPass, setShowPass] = useState({ old: false, new: false, confirm: false })
 
   // Recovery fields
-  const [recoveryEmail, setRecoveryEmail] = useState('rashid.recovery@gmail.com')
-  const [recoveryPhone, setRecoveryPhone] = useState('+92 300 1234567')
+  const [recoveryEmail, setRecoveryEmail] = useState(user && user.recovery_email ? user.recovery_email : '')
+  const [hasRecoveryEmail, setHasRecoveryEmail] = useState(!!(user && user.recovery_email))
 
   // 2FA status
-  const [is2FAEnabled, setIs2FAEnabled] = useState(false)
+  const [is2FAEnabled, setIs2FAEnabled] = useState(!!user?.two_factor_confirmed_at)
   const [show2FAModal, setShow2FAModal] = useState(false)
+  const [showConfirmPasswordModal, setShowConfirmPasswordModal] = useState(false)
+  const [passwordToConfirm, setPasswordToConfirm] = useState('')
+  const [qrCodeSvg, setQrCodeSvg] = useState('')
+  const [setupCode, setSetupCode] = useState('')
+  const [recoveryCodes, setRecoveryCodes] = useState([])
+  
   const [is2FAVerified, setIs2FAVerified] = useState(false) // Dynamic success state within modal
   const [twoFACode, setTwoFACode] = useState(['', '', '', '', '', ''])
   const twoFARefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)]
@@ -85,45 +86,38 @@ export default function ProfilePage({ onClose }) {
     setSuccessMsg('')
   }, [activeTab])
 
-  // Image upload
-  const triggerFileSelection = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click()
-    }
-  }
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setIsUploading(true)
-      setTimeout(() => {
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          setAvatar(reader.result)
-          setIsUploading(false)
-          setSuccessMsg('Picture uploaded and synced successfully.')
-        }
-        reader.readAsDataURL(file)
-      }, 900)
-    }
-  }
+  // Image upload removed
 
   // Profile save
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault()
     setLoading(true)
-    setTimeout(() => {
+    try {
+      const token = localStorage.getItem('auth_token')
+      await axios.put('http://localhost:8000/api/user/profile-information', {
+        name: fullName,
+        email: email
+      }, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
       setLoading(false)
-      setSuccessMsg('Workspace profile characteristics saved successfully.')
+      setSuccessMsg('Profile updated successfully.')
       setActivities([
         { id: Date.now(), action: 'Workspace Profile Data Synchronized', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'success' },
         ...activities
       ])
-    }, 1000)
+    } catch (err) {
+      setLoading(false)
+      const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
+      setErrorMsg(firstError || 'Error saving profile.')
+    }
   }
 
   // Password save
-  const handleSavePassword = (e) => {
+  const handleSavePassword = async (e) => {
     e.preventDefault()
     if (!oldPassword || !newPassword || !confirmPassword) {
       setErrorMsg('Please specify all security password inputs.')
@@ -134,7 +128,18 @@ export default function ProfilePage({ onClose }) {
       return
     }
     setLoading(true)
-    setTimeout(() => {
+    try {
+      const token = localStorage.getItem('auth_token')
+      await axios.put('http://localhost:8000/api/user/password', {
+        current_password: oldPassword,
+        password: newPassword,
+        password_confirmation: confirmPassword
+      }, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
       setLoading(false)
       setSuccessMsg('Your security password has been changed successfully.')
       setOldPassword('')
@@ -144,25 +149,82 @@ export default function ProfilePage({ onClose }) {
         { id: Date.now(), action: 'Password Rotation Completed', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'success' },
         ...activities
       ])
-    }, 1100)
+    } catch (err) {
+      setLoading(false)
+      const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
+      setErrorMsg(firstError || 'Error updating password.')
+    }
   }
 
-  // Recovery save
-  const handleSaveRecovery = (e) => {
+  // Recovery handlers
+  const handleAddRecoveryEmail = async (e) => {
     e.preventDefault()
-    if (!recoveryEmail || !recoveryPhone) {
-      setErrorMsg('Both recovery fields must be filled.')
+    if (!recoveryEmail) {
+      setErrorMsg('Recovery email cannot be empty.')
       return
     }
     setLoading(true)
-    setTimeout(() => {
+    try {
+      const token = localStorage.getItem('auth_token')
+      await axios.post('http://localhost:8000/api/add-recovery-email', { recovery_email: recoveryEmail }, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
       setLoading(false)
-      setSuccessMsg('Alternative recovery paths saved successfully.')
-      setActivities([
-        { id: Date.now(), action: 'Account Recovery Coordinate Set', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'success' },
-        ...activities
-      ])
-    }, 1000)
+      setHasRecoveryEmail(true)
+      setSuccessMsg('Recovery email added successfully.')
+    } catch(err) {
+      setLoading(false)
+      const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
+      setErrorMsg(firstError || 'Error adding recovery email')
+    }
+  }
+
+  const handleUpdateRecoveryEmail = async (e) => {
+    e.preventDefault()
+    if (!recoveryEmail) {
+      setErrorMsg('Recovery email cannot be empty.')
+      return
+    }
+    setLoading(true)
+    try {
+      const token = localStorage.getItem('auth_token')
+      await axios.post('http://localhost:8000/api/update-recovery-email', { recovery_email: recoveryEmail }, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+      setLoading(false)
+      setSuccessMsg('Recovery email updated successfully.')
+    } catch(err) {
+      setLoading(false)
+      const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
+      setErrorMsg(firstError || 'Error updating recovery email')
+    }
+  }
+
+  const handleRemoveRecoveryEmail = async () => {
+    setLoading(true)
+    try {
+      const token = localStorage.getItem('auth_token')
+      await axios.post('http://localhost:8000/api/remove-recovery-email', {}, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      })
+      setLoading(false)
+      setRecoveryEmail('')
+      setHasRecoveryEmail(false)
+      setSuccessMsg('Recovery email removed successfully.')
+    } catch(err) {
+      setLoading(false)
+      const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
+      setErrorMsg(firstError || 'Error removing recovery email')
+    }
   }
 
   // 2FA Digit handling
@@ -192,8 +254,8 @@ export default function ProfilePage({ onClose }) {
     }
   }
 
-  // Simulated Verification check inside 2FA modal
-  const handleVerify2FA = (e) => {
+  // Real Verification check inside 2FA modal
+  const handleVerify2FA = async (e) => {
     e.preventDefault()
     const entered = twoFACode.join('')
     if (entered.length < 6) {
@@ -201,30 +263,51 @@ export default function ProfilePage({ onClose }) {
       return
     }
     setLoading(true)
-    setTimeout(() => {
+    setErrorMsg('')
+    try {
+      const token = localStorage.getItem('auth_token')
+      const headers = { 
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+
+      await axios.post('http://localhost:8000/api/user/confirmed-two-factor-authentication', {
+        code: entered
+      }, { headers })
+
+      const recoveryResp = await axios.get('http://localhost:8000/api/user/two-factor-recovery-codes', { headers })
+      setRecoveryCodes(recoveryResp.data)
+      
       setLoading(false)
       setIs2FAVerified(true)
       setIs2FAEnabled(true)
       setTwoFACode(['', '', '', '', '', ''])
       
-      // Add timeline action
       setActivities([
         { id: Date.now(), action: 'Google Authenticator 2FA Activated', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'success' },
         ...activities
       ])
-
-      // Auto dismiss modal after 2 seconds success show
-      setTimeout(() => {
-        setShow2FAModal(false)
-        setIs2FAVerified(false)
-        setSuccessMsg('Google Authenticator 2FA protection locked successfully.')
-      }, 2000)
-    }, 1200)
+      
+      setSuccessMsg('Google Authenticator 2FA protection locked successfully.')
+    } catch (err) {
+      setLoading(false)
+      const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
+      setErrorMsg(firstError || 'Invalid verification code.')
+    }
   }
 
-  const handleDisable2FA = () => {
+  const handleDisable2FA = async () => {
     setLoading(true)
-    setTimeout(() => {
+    setErrorMsg('')
+    try {
+      const token = localStorage.getItem('auth_token')
+      const headers = { 
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+      
+      await axios.delete('http://localhost:8000/api/user/two-factor-authentication', { headers })
+      
       setLoading(false)
       setIs2FAEnabled(false)
       setSuccessMsg('Google Authenticator 2FA dismantled.')
@@ -232,7 +315,50 @@ export default function ProfilePage({ onClose }) {
         { id: Date.now(), action: 'Google Authenticator 2FA Terminated', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'warning' },
         ...activities
       ])
-    }, 1000)
+    } catch(err) {
+      setLoading(false)
+      if (err.response?.status === 423) {
+         setErrorMsg('Session locked. Please confirm your password by trying to enable 2FA again, or refresh the page.')
+      } else {
+         const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
+         setErrorMsg(firstError || 'Error disabling 2FA.')
+      }
+    }
+  }
+
+  const handleEnable2FA = () => {
+    setShowConfirmPasswordModal(true)
+  }
+
+  const handleConfirmPassword = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setErrorMsg('')
+    try {
+      const token = localStorage.getItem('auth_token')
+      const headers = { 
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+      
+      await axios.post('http://localhost:8000/api/user/confirm-password', {
+        password: passwordToConfirm
+      }, { headers })
+
+      await axios.post('http://localhost:8000/api/user/two-factor-authentication', {}, { headers })
+
+      const qrResp = await axios.get('http://localhost:8000/api/user/two-factor-qr-code', { headers })
+      setQrCodeSvg(qrResp.data.svg)
+      
+      setLoading(false)
+      setShowConfirmPasswordModal(false)
+      setPasswordToConfirm('')
+      setShow2FAModal(true)
+    } catch (err) {
+      setLoading(false)
+      const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
+      setErrorMsg(firstError || 'Error confirming password. Please verify your current password.')
+    }
   }
 
   // Sync active connections simulation
@@ -409,49 +535,6 @@ export default function ProfilePage({ onClose }) {
                   <p className="text-xs text-[#64748B] font-semibold mt-1">Configure your display name, corporate email address, and roles.</p>
                 </div>
 
-                {/* Crystal Clear Upload Avatar */}
-                <div className="flex flex-col sm:flex-row items-center gap-6 p-6 border border-[#E2E8F0] rounded-2xl bg-[#F8FAFC]">
-                  <div 
-                    onClick={triggerFileSelection}
-                    className="w-20 h-20 rounded-full bg-slate-200 overflow-hidden relative shrink-0 border-2 border-[#E2E8F0] hover:border-[#FF2D20] transition-colors flex items-center justify-center cursor-pointer group"
-                    title="Click to change profile image"
-                  >
-                    {isUploading ? (
-                      <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                        <ArrowPathIcon className="w-6 h-6 animate-spin text-[#FF2D20]" />
-                      </div>
-                    ) : avatar ? (
-                      <img src={avatar} alt="User Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <>
-                        <span className="text-[#475569] font-extrabold text-2xl font-mona group-hover:opacity-0 transition-opacity">RM</span>
-                        <PhotoIcon className="w-6 h-6 text-[#FF2D20] absolute opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </>
-                    )}
-                  </div>
-
-                  <div className="space-y-1.5 text-center sm:text-left">
-                    <h4 className="text-xs font-semibold text-[#475569] uppercase tracking-wider">Operational Avatar</h4>
-                    <p className="text-[11px] text-[#64748B] font-semibold">Click the circle to upload. Supports PNG, JPG, or WEBP up to 4MB resolution.</p>
-                    {avatar && (
-                      <button 
-                        type="button" 
-                        onClick={() => { setAvatar(''); setSuccessMsg('Avatar reverted to placeholder.') }}
-                        className="text-xs font-bold text-[#E5261A] hover:underline cursor-pointer"
-                      >
-                        Reset Picture
-                      </button>
-                    )}
-                  </div>
-
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    onChange={handleAvatarChange} 
-                    accept="image/*" 
-                    className="hidden" 
-                  />
-                </div>
 
                 {/* Form fields */}
                 <form onSubmit={handleSaveProfile} className="space-y-5">
@@ -487,31 +570,7 @@ export default function ProfilePage({ onClose }) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Operational Division</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={department}
-                        onChange={(e) => setDepartment(e.target.value)}
-                        placeholder="Growth Operations"
-                        className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] px-4 py-3 font-normal transition-all"
-                      />
-                    </div>
 
-                    <div>
-                      <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Corporate System Role</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        placeholder="Lead Engineer"
-                        className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] px-4 py-3 font-normal transition-all"
-                      />
-                    </div>
-                  </div>
 
                   <button
                     type="submit"
@@ -541,29 +600,29 @@ export default function ProfilePage({ onClose }) {
                 </div>
 
                 <form onSubmit={handleSavePassword} className="space-y-5">
-                  <div>
-                    <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Current Password</label>
-                    <div className="relative">
-                      <LockClosedIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input 
-                        type={showPass.old ? 'text' : 'password'}
-                        required
-                        value={oldPassword}
-                        onChange={(e) => setOldPassword(e.target.value)}
-                        placeholder="••••••••••••"
-                        className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] pl-10 pr-10 py-3 font-normal transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPass({ ...showPass, old: !showPass.old })}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer"
-                      >
-                        {showPass.old ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
-                      </button>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Current Password</label>
+                      <div className="relative">
+                        <LockClosedIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input 
+                          type={showPass.old ? 'text' : 'password'}
+                          required
+                          value={oldPassword}
+                          onChange={(e) => setOldPassword(e.target.value)}
+                          placeholder="••••••••••••"
+                          className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] pl-10 pr-10 py-3 font-normal transition-all"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPass({ ...showPass, old: !showPass.old })}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer"
+                        >
+                          {showPass.old ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">New Password</label>
                       <div className="relative">
@@ -636,47 +695,52 @@ export default function ProfilePage({ onClose }) {
                   <p className="text-xs text-[#64748B] font-semibold mt-1">Supply recovery coordinates. Security tokens will be dispatched to these endpoints during access failure.</p>
                 </div>
 
-                <form onSubmit={handleSaveRecovery} className="space-y-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Backup recovery Gmail</label>
-                      <div className="relative">
-                        <EnvelopeIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input 
-                          type="email" 
-                          required
-                          value={recoveryEmail}
-                          onChange={(e) => setRecoveryEmail(e.target.value)}
-                          placeholder="backup recovery@gmail.com"
-                          className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] pl-10 pr-4 py-3 font-normal transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Backup phone number</label>
-                      <div className="relative">
-                        <PhoneIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
-                        <input 
-                          type="tel" 
-                          required
-                          value={recoveryPhone}
-                          onChange={(e) => setRecoveryPhone(e.target.value)}
-                          placeholder="+92 300 1234567"
-                          className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] pl-10 pr-4 py-3 font-normal transition-all"
-                        />
-                      </div>
+                <div className="space-y-5">
+                  <div>
+                    <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Backup Recovery Email</label>
+                    <div className="relative">
+                      <EnvelopeIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input 
+                        type="email" 
+                        required
+                        value={recoveryEmail}
+                        onChange={(e) => setRecoveryEmail(e.target.value)}
+                        placeholder="recovery@company.com"
+                        className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] pl-10 pr-4 py-3 font-normal transition-all"
+                      />
                     </div>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white py-3.5 rounded-xl font-bold text-sm tracking-tight transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm"
-                  >
-                    {loading ? <ArrowPathIcon className="w-5 h-5 animate-spin text-white" /> : 'Lock In Recovery Paths'}
-                  </button>
-                </form>
+                  {hasRecoveryEmail ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={handleUpdateRecoveryEmail}
+                        disabled={loading}
+                        className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white py-3.5 rounded-xl font-bold text-sm tracking-tight transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        {loading ? <ArrowPathIcon className="w-5 h-5 animate-spin text-white" /> : 'Update Email'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRemoveRecoveryEmail}
+                        disabled={loading}
+                        className="w-full bg-white border border-red-200 text-red-600 hover:bg-red-50 py-3.5 rounded-xl font-bold text-sm tracking-tight transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        {loading ? <ArrowPathIcon className="w-5 h-5 animate-spin text-red-500" /> : 'Delete Email'}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleAddRecoveryEmail}
+                      disabled={loading}
+                      className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white py-3.5 rounded-xl font-bold text-sm tracking-tight transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      {loading ? <ArrowPathIcon className="w-5 h-5 animate-spin text-white" /> : 'Add Recovery Email'}
+                    </button>
+                  )}
+                </div>
               </motion.div>
             )}
 
@@ -733,7 +797,7 @@ export default function ProfilePage({ onClose }) {
                     ) : (
                       <button
                         type="button"
-                        onClick={() => setShow2FAModal(true)}
+                        onClick={handleEnable2FA}
                         className="px-5 py-2.5 bg-[#FF2D20] hover:bg-[#E5261A] text-white rounded-lg text-xs font-bold shadow-sm transition-all cursor-pointer"
                       >
                         Enroll Mobile Key
@@ -949,62 +1013,7 @@ export default function ProfilePage({ onClose }) {
                       {/* Sweeping Laser Indicator */}
                       <div className="absolute left-0 w-full h-[2px] bg-[#FF2D20] shadow-[0_0_8px_#FF2D20] animate-scan-laser z-10" />
 
-                      <svg className="w-full h-full text-[#0F172A] z-0" viewBox="0 0 100 100" fill="none">
-                        {/* Outer square blocks */}
-                        <rect x="5" y="5" width="22" height="22" stroke="currentColor" strokeWidth="4.5" fill="none" rx="2" />
-                        <rect x="11.5" y="11.5" width="9" height="9" fill="#FF2D20" rx="1" />
-
-                        <rect x="73" y="5" width="22" height="22" stroke="currentColor" strokeWidth="4.5" fill="none" rx="2" />
-                        <rect x="79.5" y="11.5" width="9" height="9" fill="#FF2D20" rx="1" />
-
-                        <rect x="5" y="73" width="22" height="22" stroke="currentColor" strokeWidth="4.5" fill="none" rx="2" />
-                        <rect x="11.5" y="79.5" width="9" height="9" fill="#FF2D20" rx="1" />
-
-                        {/* Complex graphics details */}
-                        <rect x="36" y="5" width="6" height="12" fill="currentColor" />
-                        <rect x="46" y="11" width="16" height="6" fill="currentColor" />
-                        <rect x="36" y="23" width="12" height="6" fill="currentColor" />
-                        <rect x="54" y="23" width="6" height="12" fill="currentColor" />
-                        <rect x="66" y="17" width="12" height="6" fill="currentColor" />
-                        
-                        <rect x="5" y="36" width="12" height="6" fill="currentColor" />
-                        <rect x="23" y="36" width="6" height="12" fill="currentColor" />
-                        <rect x="5" y="54" width="6" height="12" fill="currentColor" />
-                        <rect x="17" y="48" width="12" height="6" fill="#FF2D20" />
-
-                        {/* Red Center symbol */}
-                        <rect x="42" y="42" width="16" height="16" fill="#FF2D20" rx="2" />
-                        <circle cx="50" cy="50" r="3.5" fill="white" />
-
-                        <rect x="36" y="66" width="6" height="18" fill="currentColor" />
-                        <rect x="48" y="72" width="12" height="6" fill="currentColor" />
-                        <rect x="48" y="84" width="24" height="6" fill="currentColor" />
-                        <rect x="60" y="60" width="12" height="12" fill="currentColor" />
-                        
-                        <rect x="78" y="36" width="6" height="18" fill="currentColor" />
-                        <rect x="78" y="60" width="18" height="6" fill="currentColor" />
-                        <rect x="84" y="72" width="12" height="12" fill="currentColor" />
-                      </svg>
-                    </div>
-
-                    {/* Secret key copies */}
-                    <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 flex items-center justify-between max-w-xs mx-auto mb-6 text-left shadow-sm">
-                      <div>
-                        <span className="text-[9px] font-bold text-[#94A3B8] uppercase block tracking-wide">Manual setup key</span>
-                        <span className="text-xs font-extrabold text-[#0F172A] tracking-wider font-mono">MM-392F-K893-XP02</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleCopySecret}
-                        className="p-1.5 rounded-lg hover:bg-slate-200 text-[#64748B] hover:text-[#0F172A] cursor-pointer transition-colors"
-                        title="Copy secret key"
-                      >
-                        {copiedSecret ? (
-                          <span className="text-[10px] font-extrabold text-green-600">Copied!</span>
-                        ) : (
-                          <DocumentDuplicateIcon className="w-4 h-4" />
-                        )}
-                      </button>
+                      <div dangerouslySetInnerHTML={{ __html: qrCodeSvg }} className="w-full h-full text-[#0F172A] z-0 [&>svg]:w-full [&>svg]:h-full" />
                     </div>
 
                     {/* 6 Digit Input boxes */}
@@ -1072,9 +1081,84 @@ export default function ProfilePage({ onClose }) {
                       <ShieldCheckIcon className="w-4 h-4 text-green-600" />
                       Active Protection Enabled
                     </div>
+
+                    {recoveryCodes.length > 0 && (
+                      <div className="w-full mt-4 text-left border border-slate-200 rounded-xl p-4 bg-slate-50">
+                        <h4 className="text-xs font-bold text-slate-700 mb-2">Save These Recovery Codes</h4>
+                        <p className="text-[10px] text-slate-500 mb-3 leading-tight">
+                          If you lose your device, use these codes to recover your account. Store them securely.
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {recoveryCodes.map((code, idx) => (
+                            <div key={idx} className="bg-white border border-slate-200 px-2 py-1 rounded text-[11px] font-mono text-slate-800 text-center">
+                              {code}
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => { setShow2FAModal(false); setIs2FAVerified(false); }}
+                          className="mt-4 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                        >
+                          I have saved my codes
+                        </button>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* CONFIRM PASSWORD MODAL */}
+      <AnimatePresence>
+        {showConfirmPasswordModal && (
+          <div className="fixed inset-0 z-50 bg-[#0F172A]/40 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl border border-[#E2E8F0] shadow-2xl p-6 sm:p-8 max-w-sm w-full relative overflow-hidden"
+            >
+              <button
+                onClick={() => { setShowConfirmPasswordModal(false); setPasswordToConfirm(''); }}
+                className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-[#64748B] hover:text-[#0F172A] cursor-pointer transition-colors"
+              >
+                <ArrowLeftIcon className="w-5 h-5 rotate-180" />
+              </button>
+
+              <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                <LockClosedIcon className="w-6 h-6 text-slate-600" />
+              </div>
+
+              <h3 className="text-lg font-semibold text-[#0F172A] tracking-tight mb-2">Confirm Password</h3>
+              <p className="text-xs text-[#64748B] font-semibold mb-6">
+                For your security, please confirm your password to continue.
+              </p>
+
+              <form onSubmit={handleConfirmPassword} className="space-y-4">
+                <div className="relative">
+                  <LockClosedIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="password"
+                    required
+                    value={passwordToConfirm}
+                    onChange={(e) => setPasswordToConfirm(e.target.value)}
+                    placeholder="Enter current password"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] pl-10 pr-4 py-3 font-normal transition-all"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white py-3 rounded-lg font-bold text-sm tracking-tight transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                >
+                  {loading ? <ArrowPathIcon className="w-5 h-5 animate-spin text-white" /> : 'Confirm Password'}
+                </button>
+              </form>
             </motion.div>
           </div>
         )}

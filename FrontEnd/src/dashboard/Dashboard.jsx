@@ -282,7 +282,7 @@ const KPICard = ({ title, value, change, isPositive, suffix = '', prefix = '', i
 // MAIN DASHBOARD COMPONENT
 // ==========================================
 
-export default function Dashboard({ onLogout, onOpenProfile }) {
+export default function Dashboard({ onLogout, onOpenProfile, user }) {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
   const [showRevenue, setShowRevenue] = useState(true)
   const [editingCampaign, setEditingCampaign] = useState(null)
@@ -742,7 +742,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex flex-col text-right">
-              <span className="text-xs font-semibold text-[#0F172A]">Rashid (FYP Marketer)</span>
+              <span className="text-xs font-semibold text-[#0F172A]">{user ? user.name : 'Rashid (FYP Marketer)'}</span>
               <span className="text-[9px] font-bold text-[#FF2D20] uppercase tracking-widest mt-0.5">Enterprise Admin</span>
             </div>
             <button 
@@ -750,7 +750,7 @@ export default function Dashboard({ onLogout, onOpenProfile }) {
               title="Open Profile"
               className="w-8 h-8 rounded-full bg-[#FFF1F0] border border-[#FECACA] flex items-center justify-center font-bold text-xs text-[#FF2D20] hover:bg-[#FF2D20] hover:text-white transition-colors cursor-pointer"
             >
-              R
+              {user && user.name ? user.name.charAt(0).toUpperCase() : 'R'}
             </button>
           </div>
         </header>

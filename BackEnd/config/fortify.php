@@ -101,7 +101,7 @@ return [
     |
     */
 
-    'middleware' => ['api'],
+    'middleware' => ['api', \Illuminate\Session\Middleware\StartSession::class],
 
     /*
     |--------------------------------------------------------------------------

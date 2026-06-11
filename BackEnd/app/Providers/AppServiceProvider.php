@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
@@ -34,6 +35,11 @@ class AppServiceProvider extends ServiceProvider
                 ]
             );
             return $frontendUrl . '/verify-email?verify_url=' . urlencode($backendVerifyUrl);
+        });
+
+        ResetPassword::createUrlUsing(function ($user, string $token) {
+            $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+            return $frontendUrl . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
         });
     }
 }

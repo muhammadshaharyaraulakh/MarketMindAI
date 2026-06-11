@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
+
+axios.defaults.withCredentials = true;
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import {
@@ -2209,6 +2211,37 @@ export default function App() {
   const [viewProfile, setViewProfile] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [verifyingEmail, setVerifyingEmail] = useState(false)
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      const fetchUser = async () => {
+        try {
+          const token = localStorage.getItem('auth_token');
+          if (token) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          }
+          const backendUrl = 'http://localhost:8000';
+          const response = await axios.get(`${backendUrl}/api/user`, {
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          setUser(response.data);
+        } catch (error) {
+          console.error('Failed to fetch user:', error);
+          if (error.response && error.response.status === 401) {
+            setIsLoggedIn(false);
+            localStorage.removeItem('auth_token');
+            delete axios.defaults.headers.common['Authorization'];
+          }
+        }
+      };
+      fetchUser();
+    } else {
+      setUser(null);
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     const checkEmailVerification = async () => {
@@ -2242,6 +2275,8 @@ export default function App() {
           // Clean up URL without reloading
           window.history.replaceState({}, document.title, '/');
         }
+      } else if (path.startsWith('/reset-password')) {
+        setAuthView('password-reset');
       } else {
         // Check if token exists in local storage
         const token = localStorage.getItem('auth_token');
@@ -2270,15 +2305,32 @@ export default function App() {
     <>
       {isLoggedIn ? (
         <Dashboard 
-          onLogout={() => setIsLoggedIn(false)} 
+          onLogout={async () => {
+            try {
+              const backendUrl = 'http://localhost:8000';
+              await axios.post(`${backendUrl}/api/logout`, {}, {
+                headers: {
+                  'Accept': 'application/json'
+                }
+              });
+            } catch (error) {
+              console.error('Logout request failed:', error);
+            } finally {
+              setIsLoggedIn(false);
+              setUser(null);
+              localStorage.removeItem('auth_token');
+              delete axios.defaults.headers.common['Authorization'];
+            }
+          }} 
           onOpenProfile={() => setViewProfile(true)} 
+          user={user}
         />
       ) : (
         <main className="overflow-x-hidden w-full relative bg-white select-none">
           <Navbar 
             onSignIn={() => setAuthView('login')} 
             onSignUp={() => setAuthView('signup')} 
-            onShowDashboard={() => setIsLoggedIn(true)}
+            onShowDashboard={() => setAuthView('login')}
           />
           <Hero onGetStarted={() => setAuthView('signup')} />
           <LogoStrip />
@@ -2310,7 +2362,7 @@ export default function App() {
 
       <AnimatePresence>
         {viewProfile && (
-          <ProfilePage onClose={() => setViewProfile(false)} />
+          <ProfilePage onClose={() => setViewProfile(false)} user={user} />
         )}
       </AnimatePresence>
     </>

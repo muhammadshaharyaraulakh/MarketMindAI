@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon, ArrowPathIcon, ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
 import FeedbackAlert from '../components/FeedbackAlert'
-import OtpCodeInput from '../components/OtpCodeInput'
+import axios from 'axios'
 
 export default function PasswordResetFlow({ onSwitchView, onSuccess, pageVariants }) {
-  const [step, setStep] = useState('request') // 'request', 'verify', 'set'
+  const [step, setStep] = useState('request') // 'request', 'set'
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
+  const [token, setToken] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -15,7 +15,18 @@ export default function PasswordResetFlow({ onSwitchView, onSuccess, pageVariant
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
 
-  const handleResetRequestSubmit = (e) => {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlToken = params.get('token');
+    const urlEmail = params.get('email');
+    if (urlToken && urlEmail) {
+      setToken(urlToken);
+      setEmail(urlEmail);
+      setStep('set');
+    }
+  }, []);
+
+  const handleResetRequestSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg('')
     setSuccessMsg('')
@@ -24,31 +35,30 @@ export default function PasswordResetFlow({ onSwitchView, onSuccess, pageVariant
       return
     }
     setLoading(true)
-    setTimeout(() => {
+    try {
+      const backendUrl = 'http://localhost:8000';
+      await axios.post(`${backendUrl}/api/forgot-password`, { email }, {
+        headers: { 'Accept': 'application/json' }
+      });
+      setSuccessMsg(`We sent a password reset link to ${email}`)
+      setEmail('')
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.errors) {
+        setErrorMsg(Object.values(error.response.data.errors).flat()[0]);
+      } else if (error.response && error.response.data && error.response.data.message) {
+        setErrorMsg(error.response.data.message);
+      } else {
+        setErrorMsg('An error occurred. Please try again.');
+      }
+    } finally {
       setLoading(false)
-      setSuccessMsg(`We sent a 6 digit code to ${email}`)
-      setStep('verify')
-    }, 1200)
+    }
   }
 
-  const handleResetVerifySubmit = (e) => {
+  const handleNewPasswordSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg('')
     setSuccessMsg('')
-    if (code.length < 6) {
-      setErrorMsg('Please enter all 6 digits of your verification code.')
-      return
-    }
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      setStep('set')
-    }, 1000)
-  }
-
-  const handleNewPasswordSubmit = (e) => {
-    e.preventDefault()
-    setErrorMsg('')
     if (!password || !confirmPassword) {
       setErrorMsg('Please fill in both password fields.')
       return
@@ -58,25 +68,37 @@ export default function PasswordResetFlow({ onSwitchView, onSuccess, pageVariant
       return
     }
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      const backendUrl = 'http://localhost:8000';
+      await axios.post(`${backendUrl}/api/reset-password`, {
+        token,
+        email,
+        password,
+        password_confirmation: confirmPassword
+      }, {
+        headers: { 'Accept': 'application/json' }
+      });
+      
+      // Clean up URL parameters after success without reloading
+      window.history.replaceState({}, document.title, '/');
+      
       onSuccess({
         title: 'Password Successfully Reset',
         subtitle: 'Your credentials have been updated securely. You can now log into your console with your new password.',
         actionText: 'Sign In Now',
         actionView: 'login'
       })
-    }, 1200)
-  }
-
-  const resendCode = () => {
-    setLoading(true)
-    setErrorMsg('')
-    setSuccessMsg('')
-    setTimeout(() => {
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.errors) {
+        setErrorMsg(Object.values(error.response.data.errors).flat()[0]);
+      } else if (error.response && error.response.data && error.response.data.message) {
+        setErrorMsg(error.response.data.message);
+      } else {
+        setErrorMsg('An error occurred. Please try again.');
+      }
+    } finally {
       setLoading(false)
-      setSuccessMsg('New security code successfully re-sent.')
-    }, 800)
+    }
   }
 
   return (
@@ -101,7 +123,7 @@ export default function PasswordResetFlow({ onSwitchView, onSuccess, pageVariant
 
             <h3 className="text-2xl font-semibold text-[#0F172A] tracking-tight mb-2 text-center font-poppins">Reset Password</h3>
             <p className="text-[#475569] text-sm mb-6 text-center font-medium">
-              Enter your registered email address and we will send you a 6 digit confirmation code.
+              Enter your registered email address and we will send you a secure link to reset your password.
             </p>
 
             <form onSubmit={handleResetRequestSubmit} className="space-y-4">
@@ -129,57 +151,11 @@ export default function PasswordResetFlow({ onSwitchView, onSuccess, pageVariant
                   <ArrowPathIcon className="w-5 h-5 animate-spin text-white" />
                 ) : (
                   <>
-                    Send Reset Code
+                    Send Reset Link
                     <ArrowRightIcon className="w-4 h-4" />
                   </>
                 )}
               </button>
-            </form>
-          </motion.div>
-        )}
-
-        {step === 'verify' && (
-          <motion.div key="verify" variants={pageVariants} initial="initial" animate="animate" exit="exit">
-            <button
-              onClick={() => { setStep('request'); setSuccessMsg(''); setErrorMsg('') }}
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#94A3B8] hover:text-[#FF2D20] mb-4 transition-colors cursor-pointer font-poppins no-underline"
-            >
-              <ArrowLeftIcon className="w-3.5 h-3.5" /> Back to Email
-            </button>
-
-            <h3 className="text-2xl font-semibold text-[#0F172A] tracking-tight mb-2 text-center font-poppins">Verify Security Code</h3>
-            <p className="text-[#475569] text-sm mb-6 text-center font-medium">
-              We have dispatched a 6 digit confirmation code. Please input it below to unlock your credentials.
-            </p>
-
-            <form onSubmit={handleResetVerifySubmit} className="space-y-6">
-              <OtpCodeInput onChange={setCode} />
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white py-3 rounded-lg font-bold text-sm tracking-tight transition-all cursor-pointer flex items-center justify-center gap-2 relative shadow-sm"
-              >
-                {loading ? (
-                  <ArrowPathIcon className="w-5 h-5 animate-spin text-white" />
-                ) : (
-                  <>
-                    Verify Code
-                    <ArrowRightIcon className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-
-              <p className="text-[#475569] text-xs font-semibold text-center mt-4">
-                Didn't receive the code?{' '}
-                <button
-                  type="button"
-                  onClick={resendCode}
-                  className="text-[#FF2D20] hover:text-[#E5261A] font-bold no-underline transition-colors cursor-pointer font-poppins"
-                >
-                  Resend Code
-                </button>
-              </p>
             </form>
           </motion.div>
         )}
@@ -188,7 +164,7 @@ export default function PasswordResetFlow({ onSwitchView, onSuccess, pageVariant
           <motion.div key="set" variants={pageVariants} initial="initial" animate="animate" exit="exit">
             <h3 className="text-2xl font-semibold text-[#0F172A] tracking-tight mb-2 text-center font-poppins">Create New Password</h3>
             <p className="text-[#475569] text-sm mb-6 text-center font-medium">
-              Please define a new strong password for your digital campaign engine workspace.
+              Please define a new strong password for your digital campaign engine workspace ({email}).
             </p>
 
             <form onSubmit={handleNewPasswordSubmit} className="space-y-4">
@@ -257,3 +233,4 @@ export default function PasswordResetFlow({ onSwitchView, onSuccess, pageVariant
     </motion.div>
   )
 }
+
