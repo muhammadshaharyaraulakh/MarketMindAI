@@ -9,7 +9,7 @@ class TwoFactorLoginResponse implements TwoFactorLoginResponseContract
 {
     public function toResponse($request)
     {
-        $token = $request->user()->createToken('auth_token')->plainTextToken;
+        $token = $request->user()->createToken($request->userAgent() ?: 'auth_token')->plainTextToken;
 
         return new JsonResponse([
             'message' => 'Authenticated.',

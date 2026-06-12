@@ -21,7 +21,8 @@ import {
   ArrowPathRoundedSquareIcon,
   DevicePhoneMobileIcon,
   ComputerDesktopIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid'
 import axios from 'axios'
@@ -64,21 +65,30 @@ export default function ProfilePage({ onClose, user }) {
   // Copied status
   const [copiedSecret, setCopiedSecret] = useState(false)
 
-  // Mock timelines
-  const [activities, setActivities] = useState([
-    { id: 1, action: 'User Sign In Successful', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'success' },
-    { id: 2, action: 'Workspace Profile Data Synchronized', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: '1 hour ago', type: 'success' },
-    { id: 3, action: 'Password Rotation Completed', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: '3 hours ago', type: 'success' },
-    { id: 4, action: '2FA Scan Authentication Requested', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Yesterday', type: 'info' },
-    { id: 5, action: 'Account Recovery Coordinate Set', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: '3 days ago', type: 'success' }
-  ])
+  // Logged devices
+  const [devices, setDevices] = useState([])
 
-  // Mock logged devices
-  const [devices, setDevices] = useState([
-    { id: 'd1', os: 'Ubuntu Linux PC', browser: 'Google Chrome', location: 'Rawalpindi, PK', isCurrent: true, ip: '182.185.122.9', type: 'desktop' },
-    { id: 'd2', os: 'Apple iPhone 15 Pro', browser: 'Safari Browser', location: 'Karachi, PK', isCurrent: false, ip: '182.190.45.12', type: 'mobile' },
-    { id: 'd3', os: 'Microsoft Windows 11', browser: 'Microsoft Edge', location: 'Lahore, PK', isCurrent: false, ip: '39.40.231.8', type: 'desktop' }
-  ])
+  // Fetch sessions when activity tab opens
+  useEffect(() => {
+    if (activeTab === 'activity') {
+      fetchSessions();
+    }
+  }, [activeTab]);
+
+  const fetchSessions = async () => {
+    setIsSyncingSessions(true);
+    try {
+      const token = localStorage.getItem('auth_token');
+      const resp = await axios.get('http://localhost:8000/api/user/sessions', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDevices(resp.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSyncingSessions(false);
+    }
+  };
 
   // Reset status alerts on tab switches
   useEffect(() => {
@@ -105,10 +115,6 @@ export default function ProfilePage({ onClose, user }) {
       })
       setLoading(false)
       setSuccessMsg('Profile updated successfully.')
-      setActivities([
-        { id: Date.now(), action: 'Workspace Profile Data Synchronized', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'success' },
-        ...activities
-      ])
     } catch (err) {
       setLoading(false)
       const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
@@ -145,10 +151,6 @@ export default function ProfilePage({ onClose, user }) {
       setOldPassword('')
       setNewPassword('')
       setConfirmPassword('')
-      setActivities([
-        { id: Date.now(), action: 'Password Rotation Completed', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'success' },
-        ...activities
-      ])
     } catch (err) {
       setLoading(false)
       const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
@@ -227,6 +229,16 @@ export default function ProfilePage({ onClose, user }) {
     }
   }
 
+  const downloadRecoveryCodes = () => {
+    const element = document.createElement('a');
+    const file = new Blob([recoveryCodes.join('\\n')], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = 'marketmind-recovery-codes.txt';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
   // 2FA Digit handling
   const handle2FAChange = (element, index) => {
     const val = element.value.replace(/[^0-9]/g, '')
@@ -283,11 +295,6 @@ export default function ProfilePage({ onClose, user }) {
       setIs2FAEnabled(true)
       setTwoFACode(['', '', '', '', '', ''])
       
-      setActivities([
-        { id: Date.now(), action: 'Google Authenticator 2FA Activated', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'success' },
-        ...activities
-      ])
-      
       setSuccessMsg('Google Authenticator 2FA protection locked successfully.')
     } catch (err) {
       setLoading(false)
@@ -311,10 +318,6 @@ export default function ProfilePage({ onClose, user }) {
       setLoading(false)
       setIs2FAEnabled(false)
       setSuccessMsg('Google Authenticator 2FA dismantled.')
-      setActivities([
-        { id: Date.now(), action: 'Google Authenticator 2FA Terminated', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'warning' },
-        ...activities
-      ])
     } catch(err) {
       setLoading(false)
       if (err.response?.status === 423) {
@@ -363,28 +366,24 @@ export default function ProfilePage({ onClose, user }) {
 
   // Sync active connections simulation
   const handleRefreshSessions = () => {
-    setIsSyncingSessions(true)
-    setTimeout(() => {
-      setIsSyncingSessions(false)
-      setSuccessMsg('Live terminal connection networks synchronized successfully.')
-      setActivities([
-        { id: Date.now(), action: 'Active Terminal Sessions Polled', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'info' },
-        ...activities
-      ])
-    }, 1100)
+    fetchSessions();
+    setSuccessMsg('Live terminal connection networks synchronized successfully.');
   }
 
-  const handleLogoutOtherDevices = () => {
+  const handleLogoutOtherDevices = async () => {
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      setDevices(devices.filter(d => d.isCurrent))
-      setSuccessMsg('Logged out of all secondary devices.')
-      setActivities([
-        { id: Date.now(), action: 'Revoked Secondary Device Access', ip: '182.185.122.9', device: 'Ubuntu Linux (Chrome)', time: 'Just now', type: 'warning' },
-        ...activities
-      ])
-    }, 1000)
+    try {
+      const token = localStorage.getItem('auth_token');
+      await axios.delete('http://localhost:8000/api/user/sessions', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSuccessMsg('Logged out of all secondary devices.');
+      fetchSessions();
+    } catch (err) {
+      setErrorMsg('Failed to log out of other devices.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   const handleCopySecret = () => {
@@ -874,7 +873,7 @@ export default function ProfilePage({ onClose, user }) {
                                 )}
                               </div>
                               <p className="text-[10px] text-[#64748B] font-semibold truncate mt-0.5">
-                                {dev.browser} • {dev.location} • IP: {dev.ip}
+                                {dev.browser} • Last active: {dev.last_active}
                               </p>
                             </div>
                           </div>
@@ -897,9 +896,20 @@ export default function ProfilePage({ onClose, user }) {
                             ) : (
                               <button
                                 type="button"
-                                onClick={() => {
-                                  setDevices(devices.filter(d => d.id !== dev.id))
-                                  setSuccessMsg(`Session for ${dev.os} successfully terminated.`)
+                                onClick={async () => {
+                                  setLoading(true);
+                                  try {
+                                    const token = localStorage.getItem('auth_token');
+                                    await axios.delete(`http://localhost:8000/api/user/sessions/${dev.id}`, {
+                                      headers: { Authorization: `Bearer ${token}` }
+                                    });
+                                    setSuccessMsg(`Session for ${dev.os} successfully terminated.`);
+                                    fetchSessions();
+                                  } catch (err) {
+                                    setErrorMsg(`Failed to revoke session for ${dev.os}.`);
+                                  } finally {
+                                    setLoading(false);
+                                  }
                                 }}
                                 className="text-xs font-bold text-red-600 hover:text-red-700 transition-colors cursor-pointer"
                               >
@@ -923,45 +933,7 @@ export default function ProfilePage({ onClose, user }) {
                   </button>
                 )}
 
-                {/* Vertical Security Trace Timeline */}
-                <div className="space-y-4 pt-4 border-t border-[#E2E8F0]">
-                  <h4 className="text-xs font-semibold text-[#475569] uppercase tracking-wider">Realtime Diagnostic Logs:</h4>
-                  
-                  <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-[#E2E8F0]">
-                    {activities.slice(0, 4).map(act => (
-                      <div key={act.id} className="relative flex items-start justify-between text-xs group">
-                        
-                        {/* Circle dot marker */}
-                        <div className={`absolute -left-6 top-1 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm shrink-0 z-10 ${
-                          act.type === 'success' 
-                            ? 'bg-green-500' 
-                            : act.type === 'warning' 
-                            ? 'bg-amber-500' 
-                            : 'bg-blue-500'
-                        }`} />
 
-                        <div className="min-w-0 pr-4">
-                          <p className="font-bold text-[#0F172A] leading-tight">{act.action}</p>
-                          <p className="text-[10px] text-[#64748B] font-semibold mt-1">IP: {act.ip} • Device: {act.device}</p>
-                        </div>
-
-                        <div className="text-right shrink-0">
-                          <span className="text-[9px] font-bold text-[#94A3B8]">{act.time}</span>
-                          <span className={`block mt-1 text-[8px] font-extrabold px-1 rounded uppercase tracking-wide text-center ${
-                            act.type === 'success' 
-                              ? 'bg-green-50 text-green-700' 
-                              : act.type === 'warning' 
-                              ? 'bg-amber-50 text-amber-700' 
-                              : 'bg-blue-50 text-blue-700'
-                          }`}>
-                            {act.type}
-                          </span>
-                        </div>
-
-                      </div>
-                    ))}
-                  </div>
-                </div>
 
               </motion.div>
             )}
@@ -1095,13 +1067,23 @@ export default function ProfilePage({ onClose, user }) {
                             </div>
                           ))}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => { setShow2FAModal(false); setIs2FAVerified(false); }}
-                          className="mt-4 w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                        >
-                          I have saved my codes
-                        </button>
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={downloadRecoveryCodes}
+                            className="w-full flex items-center justify-center gap-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+                          >
+                            <ArrowDownTrayIcon className="w-4 h-4" />
+                            Download Keys
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setShow2FAModal(false); setIs2FAVerified(false); }}
+                            className="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+                          >
+                            Done
+                          </button>
+                        </div>
                       </div>
                     )}
                   </motion.div>

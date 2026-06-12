@@ -14,3 +14,6 @@ Route::get('/email/verify-custom/{id}/{hash}', [\App\Http\Controllers\ApiVerific
 Route::post('/add-recovery-email', [ProfileController::class, 'addRecoveryEmail'])->middleware('auth:sanctum');
 Route::post('/remove-recovery-email', [ProfileController::class, 'removeRecoveryEmail'])->middleware('auth:sanctum');
 Route::post('/update-recovery-email', [ProfileController::class, 'updateRecoveryEmail'])->middleware('auth:sanctum');
+Route::get('/user/sessions', [ProfileController::class, 'getSessions'])->middleware('auth:sanctum');
+Route::delete('/user/sessions', [ProfileController::class, 'logoutOtherDevices'])->middleware('auth:sanctum');
+Route::delete('/user/sessions/{id}', [ProfileController::class, 'logoutSpecificDevice'])->middleware('auth:sanctum');

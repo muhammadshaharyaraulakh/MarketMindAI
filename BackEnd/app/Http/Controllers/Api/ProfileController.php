@@ -54,4 +54,71 @@ class ProfileController extends Controller
 
         return response()->json(['message' => 'Recover email updated successfully']);
     }
+
+    public function getSessions(Request $request)
+    {
+        $tokens = $request->user()->tokens()->orderBy('last_used_at', 'desc')->get()->map(function ($token) use ($request) {
+            $agent = $token->name;
+            $browser = 'API Token';
+            $os = 'Unknown Device';
+            $type = 'desktop';
+
+            if (preg_match('/(?:MSIE |Trident\/.*; rv:|Edge\/|Edg\/)(\d+)/', $agent)) {
+                $browser = 'Microsoft Edge';
+            } elseif (preg_match('/Firefox\/(\d+)/', $agent)) {
+                $browser = 'Mozilla Firefox';
+            } elseif (preg_match('/Chrome\/(\d+)/', $agent)) {
+                $browser = 'Google Chrome';
+            } elseif (preg_match('/Safari\/(\d+)/', $agent)) {
+                $browser = 'Apple Safari';
+            } elseif ($agent === 'auth_token') {
+                $browser = 'Legacy API Token';
+            }
+
+            if (preg_match('/Windows NT 10.0/', $agent)) {
+                $os = 'Windows 10/11';
+            } elseif (preg_match('/Windows NT/', $agent)) {
+                $os = 'Windows';
+            } elseif (preg_match('/Mac OS X/', $agent)) {
+                $os = 'Mac OS';
+            } elseif (preg_match('/Linux/', $agent)) {
+                $os = 'Linux';
+            } elseif (preg_match('/Android/', $agent)) {
+                $os = 'Android';
+                $type = 'mobile';
+            } elseif (preg_match('/iPhone|iPad/', $agent)) {
+                $os = 'iOS';
+                $type = 'mobile';
+            }
+
+            return [
+                'id' => $token->id,
+                'isCurrent' => $request->user()->currentAccessToken() && $token->id === $request->user()->currentAccessToken()->id,
+                'last_active' => $token->last_used_at ? \Carbon\Carbon::parse($token->last_used_at)->diffForHumans() : 'Never',
+                'browser' => $browser,
+                'os' => $os,
+                'type' => $type,
+            ];
+        });
+
+        return response()->json($tokens);
+    }
+
+    public function logoutOtherDevices(Request $request)
+    {
+        if ($request->user()->currentAccessToken()) {
+            $request->user()->tokens()
+                ->where('id', '!=', $request->user()->currentAccessToken()->id)
+                ->delete();
+        }
+
+        return response()->json(['message' => 'Other devices logged out successfully.']);
+    }
+
+    public function logoutSpecificDevice(Request $request, $id)
+    {
+        $request->user()->tokens()->where('id', $id)->delete();
+
+        return response()->json(['message' => 'Device session revoked successfully.']);
+    }
 }
