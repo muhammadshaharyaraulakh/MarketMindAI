@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useReducer } from 'react'
+import { Routes, Route, useNavigate, useParams, useLocation, Navigate, Link, matchPath } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ResponsiveContainer,
@@ -14,6 +15,9 @@ import {
   YAxis,
   Tooltip
 } from 'recharts'
+import CampaignPanel from './CampaignPanel'
+import AdSetPanel from './AdSetPanel'
+import AdPanel from './AdPanel'
 
 // Heroicons imports (Strictly Outline with thin stroke styling)
 import { 
@@ -36,7 +40,8 @@ import {
   XMarkIcon,
   MagnifyingGlassIcon,
   PresentationChartLineIcon,
-  CircleStackIcon
+  CircleStackIcon,
+  PuzzlePieceIcon
 } from '@heroicons/react/24/outline'
 
 import {
@@ -107,24 +112,46 @@ const INITIAL_AB_TESTS = [
   { id: 3, campaignId: 4, name: 'Email subject lines - Value vs Urgency', variantA: 'MarketMind AI: Slash Customer Acquisition Costs by 38%', variantB: 'Unlock your marketing forecast metrics inside today!', splitRatio: '50/50', clicksA: 180, clicksB: 240, impressionsA: 3000, impressionsB: 3050, status: 'Running', winner: null }
 ]
 
+const INITIAL_ADSETS = [
+  { id: 1, campaignId: 1, name: 'Search Broad Match', audienceType: 'Interest', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 150 },
+  { id: 2, campaignId: 1, name: 'Search Exact Match', audienceType: 'Custom', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 200 }
+]
+
+const INITIAL_ADS = [
+  { id: 1, adSetId: 1, name: 'Promo RSA 1', format: 'RESPONSIVE', platform: 'Google', status: 'Active', headline: 'Best SaaS Tools', description: 'Grow your business', cta: 'Sign Up', metrics: { impressions: 1200, clicks: 45, spend: 35 } },
+  { id: 2, adSetId: 1, name: 'Promo RSA 2', format: 'RESPONSIVE', platform: 'Google', status: 'Paused', headline: 'AI Marketing', description: 'Automate ads', cta: 'Learn More', metrics: { impressions: 800, clicks: 20, spend: 15 } }
+]
+
+const INITIAL_INTEGRATIONS = [
+  { platform: 'Google', accounts: [{ name: 'MarketMind Main', id: '123-456-7890', currency: 'USD', status: 'Connected' }], syncSettings: { frequency: '1 hour', duration: '30 days' } },
+  { platform: 'Meta', accounts: [], syncSettings: { frequency: 'Every 15 min', duration: '7 days' } },
+  { platform: 'Snapchat', accounts: [], syncSettings: { frequency: 'Daily', duration: '90 days' } }
+]
+
 // ==========================================
 // STATE REDUCER
 // ==========================================
 
 const INITIAL_STATE = {
-  activeView: 'overview', // 'overview', 'campaigns', 'advisor', 'reports'
   campaigns: INITIAL_CAMPAIGNS,
   analytics: INITIAL_ANALYTICS,
   contentPieces: INITIAL_CONTENT_PIECES,
   abTests: INITIAL_AB_TESTS,
-  selectedCampaignId: null, // Zoomed in campaign detail view
+  adSets: INITIAL_ADSETS,
+  ads: INITIAL_ADS,
+  integrations: INITIAL_INTEGRATIONS,
+  ui: {
+    activePanelType: null,
+    editingItem: null,
+    isLoading: false,
+    oauthStep: 0
+  },
   searchQuery: '',
   platformFilter: 'All',
   statusFilter: 'All',
   chatMessages: [
     { sender: 'ai', text: 'Welcome Rashid! I have analyzed your 4 active marketing campaigns. Our average portfolio ROAS is outstanding at 8.08x. Ask me to diagnose daily snapshots, check A/B test results, or craft brand-new platform-native creatives!' }
   ],
-  isCampaignDrawerOpen: false,
   isGeneratingContent: false,
   isGeneratingReport: false,
   reportProgress: 0,
@@ -133,29 +160,27 @@ const INITIAL_STATE = {
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'SET_VIEW':
-      return { 
-        ...state, 
-        activeView: action.payload,
-        selectedCampaignId: action.payload !== 'campaigns' ? null : state.selectedCampaignId 
-      }
-    case 'ZOOM_CAMPAIGN':
-      return { ...state, selectedCampaignId: action.payload }
     case 'SET_SEARCH':
       return { ...state, searchQuery: action.payload }
     case 'SET_PLATFORM_FILTER':
       return { ...state, platformFilter: action.payload }
     case 'SET_STATUS_FILTER':
       return { ...state, statusFilter: action.payload }
-    case 'TOGGLE_CAMPAIGN_DRAWER':
-      return { ...state, isCampaignDrawerOpen: !state.isCampaignDrawerOpen }
     
+    // UI Panels
+    case 'SET_ACTIVE_PANEL':
+      return { ...state, ui: { ...state.ui, activePanelType: action.payload.type, editingItem: action.payload.item || null } }
+    case 'CLOSE_PANEL':
+      return { ...state, ui: { ...state.ui, activePanelType: null, editingItem: null } }
+    case 'SET_OAUTH_STEP':
+      return { ...state, ui: { ...state.ui, oauthStep: action.payload } }
+
     // Campaigns CRUD
     case 'ADD_CAMPAIGN':
       return { 
         ...state, 
         campaigns: [action.payload, ...state.campaigns],
-        isCampaignDrawerOpen: false
+        ui: { ...state.ui, activePanelType: null }
       }
     case 'UPDATE_CAMPAIGN':
       return {
@@ -169,8 +194,32 @@ function reducer(state, action) {
         analytics: state.analytics.filter(a => a.campaignId !== action.payload),
         contentPieces: state.contentPieces.filter(cp => cp.campaignId !== action.payload),
         abTests: state.abTests.filter(t => t.campaignId !== action.payload),
-        selectedCampaignId: state.selectedCampaignId === action.payload ? null : state.selectedCampaignId
+        adSets: state.adSets.filter(as => as.campaignId !== action.payload)
       }
+
+    // AdSets CRUD
+    case 'ADD_ADSET':
+      return { ...state, adSets: [action.payload, ...state.adSets], ui: { ...state.ui, activePanelType: null } }
+    case 'UPDATE_ADSET':
+      return { ...state, adSets: state.adSets.map(a => a.id === action.payload.id ? action.payload : a) }
+    case 'DELETE_ADSET':
+      return { ...state, adSets: state.adSets.filter(a => a.id !== action.payload), ads: state.ads.filter(ad => ad.adSetId !== action.payload) }
+
+    // Ads CRUD
+    case 'ADD_AD':
+      return { ...state, ads: [action.payload, ...state.ads], ui: { ...state.ui, activePanelType: null } }
+    case 'UPDATE_AD':
+      return { ...state, ads: state.ads.map(a => a.id === action.payload.id ? action.payload : a) }
+    case 'DELETE_AD':
+      return { ...state, ads: state.ads.filter(a => a.id !== action.payload) }
+
+    // Integrations CRUD
+    case 'CONNECT_ACCOUNT':
+      return { ...state, integrations: state.integrations.map(i => i.platform === action.payload.platform ? { ...i, accounts: [...i.accounts, action.payload.account] } : i) }
+    case 'DISCONNECT_ACCOUNT':
+      return { ...state, integrations: state.integrations.map(i => i.platform === action.payload.platform ? { ...i, accounts: i.accounts.filter(a => a.id !== action.payload.accountId) } : i) }
+    case 'UPDATE_SYNC_SETTINGS':
+      return { ...state, integrations: state.integrations.map(i => i.platform === action.payload.platform ? { ...i, syncSettings: action.payload.syncSettings } : i) }
 
     // Analytics CRUD
     case 'ADD_SNAPSHOT':
@@ -284,8 +333,28 @@ const KPICard = ({ title, value, change, isPositive, suffix = '', prefix = '', i
 
 export default function Dashboard({ onLogout, onOpenProfile, user }) {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
+  const location = useLocation()
+  const navigate = useNavigate()
+  
+  // Determine active view for sidebar highlighting
+  const currentPath = location.pathname
+  let sidebarActive = 'dashboard'
+  if (currentPath.startsWith('/campaigns')) sidebarActive = 'campaigns'
+  else if (currentPath.startsWith('/advisor')) sidebarActive = 'advisor'
+  else if (currentPath.startsWith('/reports')) sidebarActive = 'reports'
+  else if (currentPath.startsWith('/integrations')) sidebarActive = 'integrations'
+
+  // Extract params via matchPath since we are keeping the massive inline code intact 
+  // as per "untouched" requirement for existing campaign list/detail.
+
+  
+  const campaignMatch = matchPath('/campaigns/:id/*', currentPath)
+  const adSetMatch = matchPath('/campaigns/:id/adsets/:adSetId/ads', currentPath)
+  const selectedCampaignId = campaignMatch ? Number(campaignMatch.params.id) : null
+  const selectedAdSetId = adSetMatch ? Number(adSetMatch.params.adSetId) : null
+
   const [showRevenue, setShowRevenue] = useState(true)
-  const [editingCampaign, setEditingCampaign] = useState(null)
+
   
   // Relational Campaign aggregators
   const campaignStats = useMemo(() => {
@@ -694,16 +763,17 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
           {/* Navigation Links */}
           <nav className="p-4 space-y-1">
             {[
-              { id: 'overview', label: 'Overview Canvas', icon: PresentationChartLineIcon },
-              { id: 'campaigns', label: 'Campaign Hub', icon: ChartBarIcon },
-              { id: 'advisor', label: 'AI Advisor Chat', icon: ChatBubbleLeftRightIcon },
-              { id: 'reports', label: 'Reports Export', icon: DocumentArrowDownIcon }
+              { id: 'dashboard', path: '/dashboard', label: 'Overview Canvas', icon: PresentationChartLineIcon },
+              { id: 'campaigns', path: '/campaigns', label: 'Campaign Hub', icon: ChartBarIcon },
+              { id: 'advisor', path: '/advisor', label: 'AI Advisor Chat', icon: ChatBubbleLeftRightIcon },
+              { id: 'reports', path: '/reports', label: 'Reports Export', icon: DocumentArrowDownIcon },
+              { id: 'integrations', path: '/integrations', label: 'Platform Integrations', icon: PuzzlePieceIcon }
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => dispatch({ type: 'SET_VIEW', payload: tab.id })}
+                onClick={() => navigate(tab.path)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all cursor-pointer border ${
-                  state.activeView === tab.id 
+                  sidebarActive === tab.id 
                     ? 'bg-[#FFF1F0] border-[#FF2D20]/20 text-[#FF2D20] font-semibold' 
                     : 'bg-white border-transparent text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A]'
                 }`}
@@ -758,11 +828,14 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
         {/* Content body padding container */}
         <div className="p-8 flex-1 max-w-7xl w-full mx-auto space-y-8">
           
-          {/* ==========================================
-              VIEW 1: OVERVIEW CANVAS
-              ========================================== */}
-          {state.activeView === 'overview' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+            {/* ==========================================
+                VIEW 1: OVERVIEW CANVAS
+                ========================================== */}
+            <Route path="/dashboard" element={
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
               {/* Titles */}
               <div>
                 <h2 className="text-2xl font-semibold text-[#0F172A] tracking-tight font-mona" style={{ fontVariationSettings: "'wdth' 100, 'wght' 550" }}>
@@ -860,16 +933,12 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                 </div>
               </div>
             </motion.div>
-          )}
-
-          {/* ==========================================
-              VIEW 2: CAMPAIGN HUB
-              ========================================== */}
-          {state.activeView === 'campaigns' && (
-            <AnimatePresence mode="wait">
-              
-              {/* SUB VIEW 2A: MASTER LIST TABLE */}
-              {!state.selectedCampaignId ? (
+          } />
+            {/* ==========================================
+                VIEW 2: CAMPAIGN HUB
+                ========================================== */}
+            <Route path="/campaigns" element={
+              <AnimatePresence mode="wait">
                 <motion.div key="hub_master" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
                   {/* Title & trigger */}
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -878,7 +947,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                       <p className="text-xs font-semibold text-[#94A3B8] mt-0.5">Control individual campaign budgets, platforms, and specific analytics relationships.</p>
                     </div>
                     <button
-                      onClick={() => dispatch({ type: 'TOGGLE_CAMPAIGN_DRAWER' })}
+                      onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'campaign' } })}
                       className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-xs font-bold px-4 py-2.5 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                     >
                       <PlusIcon className="w-4 h-4 shrink-0" />
@@ -950,13 +1019,13 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                               <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4">
                                 <span className="text-xs font-bold text-[#0F172A]">{camp.roas}x</span>
                               </td>
-                              <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4">
+                              <td onClick={() => navigate(`/campaigns/${camp.id}`)} className="p-4">
                                 <span className="text-xs font-bold text-[#FF2D20]">{camp.ctr}%</span>
                               </td>
                               <td className="p-4 pr-6 text-right">
                                 <div className="inline-flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                                   <button
-                                    onClick={() => setEditingCampaign({ ...camp })}
+                                    onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'campaign', item: camp } })}
                                     className="p-1.5 hover:bg-[#F8FAFC] border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-blue-500 cursor-pointer transition-all"
                                   >
                                     <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
@@ -968,7 +1037,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                                     <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
                                   </button>
                                   <button
-                                    onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })}
+                                    onClick={() => navigate(`/campaigns/${camp.id}`)}
                                     className="p-1.5 hover:bg-[#FFF1F0] border border-transparent hover:border-[#FF2D20]/20 rounded-lg text-[#94A3B8] hover:text-[#FF2D20] cursor-pointer transition-all ml-1"
                                   >
                                     <ChevronRightIcon className="w-3.5 h-3.5 stroke-2" />
@@ -982,15 +1051,18 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                     </div>
                   </div>
                 </motion.div>
-              ) : (
-                
-                /* SUB VIEW 2B: INDIVIDUAL CAMPAIGN WORKSPACE */
+              </AnimatePresence>
+            } />
+
+            {/* SUB VIEW 2B: INDIVIDUAL CAMPAIGN WORKSPACE */}
+            <Route path="/campaigns/:id/*" element={
+              <AnimatePresence mode="wait">
                 <motion.div key="hub_workspace" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
                   {/* Top nav */}
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E2E8F0] pb-5">
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: null })}
+                        onClick={() => navigate('/campaigns')}
                         className="p-2 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] rounded-xl text-[#475569] shadow-sm cursor-pointer transition-all"
                       >
                         <ArrowLeftIcon className="w-4 h-4 stroke-2" />
@@ -1011,7 +1083,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                     <div className="flex items-center gap-2">
                       <StatusBadge status={selectedCampaign?.status} />
                       <button
-                        onClick={() => setEditingCampaign({ ...selectedCampaign })}
+                        onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'campaign', item: selectedCampaign } })}
                         className="bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-semibold px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm inline-flex items-center gap-1"
                       >
                         <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
@@ -1029,9 +1101,10 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                   </div>
 
                   {/* Inner Tab bar navigation */}
-                  <div className="flex border-b border-[#E2E8F0]">
+                  <div className="flex overflow-x-auto no-scrollbar border-b border-[#E2E8F0]">
                     {[
                       { id: 'analytics', label: 'Analytics Logs', count: state.analytics.filter(a => a.campaignId === selectedCampaign?.id).length },
+                      { id: 'adsets', label: 'Ad Sets', count: state.adSets.filter(a => a.campaignId === selectedCampaign?.id).length },
                       { id: 'content', label: 'AI Creative Studio', count: state.contentPieces.filter(cp => cp.campaignId === selectedCampaign?.id).length },
                       { id: 'ab_testing', label: 'A/B Splitting', count: state.abTests.filter(t => t.campaignId === selectedCampaign?.id).length }
                     ].map(tab => (
@@ -1287,7 +1360,99 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                       </div>
                     )}
 
-                    {/* SUB TAB 2: AI CREATIVE STUDIO */}
+                    {/* SUB TAB 2: AD SETS */}
+                    {workspaceTab === 'adsets' && (
+                      <div className="space-y-6 animate-fadeIn">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider block mb-0.5">Campaign Audiences</span>
+                            <span className="text-sm font-bold text-[#0F172A] block font-mona">Ad Sets Management</span>
+                          </div>
+                          <button
+                            onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset' } })}
+                            className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-bold px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                          >
+                            <PlusIcon className="w-4 h-4 shrink-0" />
+                            Create Ad Set
+                          </button>
+                        </div>
+                        
+                        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
+                          {state.adSets.filter(a => a.campaignId === selectedCampaign?.id).length > 0 ? (
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left border-collapse">
+                                <thead>
+                                  <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                                    <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider pl-6 font-mona">Ad Set Name</th>
+                                    <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider font-mona">Audience Type</th>
+                                    <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider font-mona">Status</th>
+                                    <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider font-mona">Daily Budget</th>
+                                    <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider font-mona">Spend Today</th>
+                                    <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider font-mona">Goal</th>
+                                    <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider text-right pr-6 font-mona">Actions</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {state.adSets
+                                    .filter(a => a.campaignId === selectedCampaign?.id)
+                                    .map(adSet => (
+                                      <tr key={adSet.id} onClick={() => navigate(`/campaigns/${selectedCampaign?.id}/adsets/${adSet.id}/ads`)} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
+                                        <td className="p-4 pl-6 text-xs font-bold text-[#0F172A]">
+                                          {adSet.name}
+                                          <span className="block text-[10px] font-semibold text-[#94A3B8] mt-0.5">{adSet.platform}</span>
+                                        </td>
+                                        <td className="p-4 text-xs font-semibold text-[#475569]">{adSet.audienceType}</td>
+                                        <td className="p-4"><StatusBadge status={adSet.status} /></td>
+                                        <td className="p-4 text-xs font-bold text-[#0F172A]">${adSet.budget.toLocaleString()}</td>
+                                        <td className="p-4 text-xs font-bold text-[#FF2D20]">${adSet.spendToday.toLocaleString()}</td>
+                                        <td className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">{adSet.goal}</td>
+                                        <td className="p-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
+                                          <div className="inline-flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                              onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset', item: adSet } })}
+                                              className="p-1.5 hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-blue-500 cursor-pointer transition-all shadow-sm"
+                                            >
+                                              <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
+                                            </button>
+                                            <button
+                                              onClick={() => dispatch({ type: 'DELETE_ADSET', payload: adSet.id })}
+                                              className="p-1.5 hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-red-500 cursor-pointer transition-all shadow-sm"
+                                            >
+                                              <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
+                                            </button>
+                                            <button
+                                              onClick={() => navigate(`/campaigns/${selectedCampaign?.id}/adsets/${adSet.id}/ads`)}
+                                              className="p-1.5 bg-[#FFF1F0] hover:bg-[#FF2D20] border border-transparent rounded-lg text-[#FF2D20] hover:text-white cursor-pointer transition-all ml-1 shadow-[0_1px_2px_rgba(255,45,32,0.1)]"
+                                            >
+                                              <ChevronRightIcon className="w-3.5 h-3.5 stroke-2" />
+                                            </button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          ) : (
+                            <div className="p-12 flex flex-col items-center justify-center text-center">
+                              <div className="w-16 h-16 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl flex items-center justify-center mb-4 text-[#94A3B8]">
+                                <CircleStackIcon className="w-8 h-8 stroke-[1.5]" />
+                              </div>
+                              <h3 className="text-sm font-bold text-[#0F172A] font-mona mb-1">No Ad Sets Configured</h3>
+                              <p className="text-xs font-semibold text-[#94A3B8] max-w-xs mb-6">Create an ad set to define audience targeting, platform networks, and daily optimization goals.</p>
+                              <button
+                                onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset' } })}
+                                className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
+                              >
+                                Create First Ad Set
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* SUB TAB 3: AI CREATIVE STUDIO */}
                     {workspaceTab === 'content' && (
                       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fadeIn">
                         {/* Left Generator form */}
@@ -1617,14 +1782,111 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                     )}
                   </div>
                 </motion.div>
-              )}
-            </AnimatePresence>
-          )}
+              </AnimatePresence>
+            } />
+
+            {/* ==========================================
+                VIEW: ADS SCREEN (Sub-view of Ad Sets)
+                ========================================== */}
+            <Route path="/campaigns/:id/adsets/:adSetId/ads" element={
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between bg-white border border-[#E2E8F0] p-5 rounded-2xl shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => navigate(`/campaigns/${selectedCampaignId}`)}
+                      className="p-2 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] rounded-xl text-[#475569] shadow-sm cursor-pointer transition-all"
+                    >
+                      <ArrowLeftIcon className="w-4 h-4 stroke-2" />
+                    </button>
+                    <div>
+                      <h2 className="text-lg font-bold text-[#0F172A] font-mona leading-tight">Ad Creatives</h2>
+                      <p className="text-[11px] font-semibold text-[#94A3B8] mt-0.5">Manage individual ads for this Ad Set.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })}
+                    className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-bold px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  >
+                    <PlusIcon className="w-4 h-4 shrink-0" />
+                    Create Ad
+                  </button>
+                </div>
+
+                {/* Ads Grid */}
+                {state.ads.filter(a => a.adSetId === selectedAdSetId).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {state.ads.filter(a => a.adSetId === selectedAdSetId).map(ad => (
+                      <div key={ad.id} className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h3 className="text-sm font-bold text-[#0F172A]">{ad.name}</h3>
+                              <span className="text-[10px] font-semibold text-[#94A3B8] block">{ad.format} · {ad.platform}</span>
+                            </div>
+                            <StatusBadge status={ad.status} />
+                          </div>
+                          
+                          <div className="bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0] mb-4">
+                            <p className="text-[11px] font-bold text-[#0F172A] mb-1">Headline: <span className="font-semibold text-[#475569]">{ad.headline}</span></p>
+                            <p className="text-[10px] text-[#475569] line-clamp-2">{ad.description}</p>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-2 mb-4 text-center">
+                            <div className="bg-[#FFF1F0] p-2 rounded-lg">
+                              <span className="block text-[9px] font-bold text-[#FF2D20] uppercase">Spend</span>
+                              <span className="block text-xs font-extrabold text-[#0F172A]">${ad.metrics.spend}</span>
+                            </div>
+                            <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
+                              <span className="block text-[9px] font-bold text-[#94A3B8] uppercase">Impr.</span>
+                              <span className="block text-xs font-extrabold text-[#0F172A]">{ad.metrics.impressions}</span>
+                            </div>
+                            <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
+                              <span className="block text-[9px] font-bold text-[#94A3B8] uppercase">Clicks</span>
+                              <span className="block text-xs font-extrabold text-[#0F172A]">{ad.metrics.clicks}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad', item: ad } })}
+                            className="flex-1 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-bold py-2 rounded-xl cursor-pointer transition-all shadow-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => dispatch({ type: 'DELETE_AD', payload: ad.id })}
+                            className="bg-white border border-[#E2E8F0] hover:bg-red-50 text-[#94A3B8] hover:text-red-500 px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm"
+                          >
+                            <TrashIcon className="w-4 h-4 stroke-[1.5]" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-12 flex flex-col items-center justify-center text-center bg-white border border-[#E2E8F0] rounded-2xl shadow-sm">
+                    <div className="w-16 h-16 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl flex items-center justify-center mb-4 text-[#94A3B8]">
+                      <CursorArrowRaysIcon className="w-8 h-8 stroke-[1.5]" />
+                    </div>
+                    <h3 className="text-sm font-bold text-[#0F172A] font-mona mb-1">No Ads Created</h3>
+                    <p className="text-xs font-semibold text-[#94A3B8] max-w-xs mb-6">Start building your creative variations for this ad set.</p>
+                    <button
+                      onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })}
+                      className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
+                    >
+                      Create First Ad
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            } />
 
           {/* ==========================================
               VIEW 3: AI ADVISOR CHAT
               ========================================== */}
-          {state.activeView === 'advisor' && (
+          <Route path="/advisor" element={
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 text-left">
               <div>
                 <h2 className="text-xl font-bold text-[#0F172A] font-mona leading-tight">Gemini Campaign Advisor</h2>
@@ -1692,12 +1954,12 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                 </form>
               </div>
             </motion.div>
-          )}
+          } />
 
           {/* ==========================================
               VIEW 4: REPORTS EXPORT
               ========================================== */}
-          {state.activeView === 'reports' && (
+          <Route path="/reports" element={
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 text-left">
               <div>
                 <h2 className="text-xl font-bold text-[#0F172A] font-mona leading-tight">SaaS Performance Reports</h2>
@@ -1774,8 +2036,58 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                 </div>
               </div>
             </motion.div>
-          )}
+          } />
 
+          {/* ==========================================
+              VIEW 5: PLATFORM INTEGRATIONS
+              ========================================== */}
+          <Route path="/integrations" element={
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 text-left">
+              <div>
+                <h2 className="text-xl font-bold text-[#0F172A] font-mona leading-tight">Platform Integrations</h2>
+                <p className="text-xs font-semibold text-[#94A3B8] mt-0.5">Manage connected ad accounts and OAuth tokens.</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {state.integrations.map((integration, idx) => (
+                  <div key={idx} className="bg-white border border-[#E2E8F0] p-6 rounded-2xl shadow-sm text-left flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold text-[#0F172A] font-mona mb-1">{integration.platform}</h3>
+                      {integration.accounts.length > 0 ? (
+                        <div className="space-y-3 mt-4">
+                          {integration.accounts.map((acc, aIdx) => (
+                            <div key={aIdx} className="bg-[#F8FAFC] border border-[#E2E8F0] p-3 rounded-xl flex items-center justify-between">
+                              <div>
+                                <p className="text-xs font-bold text-[#0F172A]">{acc.name}</p>
+                                <p className="text-[10px] font-semibold text-[#94A3B8]">ID: {acc.id}</p>
+                              </div>
+                              <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs font-semibold text-[#94A3B8] mt-4">No accounts connected.</p>
+                      )}
+                    </div>
+                    <button 
+                      onClick={() => {
+                        dispatch({ type: 'SET_OAUTH_STEP', payload: 1 })
+                        // Local state modal logic can be wired here or inside a specialized panel
+                      }}
+                      className={`mt-6 w-full text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-colors shadow-sm ${
+                        integration.accounts.length > 0 
+                          ? 'bg-white border border-[#E2E8F0] text-[#475569] hover:bg-[#FFF1F0] hover:text-[#FF2D20]' 
+                          : 'bg-[#FF2D20] text-white hover:bg-[#E5261A]'
+                      }`}
+                    >
+                      {integration.accounts.length > 0 ? 'Manage Settings' : 'Connect Account'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          } />
+
+          </Routes>
         </div>
       </main>
 
@@ -1783,189 +2095,40 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
           MODALS & DRAWERS
           ========================================== */}
 
-      {/* EDIT CAMPAIGN MODAL DIALOG */}
       <AnimatePresence>
-        {editingCampaign && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 0.3 }} exit={{ opacity: 0 }}
-              onClick={() => setEditingCampaign(null)}
-              className="fixed inset-0 bg-black z-40"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed inset-0 m-auto w-full max-w-sm h-fit bg-white rounded-2xl p-5 z-50 shadow-xl border border-[#E2E8F0] space-y-4 text-left"
-            >
-              <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
-                <span className="text-sm font-bold text-[#0F172A] font-mona">Modify Campaign Scope</span>
-                <button onClick={() => setEditingCampaign(null)} className="p-1 hover:bg-[#F8FAFC] rounded-lg cursor-pointer">
-                  <XMarkIcon className="w-4.5 h-4.5 text-[#94A3B8]" />
-                </button>
-              </div>
-
-              <form onSubmit={submitEditCampaign} className="space-y-3.5">
-                <div>
-                  <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Campaign Title</label>
-                  <input 
-                    type="text"
-                    value={editingCampaign.name}
-                    onChange={(e) => setEditingCampaign({ ...editingCampaign, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20]"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Channel</label>
-                    <select
-                      value={editingCampaign.platform}
-                      onChange={(e) => setEditingCampaign({ ...editingCampaign, platform: e.target.value })}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-bold text-slate-500 bg-white"
-                    >
-                      <option value="Google">Google Ads</option>
-                      <option value="Meta">Meta Ads</option>
-                      <option value="TikTok">TikTok Ads</option>
-                      <option value="Email">Email Campaigns</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Status</label>
-                    <select
-                      value={editingCampaign.status}
-                      onChange={(e) => setEditingCampaign({ ...editingCampaign, status: e.target.value })}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-bold text-slate-500 bg-white"
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Paused">Paused</option>
-                      <option value="Optimizing">Optimizing</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Budget Allocation Cap ($)</label>
-                  <input 
-                    type="number"
-                    value={editingCampaign.budget}
-                    onChange={(e) => setEditingCampaign({ ...editingCampaign, budget: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20]"
-                    required
-                  />
-                </div>
-
-                <button 
-                  type="submit"
-                  className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white text-xs font-bold py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
-                >
-                  Save Changes
-                </button>
-              </form>
-            </motion.div>
-          </>
+        {state.ui.activePanelType === 'campaign' && (
+          <CampaignPanel 
+            item={state.ui.activePanelItem}
+            onClose={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })}
+            onSave={(data) => {
+              dispatch({ type: state.ui.activePanelItem ? 'EDIT_CAMPAIGN' : 'ADD_CAMPAIGN', payload: data })
+              dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
+            }}
+          />
         )}
-      </AnimatePresence>
-
-      {/* DRAWER: LAUNCH NEW CAMPAIGN */}
-      <AnimatePresence>
-        {state.isCampaignDrawerOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 0.3 }} exit={{ opacity: 0 }}
-              onClick={() => dispatch({ type: 'TOGGLE_CAMPAIGN_DRAWER' })}
-              className="fixed inset-0 bg-black z-40"
-            />
-            <motion.div 
-              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 24, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white z-50 shadow-2xl p-6 flex flex-col justify-between text-left"
-            >
-              <div>
-                <div className="flex items-center justify-between pb-4 border-b border-[#E2E8F0]">
-                  <span className="text-sm font-bold text-[#0F172A] font-mona">Configure Campaign Pipeline</span>
-                  <button 
-                    onClick={() => dispatch({ type: 'TOGGLE_CAMPAIGN_DRAWER' })}
-                    className="p-1 rounded-lg hover:bg-[#F8FAFC] cursor-pointer"
-                  >
-                    <XMarkIcon className="w-5 h-5 text-[#94A3B8]" />
-                  </button>
-                </div>
-
-                <form onSubmit={handleLaunchCampaign} className="space-y-4 mt-5">
-                  <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Campaign Title</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. Q3 Google Brand Growth"
-                      value={newCampName}
-                      onChange={(e) => setNewCampName(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Channel</label>
-                      <select 
-                        value={newCampPlatform}
-                        onChange={(e) => setNewCampPlatform(e.target.value)}
-                        className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-bold text-slate-500 bg-white"
-                      >
-                        <option value="Google">Google Ads</option>
-                        <option value="Meta">Meta Ads</option>
-                        <option value="TikTok">TikTok Ads</option>
-                        <option value="Email">Email campaigns</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Budget Allocation ($)</label>
-                      <input 
-                        type="number" 
-                        placeholder="5000"
-                        value={newCampBudget}
-                        onChange={(e) => setNewCampBudget(e.target.value)}
-                        className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Start Date</label>
-                      <input 
-                        type="date" 
-                        value={newCampStart}
-                        onChange={(e) => setNewCampStart(e.target.value)}
-                        className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">End Date</label>
-                      <input 
-                        type="date" 
-                        value={newCampEnd}
-                        onChange={(e) => setNewCampEnd(e.target.value)}
-                        className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none bg-white"
-                      />
-                    </div>
-                  </div>
-
-                  <button 
-                    type="submit"
-                    className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white text-xs font-bold py-2.5 rounded-xl cursor-pointer transition-all mt-3 shadow-sm"
-                  >
-                    Launch Campaign Pipeline
-                  </button>
-                </form>
-              </div>
-
-              <div className="text-[9px] text-[#94A3B8] font-bold text-center uppercase tracking-wider">
-                MarketMind AI · Relational state console
-              </div>
-            </motion.div>
-          </>
+        
+        {state.ui.activePanelType === 'adset' && (
+          <AdSetPanel 
+            item={state.ui.activePanelItem}
+            campaignId={selectedCampaignId}
+            onClose={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })}
+            onSave={(data) => {
+              dispatch({ type: state.ui.activePanelItem ? 'EDIT_ADSET' : 'ADD_ADSET', payload: data })
+              dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
+            }}
+          />
+        )}
+        
+        {state.ui.activePanelType === 'ad' && (
+          <AdPanel 
+            item={state.ui.activePanelItem}
+            adSetId={selectedAdSetId}
+            onClose={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })}
+            onSave={(data) => {
+              dispatch({ type: state.ui.activePanelItem ? 'EDIT_AD' : 'ADD_AD', payload: data })
+              dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
+            }}
+          />
         )}
       </AnimatePresence>
     </div>

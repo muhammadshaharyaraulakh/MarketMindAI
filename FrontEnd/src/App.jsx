@@ -3,6 +3,7 @@ import axios from 'axios'
 
 axios.defaults.withCredentials = true;
 import { motion, AnimatePresence } from 'framer-motion'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useInView } from 'react-intersection-observer'
 import {
   ResponsiveContainer,
@@ -2326,7 +2327,9 @@ export default function App() {
           user={user}
         />
       ) : (
-        <main className="overflow-x-hidden w-full relative bg-white select-none">
+        <>
+          {window.location.pathname !== '/' && <Navigate to="/" replace />}
+          <main className="overflow-x-hidden w-full relative bg-white select-none">
           <Navbar 
             onSignIn={() => setAuthView('login')} 
             onSignUp={() => setAuthView('signup')} 
@@ -2358,6 +2361,7 @@ export default function App() {
             )}
           </AnimatePresence>
         </main>
+        </>
       )}
 
       <AnimatePresence>
