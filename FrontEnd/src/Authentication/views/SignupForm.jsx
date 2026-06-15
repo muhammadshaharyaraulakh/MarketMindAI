@@ -57,8 +57,8 @@ export default function SignupForm({ onSwitchView, onSuccess, pageVariants }) {
       if (error.response && error.response.status === 422) {
         // Validation failed
         const errors = error.response.data.errors;
-        const firstErrorMsg = Object.values(errors)[0][0];
-        setErrorMsg(firstErrorMsg);
+        const firstErrorMsg = errors ? Object.values(errors)[0][0] : error.response.data.message;
+        setErrorMsg(firstErrorMsg || 'Invalid registration details.');
       } else {
         setErrorMsg('An error occurred during registration. Please try again.');
       }

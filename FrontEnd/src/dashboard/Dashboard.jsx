@@ -18,6 +18,7 @@ import {
 import CampaignPanel from './CampaignPanel'
 import AdSetPanel from './AdSetPanel'
 import AdPanel from './AdPanel'
+import ConfirmDialog from './ConfirmDialog'
 
 // Heroicons imports (Strictly Outline with thin stroke styling)
 import { 
@@ -39,6 +40,10 @@ import {
   PlusIcon,
   XMarkIcon,
   MagnifyingGlassIcon,
+  ChatBubbleBottomCenterIcon,
+  VideoCameraIcon,
+  AtSymbolIcon,
+  PhotoIcon,
   PresentationChartLineIcon,
   CircleStackIcon,
   PuzzlePieceIcon
@@ -60,10 +65,10 @@ import {
 // ==========================================
 
 const INITIAL_CAMPAIGNS = [
-  { id: 1, name: 'Summer Performance Ads', platform: 'Google', status: 'Active', budget: 5000, startDate: '2026-05-01', endDate: '2026-06-01' },
-  { id: 2, name: 'Meta Retargeting Q2', platform: 'Meta', status: 'Active', budget: 4000, startDate: '2026-05-10', endDate: '2026-06-10' },
-  { id: 3, name: 'TikTok Brand Viral', platform: 'TikTok', status: 'Paused', budget: 2000, startDate: '2026-05-15', endDate: '2026-06-15' },
-  { id: 4, name: 'Email Newsletter Nurture', platform: 'Email', status: 'Active', budget: 1000, startDate: '2026-05-01', endDate: '2026-08-30' }
+  { id: 1, name: 'Summer Performance Ads', platform: 'Google', status: 'Active', budget: 5000, startDate: '2026-05-01', endDate: '2026-06-01', objective: 'SALES', budget_type: 'Daily', bid_strategy: 'Maximize Conversions', sync_status: 'SYNCED', deletedAt: null },
+  { id: 2, name: 'Meta Retargeting Q2', platform: 'Meta', status: 'Active', budget: 4000, startDate: '2026-05-10', endDate: '2026-06-10', objective: 'LEADS', budget_type: 'Lifetime', bid_strategy: 'Lowest Cost', sync_status: 'SYNCED', deletedAt: null },
+  { id: 3, name: 'TikTok Brand Viral', platform: 'TikTok', status: 'Paused', budget: 2000, startDate: '2026-05-15', endDate: '2026-06-15', objective: 'AWARENESS', budget_type: 'Daily', bid_strategy: 'Cost Cap', sync_status: 'SYNCED', deletedAt: null },
+  { id: 4, name: 'Email Newsletter Nurture', platform: 'Email', status: 'Active', budget: 1000, startDate: '2026-05-01', endDate: '2026-08-30', objective: 'TRAFFIC', budget_type: 'Daily', bid_strategy: 'Manual', sync_status: 'SYNCED', deletedAt: null }
 ]
 
 const INITIAL_ANALYTICS = [
@@ -113,13 +118,13 @@ const INITIAL_AB_TESTS = [
 ]
 
 const INITIAL_ADSETS = [
-  { id: 1, campaignId: 1, name: 'Search Broad Match', audienceType: 'Interest', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 150 },
-  { id: 2, campaignId: 1, name: 'Search Exact Match', audienceType: 'Custom', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 200 }
+  { id: 1, campaignId: 1, name: 'Search Broad Match', audienceType: 'Interest', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 150, billing_event: 'IMPRESSIONS', budget_type: 'Daily', start_time: '2026-05-01T00:00', end_time: '2026-06-01T23:59', frequency_cap: '3 per day', sync_status: 'SYNCED', targeting: { age_min: 18, age_max: 65, genders: ['All'], locations: ['US'], interests: ['SaaS'] }, deletedAt: null },
+  { id: 2, campaignId: 1, name: 'Search Exact Match', audienceType: 'Custom', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 200, billing_event: 'CLICKS', budget_type: 'Daily', start_time: '2026-05-01T00:00', end_time: '2026-06-01T23:59', frequency_cap: 'None', sync_status: 'SYNCED', targeting: { age_min: 25, age_max: 55, genders: ['All'], locations: ['US', 'CA'], interests: ['B2B'] }, deletedAt: null }
 ]
 
 const INITIAL_ADS = [
-  { id: 1, adSetId: 1, name: 'Promo RSA 1', format: 'RESPONSIVE', platform: 'Google', status: 'Active', headline: 'Best SaaS Tools', description: 'Grow your business', cta: 'Sign Up', metrics: { impressions: 1200, clicks: 45, spend: 35 } },
-  { id: 2, adSetId: 1, name: 'Promo RSA 2', format: 'RESPONSIVE', platform: 'Google', status: 'Paused', headline: 'AI Marketing', description: 'Automate ads', cta: 'Learn More', metrics: { impressions: 800, clicks: 20, spend: 15 } }
+  { id: 1, adSetId: 1, name: 'Promo RSA 1', format: 'RESPONSIVE', platform: 'Google', status: 'Active', headline: 'Best SaaS Tools', description: 'Grow your business', cta: 'Sign Up', metrics: { impressions: 1200, clicks: 45, spend: 35 }, destination_url: 'https://marketmind.ai', cta_type: 'SIGN_UP', review_status: 'APPROVED', sync_status: 'SYNCED', ab_test_group: 'A', deletedAt: null },
+  { id: 2, adSetId: 1, name: 'Promo RSA 2', format: 'RESPONSIVE', platform: 'Google', status: 'Paused', headline: 'AI Marketing', description: 'Automate ads', cta: 'Learn More', metrics: { impressions: 800, clicks: 20, spend: 15 }, destination_url: 'https://marketmind.ai/features', cta_type: 'LEARN_MORE', review_status: 'PENDING', sync_status: 'SYNCED', ab_test_group: 'B', deletedAt: null }
 ]
 
 const INITIAL_INTEGRATIONS = [
@@ -144,7 +149,8 @@ const INITIAL_STATE = {
     activePanelType: null,
     editingItem: null,
     isLoading: false,
-    oauthStep: 0
+    oauthStep: 0,
+    confirmDialog: { isOpen: false, type: null, id: null, title: '', message: '' }
   },
   searchQuery: '',
   platformFilter: 'All',
@@ -179,39 +185,54 @@ function reducer(state, action) {
     case 'ADD_CAMPAIGN':
       return { 
         ...state, 
-        campaigns: [action.payload, ...state.campaigns],
+        campaigns: [{...action.payload, sync_status: 'PENDING', deletedAt: null}, ...state.campaigns],
         ui: { ...state.ui, activePanelType: null }
       }
     case 'UPDATE_CAMPAIGN':
       return {
         ...state,
-        campaigns: state.campaigns.map(c => c.id === action.payload.id ? action.payload : c)
+        campaigns: state.campaigns.map(c => c.id === action.payload.id ? { ...action.payload, sync_status: 'PENDING' } : c)
       }
     case 'DELETE_CAMPAIGN':
       return {
         ...state,
-        campaigns: state.campaigns.filter(c => c.id !== action.payload),
-        analytics: state.analytics.filter(a => a.campaignId !== action.payload),
-        contentPieces: state.contentPieces.filter(cp => cp.campaignId !== action.payload),
-        abTests: state.abTests.filter(t => t.campaignId !== action.payload),
-        adSets: state.adSets.filter(as => as.campaignId !== action.payload)
+        campaigns: state.campaigns.map(c => c.id === action.payload ? { ...c, deletedAt: new Date().toISOString() } : c),
+        ui: { ...state.ui, confirmDialog: { ...state.ui.confirmDialog, isOpen: false } }
       }
 
     // AdSets CRUD
     case 'ADD_ADSET':
-      return { ...state, adSets: [action.payload, ...state.adSets], ui: { ...state.ui, activePanelType: null } }
+      return { ...state, adSets: [{...action.payload, sync_status: 'PENDING', deletedAt: null}, ...state.adSets], ui: { ...state.ui, activePanelType: null } }
     case 'UPDATE_ADSET':
-      return { ...state, adSets: state.adSets.map(a => a.id === action.payload.id ? action.payload : a) }
+      return { ...state, adSets: state.adSets.map(a => a.id === action.payload.id ? { ...action.payload, sync_status: 'PENDING' } : a) }
     case 'DELETE_ADSET':
-      return { ...state, adSets: state.adSets.filter(a => a.id !== action.payload), ads: state.ads.filter(ad => ad.adSetId !== action.payload) }
+      return { ...state, adSets: state.adSets.map(a => a.id === action.payload ? { ...a, deletedAt: new Date().toISOString() } : a), ui: { ...state.ui, confirmDialog: { ...state.ui.confirmDialog, isOpen: false } } }
 
     // Ads CRUD
     case 'ADD_AD':
-      return { ...state, ads: [action.payload, ...state.ads], ui: { ...state.ui, activePanelType: null } }
+      return { ...state, ads: [{...action.payload, sync_status: 'PENDING', deletedAt: null}, ...state.ads], ui: { ...state.ui, activePanelType: null } }
     case 'UPDATE_AD':
-      return { ...state, ads: state.ads.map(a => a.id === action.payload.id ? action.payload : a) }
+      return { ...state, ads: state.ads.map(a => a.id === action.payload.id ? { ...action.payload, sync_status: 'PENDING' } : a) }
     case 'DELETE_AD':
-      return { ...state, ads: state.ads.filter(a => a.id !== action.payload) }
+      return { ...state, ads: state.ads.map(a => a.id === action.payload ? { ...a, deletedAt: new Date().toISOString() } : a), ui: { ...state.ui, confirmDialog: { ...state.ui.confirmDialog, isOpen: false } } }
+
+    case 'OPEN_CONFIRM':
+      return { ...state, ui: { ...state.ui, confirmDialog: { isOpen: true, ...action.payload } } }
+    case 'CLOSE_CONFIRM':
+      return { ...state, ui: { ...state.ui, confirmDialog: { ...state.ui.confirmDialog, isOpen: false } } }
+    case 'SYNC_SUCCESS': {
+      const { entityType, id } = action.payload
+      return {
+        ...state,
+        [entityType]: state[entityType].map(item => item.id === id ? { ...item, sync_status: 'SYNCED', ...(entityType === 'ads' ? { review_status: 'IN_REVIEW' } : {}) } : item)
+      }
+    }
+    case 'SET_AD_APPROVED':
+      return { ...state, ads: state.ads.map(a => a.id === action.payload ? { ...a, review_status: 'APPROVED', status: 'Active' } : a) }
+    case 'SET_AD_REJECTED':
+      return { ...state, ads: state.ads.map(a => a.id === action.payload.id ? { ...a, review_status: 'REJECTED', rejection_reason: action.payload.reason, status: 'Draft' } : a) }
+    case 'TOGGLE_AD_STATUS':
+      return { ...state, ads: state.ads.map(a => a.id === action.payload ? { ...a, status: a.status === 'Active' ? 'Paused' : 'Active' } : a) }
 
     // Integrations CRUD
     case 'CONNECT_ACCOUNT':
@@ -286,6 +307,26 @@ const StatusBadge = ({ status }) => {
   )
 }
 
+const SyncBadge = ({ sync_status }) => {
+  const isSyncing = sync_status === 'PENDING'
+  if (!sync_status) return null
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ml-2 ${isSyncing ? 'bg-slate-50 text-slate-500 border-slate-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+      {isSyncing ? 'Syncing...' : 'Synced'}
+    </span>
+  )
+}
+
+const AdStatusBadge = ({ ad }) => {
+  if (ad.review_status === 'REJECTED') return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border bg-red-50 text-red-700 border-red-200">Rejected</span>
+  if (ad.review_status === 'IN_REVIEW') return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border bg-blue-50 text-blue-700 border-blue-200">Pending Review</span>
+  if (ad.sync_status === 'PENDING') return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border bg-slate-50 text-slate-500 border-slate-200">Syncing...</span>
+  if (ad.status === 'Active') return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border bg-green-50 text-green-700 border-green-200">Active</span>
+  if (ad.status === 'Paused') return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border bg-yellow-50 text-yellow-700 border-yellow-200">Paused</span>
+  if (ad.status === 'Draft') return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border bg-gray-50 text-gray-700 border-gray-200">Draft</span>
+  return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border bg-slate-50 text-slate-500 border-slate-200">{ad.status}</span>
+}
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
@@ -355,10 +396,24 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
 
   const [showRevenue, setShowRevenue] = useState(true)
 
-  
+  const activeCampaigns = state.campaigns.filter(c => !c.deletedAt)
+  const activeAdSets = state.adSets.filter(a => !a.deletedAt)
+  const activeAds = state.ads.filter(a => !a.deletedAt)
+
+  // Platform Icon Helper
+  const getPlatformIcon = (platform) => {
+    switch(platform) {
+      case 'Google': return <MagnifyingGlassIcon className="w-3 h-3 inline-block mr-1" />
+      case 'Meta': return <ChatBubbleBottomCenterIcon className="w-3 h-3 inline-block mr-1" />
+      case 'Snapchat': return <VideoCameraIcon className="w-3 h-3 inline-block mr-1" />
+      case 'Email': return <AtSymbolIcon className="w-3 h-3 inline-block mr-1" />
+      default: return null
+    }
+  }
+
   // Relational Campaign aggregators
   const campaignStats = useMemo(() => {
-    return state.campaigns.map(camp => {
+    return activeCampaigns.map(camp => {
       const relatedAnalytics = state.analytics.filter(a => a.campaignId === camp.id)
       
       const totalSpend = relatedAnalytics.reduce((sum, a) => sum + a.spend, 0)
@@ -396,7 +451,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
     const roas = totalSpend > 0 ? +(totalRevenue / totalSpend).toFixed(2) : 0
     const ctr = totalImpressions > 0 ? +((totalClicks / totalImpressions) * 100).toFixed(2) : 0
     const cpa = totalLeads > 0 ? +(totalSpend / totalLeads).toFixed(2) : 0
-    const budgetLimit = state.campaigns.reduce((sum, c) => sum + c.budget, 0)
+    const budgetLimit = activeCampaigns.reduce((sum, c) => sum + c.budget, 0)
 
     return {
       totalSpend,
@@ -1005,10 +1060,13 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                             <tr key={camp.id} className="hover:bg-[#F8FAFC]/50 transition-colors cursor-pointer group">
                               <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4 pl-6">
                                 <span className="block text-xs font-bold text-[#0F172A] group-hover:text-[#FF2D20] transition-colors">{camp.name}</span>
-                                <span className="block text-[9px] font-bold text-[#94A3B8] uppercase tracking-widest mt-0.5 font-mona">{camp.platform} Network</span>
+                                <span className="flex items-center text-[9px] font-bold text-[#94A3B8] uppercase tracking-widest mt-0.5 font-mona">
+                                  {getPlatformIcon(camp.platform)} {camp.platform} Network
+                                </span>
                               </td>
                               <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4">
                                 <StatusBadge status={camp.status} />
+                                <SyncBadge sync_status={camp.sync_status} />
                               </td>
                               <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4 text-xs font-bold text-[#0F172A]">
                                 ${camp.totalSpend.toLocaleString()}
@@ -1031,7 +1089,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                                     <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
                                   </button>
                                   <button
-                                    onClick={() => dispatch({ type: 'DELETE_CAMPAIGN', payload: camp.id })}
+                                    onClick={() => dispatch({ type: 'OPEN_CONFIRM', payload: { type: 'DELETE_CAMPAIGN', id: camp.id, title: 'Delete Campaign', message: 'Are you sure you want to delete this campaign? This action cannot be undone.' } })}
                                     className="p-1.5 hover:bg-[#F8FAFC] border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-red-500 cursor-pointer transition-all"
                                   >
                                     <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
@@ -1082,6 +1140,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
 
                     <div className="flex items-center gap-2">
                       <StatusBadge status={selectedCampaign?.status} />
+                      <SyncBadge sync_status={selectedCampaign?.sync_status} />
                       <button
                         onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'campaign', item: selectedCampaign } })}
                         className="bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-semibold px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm inline-flex items-center gap-1"
@@ -1104,7 +1163,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                   <div className="flex overflow-x-auto no-scrollbar border-b border-[#E2E8F0]">
                     {[
                       { id: 'analytics', label: 'Analytics Logs', count: state.analytics.filter(a => a.campaignId === selectedCampaign?.id).length },
-                      { id: 'adsets', label: 'Ad Sets', count: state.adSets.filter(a => a.campaignId === selectedCampaign?.id).length },
+                      { id: 'adsets', label: 'Ad Sets', count: activeAdSets.filter(a => a.campaignId === selectedCampaign?.id).length },
                       { id: 'content', label: 'AI Creative Studio', count: state.contentPieces.filter(cp => cp.campaignId === selectedCampaign?.id).length },
                       { id: 'ab_testing', label: 'A/B Splitting', count: state.abTests.filter(t => t.campaignId === selectedCampaign?.id).length }
                     ].map(tab => (
@@ -1378,7 +1437,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                         </div>
                         
                         <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
-                          {state.adSets.filter(a => a.campaignId === selectedCampaign?.id).length > 0 ? (
+                          {activeAdSets.filter(a => a.campaignId === selectedCampaign?.id).length > 0 ? (
                             <div className="overflow-x-auto">
                               <table className="w-full text-left border-collapse">
                                 <thead>
@@ -1393,7 +1452,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {state.adSets
+                                  {activeAdSets
                                     .filter(a => a.campaignId === selectedCampaign?.id)
                                     .map(adSet => (
                                       <tr key={adSet.id} onClick={() => navigate(`/campaigns/${selectedCampaign?.id}/adsets/${adSet.id}/ads`)} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
@@ -1402,7 +1461,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                                           <span className="block text-[10px] font-semibold text-[#94A3B8] mt-0.5">{adSet.platform}</span>
                                         </td>
                                         <td className="p-4 text-xs font-semibold text-[#475569]">{adSet.audienceType}</td>
-                                        <td className="p-4"><StatusBadge status={adSet.status} /></td>
+                                        <td className="p-4"><StatusBadge status={adSet.status} /><SyncBadge sync_status={adSet.sync_status} /></td>
                                         <td className="p-4 text-xs font-bold text-[#0F172A]">${adSet.budget.toLocaleString()}</td>
                                         <td className="p-4 text-xs font-bold text-[#FF2D20]">${adSet.spendToday.toLocaleString()}</td>
                                         <td className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">{adSet.goal}</td>
@@ -1415,7 +1474,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                                               <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
                                             </button>
                                             <button
-                                              onClick={() => dispatch({ type: 'DELETE_ADSET', payload: adSet.id })}
+                                              onClick={() => dispatch({ type: 'OPEN_CONFIRM', payload: { type: 'DELETE_ADSET', id: adSet.id, title: 'Delete Ad Set', message: 'Are you sure you want to delete this Ad Set? This action cannot be undone.' } })}
                                               className="p-1.5 hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-red-500 cursor-pointer transition-all shadow-sm"
                                             >
                                               <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
@@ -1800,7 +1859,9 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                       <ArrowLeftIcon className="w-4 h-4 stroke-2" />
                     </button>
                     <div>
-                      <h2 className="text-lg font-bold text-[#0F172A] font-mona leading-tight">Ad Creatives</h2>
+                      <h2 className="text-lg font-bold text-[#0F172A] font-mona leading-tight">
+                        <span className="text-[#94A3B8] font-semibold">Campaigns / {selectedCampaign?.name} / {selectedAdSet?.name} / </span> Ads
+                      </h2>
                       <p className="text-[11px] font-semibold text-[#94A3B8] mt-0.5">Manage individual ads for this Ad Set.</p>
                     </div>
                   </div>
@@ -1814,36 +1875,76 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                 </div>
 
                 {/* Ads Grid */}
-                {state.ads.filter(a => a.adSetId === selectedAdSetId).length > 0 ? (
+                {activeAds.filter(a => a.adSetId === selectedAdSetId).length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {state.ads.filter(a => a.adSetId === selectedAdSetId).map(ad => (
-                      <div key={ad.id} className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-                        <div>
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h3 className="text-sm font-bold text-[#0F172A]">{ad.name}</h3>
-                              <span className="text-[10px] font-semibold text-[#94A3B8] block">{ad.format} · {ad.platform}</span>
+                    {activeAds.filter(a => a.adSetId === selectedAdSetId).map(ad => (
+                      <div key={ad.id} className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm flex flex-col justify-between overflow-hidden">
+                        {ad.review_status === 'REJECTED' && (
+                          <div className="bg-red-50 text-red-700 px-4 py-2.5 text-[10px] font-bold border-b border-red-100 flex justify-between items-center">
+                            <span>Rejected — {ad.rejection_reason}</span>
+                            <button 
+                              onClick={() => {
+                                dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad', item: ad } });
+                              }}
+                              className="underline hover:text-red-900"
+                            >
+                              Edit & Resubmit
+                            </button>
+                          </div>
+                        )}
+                        <div className="p-5 flex-1 flex flex-col justify-between">
+                            <div className="p-4">
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="flex gap-3">
+                                <div className="w-12 h-12 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center justify-center shrink-0">
+                                  <PhotoIcon className="w-5 h-5 text-[#94A3B8]" />
+                                </div>
+                                <div>
+                                  <h3 className="text-sm font-bold text-[#0F172A]">{ad.name}</h3>
+                                  <span className="text-[10px] font-semibold text-[#94A3B8] flex items-center">
+                                    {getPlatformIcon(ad.platform)} {ad.format} · {ad.platform}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <StatusBadge status={ad.status} />
+                              <div className="flex flex-col items-end gap-2">
+                                <AdStatusBadge ad={ad} />
+                                {(ad.status === 'Active' || ad.status === 'Paused') && ad.review_status === 'APPROVED' && (
+                                  <button 
+                                    onClick={() => dispatch({ type: 'TOGGLE_AD_STATUS', payload: ad.id })}
+                                    className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${ad.status === 'Active' ? 'bg-green-500' : 'bg-slate-300'}`}
+                                  >
+                                    <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${ad.status === 'Active' ? 'translate-x-3' : 'translate-x-0.5'}`} />
+                                  </button>
+                                )}
+                              </div>
+                          
+                          <div className="bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0] mb-4 relative">
+                            <p className="text-[11px] font-bold text-[#0F172A] mb-1 pr-16">Headline: <span className="font-semibold text-[#475569]">{ad.headline}</span></p>
+                            <p className="text-[10px] text-[#475569] line-clamp-2 pr-16">{ad.description}</p>
+                            <span className="absolute top-3 right-3 bg-white border border-[#E2E8F0] text-[9px] font-bold text-[#0F172A] px-2 py-0.5 rounded shadow-sm">
+                              {ad.cta_type || 'LEARN_MORE'}
+                            </span>
                           </div>
                           
-                          <div className="bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0] mb-4">
-                            <p className="text-[11px] font-bold text-[#0F172A] mb-1">Headline: <span className="font-semibold text-[#475569]">{ad.headline}</span></p>
-                            <p className="text-[10px] text-[#475569] line-clamp-2">{ad.description}</p>
-                          </div>
-                          
-                          <div className="grid grid-cols-3 gap-2 mb-4 text-center">
+                          <div className="grid grid-cols-4 gap-2 mb-4 text-center">
                             <div className="bg-[#FFF1F0] p-2 rounded-lg">
-                              <span className="block text-[9px] font-bold text-[#FF2D20] uppercase">Spend</span>
+                              <span className="block text-[8px] font-bold text-[#FF2D20] uppercase">Spend</span>
                               <span className="block text-xs font-extrabold text-[#0F172A]">${ad.metrics.spend}</span>
                             </div>
                             <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
-                              <span className="block text-[9px] font-bold text-[#94A3B8] uppercase">Impr.</span>
+                              <span className="block text-[8px] font-bold text-[#94A3B8] uppercase">Impr.</span>
                               <span className="block text-xs font-extrabold text-[#0F172A]">{ad.metrics.impressions}</span>
                             </div>
                             <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
-                              <span className="block text-[9px] font-bold text-[#94A3B8] uppercase">Clicks</span>
+                              <span className="block text-[8px] font-bold text-[#94A3B8] uppercase">Clicks</span>
                               <span className="block text-xs font-extrabold text-[#0F172A]">{ad.metrics.clicks}</span>
+                            </div>
+                            <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
+                              <span className="block text-[8px] font-bold text-[#94A3B8] uppercase">CTR</span>
+                              <span className="block text-xs font-extrabold text-[#0F172A]">
+                                {ad.metrics.impressions > 0 ? ((ad.metrics.clicks / ad.metrics.impressions) * 100).toFixed(1) : '0.0'}%
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -1856,11 +1957,12 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
                             Edit
                           </button>
                           <button
-                            onClick={() => dispatch({ type: 'DELETE_AD', payload: ad.id })}
+                            onClick={() => dispatch({ type: 'OPEN_CONFIRM', payload: { type: 'DELETE_AD', id: ad.id, title: 'Delete Ad', message: 'Are you sure you want to delete this ad? This action cannot be undone.' } })}
                             className="bg-white border border-[#E2E8F0] hover:bg-red-50 text-[#94A3B8] hover:text-red-500 px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm"
                           >
                             <TrashIcon className="w-4 h-4 stroke-[1.5]" />
                           </button>
+                        </div>
                         </div>
                       </div>
                     ))}
@@ -2101,7 +2203,8 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
             item={state.ui.activePanelItem}
             onClose={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })}
             onSave={(data) => {
-              dispatch({ type: state.ui.activePanelItem ? 'EDIT_CAMPAIGN' : 'ADD_CAMPAIGN', payload: data })
+              dispatch({ type: state.ui.activePanelItem ? 'UPDATE_CAMPAIGN' : 'ADD_CAMPAIGN', payload: data })
+              setTimeout(() => dispatch({ type: 'SYNC_SUCCESS', payload: { entityType: 'campaigns', id: data.id } }), 1500)
               dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
             }}
           />
@@ -2113,7 +2216,8 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
             campaignId={selectedCampaignId}
             onClose={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })}
             onSave={(data) => {
-              dispatch({ type: state.ui.activePanelItem ? 'EDIT_ADSET' : 'ADD_ADSET', payload: data })
+              dispatch({ type: state.ui.activePanelItem ? 'UPDATE_ADSET' : 'ADD_ADSET', payload: data })
+              setTimeout(() => dispatch({ type: 'SYNC_SUCCESS', payload: { entityType: 'adSets', id: data.id } }), 1500)
               dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
             }}
           />
@@ -2123,14 +2227,37 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
           <AdPanel 
             item={state.ui.activePanelItem}
             adSetId={selectedAdSetId}
+            platform={selectedCampaign?.platform}
             onClose={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })}
             onSave={(data) => {
-              dispatch({ type: state.ui.activePanelItem ? 'EDIT_AD' : 'ADD_AD', payload: data })
+              dispatch({ type: state.ui.activePanelItem ? 'UPDATE_AD' : 'ADD_AD', payload: data })
+              setTimeout(() => {
+                dispatch({ type: 'SYNC_SUCCESS', payload: { entityType: 'ads', id: data.id } })
+                setTimeout(() => {
+                  const isApproved = Math.random() < 0.8
+                  if (isApproved) {
+                    dispatch({ type: 'SET_AD_APPROVED', payload: data.id })
+                  } else {
+                    const reasons = ["Image text exceeds 20% coverage", "Landing page mismatch", "Missing privacy policy link"]
+                    const reason = reasons[Math.floor(Math.random() * reasons.length)]
+                    dispatch({ type: 'SET_AD_REJECTED', payload: { id: data.id, reason } })
+                  }
+                }, 2000)
+              }, 1500)
               dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
             }}
           />
         )}
       </AnimatePresence>
+      <ConfirmDialog 
+        isOpen={state.ui.confirmDialog.isOpen}
+        title={state.ui.confirmDialog.title}
+        message={state.ui.confirmDialog.message}
+        onConfirm={() => {
+          dispatch({ type: state.ui.confirmDialog.type, payload: state.ui.confirmDialog.id });
+        }}
+        onCancel={() => dispatch({ type: 'CLOSE_CONFIRM' })}
+      />
     </div>
   )
 }
