@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
+import axios from 'axios'
 import Dashboard from './dashboard/Dashboard'
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -42,21 +43,79 @@ function LandingPage({ onSignIn, onSignUp }) {
 }
 
 export default function App() {
-  const [user] = useState({ name: 'Test User', email: 'test@example.com' }) // Mock user
+  const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   const [authView, setAuthView] = useState(null)
   const [viewProfile, setViewProfile] = useState(false)
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get('/api/user');
+        if (response.data && !response.data.email_verified_at) {
+          // Force logout if not verified
+          try { await axios.post('/api/logout'); } catch(e) {}
+          setUser(null);
+          localStorage.clear();
+          sessionStorage.clear();
+          document.cookie.split(";").forEach((c) => {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+          });
+        } else {
+          setUser(response.data);
+        }
+      } catch (err) {
+        setUser(null);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  React.useEffect(() => {
+    if (!loadingUser && user && (location.pathname === '/' || location.pathname === '/login' || location.pathname === '/signup' || authView)) {
+      setAuthView(null);
+      navigate('/dashboard');
+    }
+  }, [user, loadingUser, location.pathname, authView, navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('/api/logout');
+    } catch (err) {
+      console.error('Logout API failed', err);
+    } finally {
+      setUser(null);
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      navigate('/');
+    }
+  };
+
+  if (loadingUser) {
+    return <div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <>
       <Routes>
         <Route path="/" element={<LandingPage onSignIn={() => setAuthView('login')} onSignUp={() => setAuthView('signup')} />} />
         <Route path="/*" element={
-          <Dashboard 
-            onLogout={() => navigate('/')} 
-            onOpenProfile={() => setViewProfile(true)} 
-            user={user}
-          />
+          user ? (
+            <Dashboard 
+              onLogout={handleLogout} 
+              onOpenProfile={() => setViewProfile(true)} 
+              user={user}
+            />
+          ) : (
+            <Navigate to="/" />
+          )
         } />
       </Routes>
 
@@ -67,7 +126,11 @@ export default function App() {
             onClose={(result) => {
               setAuthView(null)
               if (result?.loggedIn) {
-                navigate('/dashboard')
+                // Trigger a re-fetch of the user
+                axios.get('/api/user').then(res => {
+                  setUser(res.data);
+                  navigate('/dashboard');
+                });
               }
             }}
           />

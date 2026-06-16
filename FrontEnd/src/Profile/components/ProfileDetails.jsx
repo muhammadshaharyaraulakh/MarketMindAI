@@ -5,8 +5,11 @@ import { SectionLabel } from './SectionLabel';
 import { profileService } from '../services/profileService';
 
 export default function ProfileDetails({ user, tabVariants, setErrorMsg, setSuccessMsg }) {
-  const [fullName, setFullName] = useState(user?.name || 'Rashid Mahmood');
-  const [email, setEmail] = useState(user?.email || 'rashid@company.com');
+  const [fullName, setFullName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [timezone, setTimezone] = useState(user?.timezone || '');
+  const [language, setLanguage] = useState(user?.language || '');
+  const [bio, setBio] = useState(user?.bio || '');
   const [loading, setLoading] = useState(false);
 
   const handleSaveProfile = async (e) => {
@@ -15,7 +18,7 @@ export default function ProfileDetails({ user, tabVariants, setErrorMsg, setSucc
     setErrorMsg('');
     setSuccessMsg('');
     try {
-      await profileService.updateProfile(fullName, email);
+      await profileService.updateProfile({ name: fullName, email, timezone, language, bio });
       setLoading(false);
       setSuccessMsg('Profile updated successfully.');
     } catch (err) {
@@ -71,6 +74,37 @@ export default function ProfileDetails({ user, tabVariants, setErrorMsg, setSucc
               />
             </div>
           </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Timezone</label>
+            <input 
+              type="text" 
+              value={timezone}
+              onChange={(e) => setTimezone(e.target.value)}
+              placeholder="America/New_York"
+              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] px-4 py-3 font-normal transition-all"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Language</label>
+            <input 
+              type="text" 
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              placeholder="en-US"
+              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] px-4 py-3 font-normal transition-all"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Bio</label>
+          <textarea 
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder="Tell us about yourself"
+            className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] px-4 py-3 font-normal transition-all min-h-[100px] resize-y"
+          />
         </div>
 
         <button

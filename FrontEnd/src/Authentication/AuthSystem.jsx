@@ -4,10 +4,9 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 import LoginForm from './views/LoginForm'
 import SignupForm from './views/SignupForm'
-import PasswordResetFlow from './views/PasswordResetFlow'
-import AccountRecoveryFlow from './views/AccountRecoveryFlow'
 import SuccessScreen from './views/SuccessScreen'
 import TwoFactorChallengeForm from './views/TwoFactorChallengeForm'
+import PasswordResetFlow from './views/PasswordResetFlow'
 
 export default function AuthSystem({ onClose, initialView = 'login' }) {
   const [view, setView] = useState(initialView)
@@ -66,20 +65,15 @@ export default function AuthSystem({ onClose, initialView = 'login' }) {
               pageVariants={pageVariants} 
             />
           )}
-          {view === 'password-reset' && (
+
+          {view === 'forgot-password' && (
             <PasswordResetFlow 
               onSwitchView={setView} 
               onSuccess={handleSuccess} 
               pageVariants={pageVariants} 
             />
           )}
-          {view === 'account-recovery' && (
-            <AccountRecoveryFlow 
-              onSwitchView={setView} 
-              onSuccess={handleSuccess} 
-              pageVariants={pageVariants} 
-            />
-          )}
+
           {view === 'two-factor-challenge' && (
             <TwoFactorChallengeForm 
               onSwitchView={setView} 

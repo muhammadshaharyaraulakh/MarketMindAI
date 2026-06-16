@@ -36,8 +36,8 @@ export default function PasswordResetFlow({ onSwitchView, onSuccess, pageVariant
     }
     setLoading(true)
     try {
-      const backendUrl = 'http://localhost:8000';
-      await axios.post(`${backendUrl}/api/forgot-password`, { email }, {
+      await axios.get('/sanctum/csrf-cookie');
+      await axios.post('/api/forgot-password', { email }, {
         headers: { 'Accept': 'application/json' }
       });
       setSuccessMsg(`We sent a password reset link to ${email}`)
@@ -69,8 +69,8 @@ export default function PasswordResetFlow({ onSwitchView, onSuccess, pageVariant
     }
     setLoading(true)
     try {
-      const backendUrl = 'http://localhost:8000';
-      await axios.post(`${backendUrl}/api/reset-password`, {
+      await axios.get('/sanctum/csrf-cookie');
+      await axios.post('/api/reset-password', {
         token,
         email,
         password,

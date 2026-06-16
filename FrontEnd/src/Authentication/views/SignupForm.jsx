@@ -32,7 +32,8 @@ export default function SignupForm({ onSwitchView, onSuccess, pageVariants }) {
     setLoading(true)
     
     try {
-      const response = await axios.post('http://localhost:8000/api/register', {
+      await axios.get('/sanctum/csrf-cookie');
+      const response = await axios.post('/api/register', {
         name: fullName,
         email: email,
         password: password,

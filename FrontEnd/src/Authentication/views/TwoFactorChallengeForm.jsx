@@ -28,8 +28,9 @@ export default function TwoFactorChallengeForm({ onSwitchView, onSuccess, pageVa
     setLoading(true)
     
     try {
+      await axios.get('/sanctum/csrf-cookie');
       const payload = useRecoveryCode ? { recovery_code: recoveryCode } : { code }
-      const response = await axios.post('http://localhost:8000/api/two-factor-challenge', payload, {
+      const response = await axios.post('/api/two-factor-challenge', payload, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
@@ -37,9 +38,6 @@ export default function TwoFactorChallengeForm({ onSwitchView, onSuccess, pageVa
       });
       
       setLoading(false)
-      if (response.data.token) {
-        localStorage.setItem('auth_token', response.data.token);
-      }
       onSuccess()
     } catch (error) {
       setLoading(false)

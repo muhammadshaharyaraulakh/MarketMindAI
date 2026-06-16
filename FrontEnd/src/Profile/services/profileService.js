@@ -1,54 +1,37 @@
 import axios from 'axios';
 
-const getHeaders = () => {
-  const token = localStorage.getItem('auth_token');
-  return { 
-    'Authorization': `Bearer ${token}`,
-    'Accept': 'application/json'
-  };
-};
-
 export const profileService = {
-  updateProfile: async (fullName, email) => {
-    return axios.put('http://localhost:8000/api/user/profile-information', { name: fullName, email: email }, { headers: getHeaders() });
+  updateProfile: async (data) => {
+    return axios.put('/api/profile', data);
   },
   updatePassword: async (current_password, password, password_confirmation) => {
-    return axios.put('http://localhost:8000/api/user/password', { current_password, password, password_confirmation }, { headers: getHeaders() });
-  },
-  addRecoveryEmail: async (recovery_email) => {
-    return axios.post('http://localhost:8000/api/add-recovery-email', { recovery_email }, { headers: getHeaders() });
-  },
-  updateRecoveryEmail: async (recovery_email) => {
-    return axios.post('http://localhost:8000/api/update-recovery-email', { recovery_email }, { headers: getHeaders() });
-  },
-  removeRecoveryEmail: async () => {
-    return axios.post('http://localhost:8000/api/remove-recovery-email', {}, { headers: getHeaders() });
+    return axios.put('/api/user/password', { current_password, password, password_confirmation });
   },
   confirmPassword: async (password) => {
-    return axios.post('http://localhost:8000/api/user/confirm-password', { password }, { headers: getHeaders() });
+    return axios.post('/api/user/confirm-password', { password });
   },
   enable2FA: async () => {
-    return axios.post('http://localhost:8000/api/user/two-factor-authentication', {}, { headers: getHeaders() });
+    return axios.post('/api/user/two-factor-authentication');
   },
   disable2FA: async () => {
-    return axios.delete('http://localhost:8000/api/user/two-factor-authentication', { headers: getHeaders() });
+    return axios.delete('/api/user/two-factor-authentication');
   },
   get2FAQR: async () => {
-    return axios.get('http://localhost:8000/api/user/two-factor-qr-code', { headers: getHeaders() });
+    return axios.get('/api/user/two-factor-qr-code');
   },
   verify2FA: async (code) => {
-    return axios.post('http://localhost:8000/api/user/confirmed-two-factor-authentication', { code }, { headers: getHeaders() });
+    return axios.post('/api/user/confirmed-two-factor-authentication', { code });
   },
   getRecoveryCodes: async () => {
-    return axios.get('http://localhost:8000/api/user/two-factor-recovery-codes', { headers: getHeaders() });
+    return axios.get('/api/user/two-factor-recovery-codes');
   },
   getSessions: async () => {
-    return axios.get('http://localhost:8000/api/user/sessions', { headers: getHeaders() });
+    return axios.get('/api/user/sessions');
   },
   revokeSession: async (id) => {
-    return axios.delete(`http://localhost:8000/api/user/sessions/${id}`, { headers: getHeaders() });
+    return axios.delete(`/api/user/sessions/${id}`);
   },
   revokeAllSessions: async () => {
-    return axios.delete('http://localhost:8000/api/user/sessions', { headers: getHeaders() });
+    return axios.delete('/api/user/sessions');
   }
 };

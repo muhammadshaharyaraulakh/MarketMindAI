@@ -29,7 +29,8 @@ export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
     setLoading(true)
     
     try {
-      const response = await axios.post('http://localhost:8000/api/login', {
+      await axios.get('/sanctum/csrf-cookie');
+      const response = await axios.post('/api/login', {
         email,
         password
       }, {
@@ -43,9 +44,6 @@ export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
       if (response.data.two_factor) {
         onSwitchView('two-factor-challenge')
       } else {
-        if (response.data.token) {
-          localStorage.setItem('auth_token', response.data.token);
-        }
         onSuccess() 
       }
     } catch (error) {
@@ -96,7 +94,7 @@ export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
             <label className="text-xs font-bold text-[#475569] uppercase tracking-wider block font-poppins">Security Password</label>
             <button
               type="button"
-              onClick={() => onSwitchView('password-reset')}
+              onClick={() => onSwitchView('forgot-password')}
               className="text-[#FF2D20] hover:text-[#E5261A] text-xs font-bold no-underline transition-colors cursor-pointer font-poppins"
             >
               Forgot Password?
@@ -127,13 +125,6 @@ export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
             <input type="checkbox" className="accent-[#FF2D20] w-4 h-4 rounded border-[#E2E8F0]" />
             <span className="text-[#64748B] text-xs font-semibold">Keep me signed in</span>
           </label>
-          <button
-            type="button"
-            onClick={() => onSwitchView('account-recovery')}
-            className="text-[#FF2D20] hover:text-[#E5261A] text-xs font-bold no-underline transition-colors cursor-pointer font-poppins"
-          >
-            Account Recovery
-          </button>
         </div>
 
         <button

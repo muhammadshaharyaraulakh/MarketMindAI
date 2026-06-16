@@ -5,7 +5,6 @@ import {
 } from '@heroicons/react/24/outline';
 import ProfileDetails from './components/ProfileDetails';
 import PasswordCredentials from './components/PasswordCredentials';
-import RecoveryPaths from './components/RecoveryPaths';
 import TwoFactorShield from './components/TwoFactorShield';
 import ActiveSessions from './components/ActiveSessions';
 
@@ -28,7 +27,6 @@ export default function ProfilePage({ onClose, user }) {
   const tabList = [
     { id: 'profile', label: 'Profile' },
     { id: 'password', label: 'Password' },
-    { id: 'recovery', label: 'Recovery Paths' },
     { id: '2fa', label: '2FA Shield' },
     { id: 'activity', label: 'Active Sessions' }
   ];
@@ -122,7 +120,6 @@ export default function ProfilePage({ onClose, user }) {
           <AnimatePresence mode="wait">
             {activeTab === 'profile' && <ProfileDetails user={user} tabVariants={tabVariants} setErrorMsg={setErrorMsg} setSuccessMsg={setSuccessMsg} />}
             {activeTab === 'password' && <PasswordCredentials tabVariants={tabVariants} setErrorMsg={setErrorMsg} setSuccessMsg={setSuccessMsg} />}
-            {activeTab === 'recovery' && <RecoveryPaths user={user} tabVariants={tabVariants} setErrorMsg={setErrorMsg} setSuccessMsg={setSuccessMsg} />}
             {activeTab === '2fa' && <TwoFactorShield user={user} tabVariants={tabVariants} setErrorMsg={setErrorMsg} setSuccessMsg={setSuccessMsg} />}
             {activeTab === 'activity' && <ActiveSessions activeTab={activeTab} tabVariants={tabVariants} setErrorMsg={setErrorMsg} setSuccessMsg={setSuccessMsg} onClose={onClose} />}
           </AnimatePresence>
