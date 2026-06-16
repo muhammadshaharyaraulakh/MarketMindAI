@@ -7,7 +7,8 @@ export default function SocialLogins({ onSuccess, mode = 'login' }) {
   const handleProviderClick = async (providerName) => {
     setLoading(true)
     try {
-      const response = await axios.get(`http://localhost:8000/auth/${providerName.toLowerCase()}/redirect`);
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+      const response = await axios.get(`${backendUrl}/auth/${providerName.toLowerCase()}/redirect`);
       if (response.data && response.data.url) {
         window.location.href = response.data.url;
       }

@@ -11,6 +11,9 @@ Route::get('/email/verify-custom/{id}/{hash}', [\App\Http\Controllers\ApiVerific
     ->middleware(['signed'])
     ->name('api.verification.verify');
 
+Route::post('/email/resend', [\App\Http\Controllers\ApiVerificationController::class, 'resend'])
+    ->name('api.verification.resend');
+
 Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->middleware('auth:sanctum');
 Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->middleware('auth:sanctum');
 

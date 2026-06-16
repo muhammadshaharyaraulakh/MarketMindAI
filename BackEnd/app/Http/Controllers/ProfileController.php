@@ -23,11 +23,18 @@ class ProfileController extends Controller
             'bio' => 'nullable|string',
         ]);
 
+        $emailChanged = false;
         if (isset($validated['email']) && $validated['email'] !== $request->user()->email) {
             $validated['email_verified_at'] = null;
+            $emailChanged = true;
         }
 
         $request->user()->update($validated);
+
+        // If email changed, trigger a verification notification to the new address.
+        if ($emailChanged && $request->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail) {
+            $request->user()->sendEmailVerificationNotification();
+        }
 
         return response()->json($request->user()->fresh());
     }

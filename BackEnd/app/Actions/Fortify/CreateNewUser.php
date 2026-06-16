@@ -34,10 +34,17 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
         ]);
+
+        // Send verification email for new users so they can activate their account.
+        if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail) {
+            $user->sendEmailVerificationNotification();
+        }
+
+        return $user;
     }
 }

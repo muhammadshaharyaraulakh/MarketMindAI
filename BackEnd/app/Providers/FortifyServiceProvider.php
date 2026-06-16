@@ -50,9 +50,11 @@ class FortifyServiceProvider extends ServiceProvider
 
             if ($user && Hash::check($request->password, $user->password)) {
                 if (! $user->hasVerifiedEmail()) {
-                    $user->sendEmailVerificationNotification();
+                    // Do NOT automatically resend verification on login attempts to
+                    // avoid account enumeration and spamming. Provide a separate
+                    // resend endpoint in the future if needed.
                     throw ValidationException::withMessages([
-                        'email' => ['Please verify your email address. A new verification link has been sent to your inbox.'],
+                        'email' => ['Please verify your email address. Check your inbox for the verification link.'],
                     ]);
                 }
                 return $user;
