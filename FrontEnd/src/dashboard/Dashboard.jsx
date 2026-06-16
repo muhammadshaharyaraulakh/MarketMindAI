@@ -15,10 +15,14 @@ import {
   YAxis,
   Tooltip
 } from 'recharts'
-import CampaignPanel from './CampaignPanel'
-import AdSetPanel from './AdSetPanel'
-import AdPanel from './AdPanel'
-import ConfirmDialog from './ConfirmDialog'
+import CampaignPanel from './CampaignHub/CampaignPanel'
+import AdSetPanel from './CampaignHub/AdSetPanel'
+import AdPanel from './CampaignHub/AdPanel'
+import ConfirmDialog from './CampaignHub/ConfirmDialog'
+import DataIngestion from './DataIngestion/DataIngestion'
+import AIInsights from './AIInsights/AIInsights'
+import AIAdvisorChat from './AIAdvisor/AIAdvisorChat'
+import ReportsExport from './ReportsExport/ReportsExport'
 
 // Heroicons imports (Strictly Outline with thin stroke styling)
 import { 
@@ -46,7 +50,13 @@ import {
   PhotoIcon,
   PresentationChartLineIcon,
   CircleStackIcon,
-  PuzzlePieceIcon
+  PuzzlePieceIcon,
+  ArrowUpTrayIcon,
+  LightBulbIcon,
+  UserCircleIcon,
+  Squares2X2Icon,
+  MegaphoneIcon,
+  DocumentChartBarIcon
 } from '@heroicons/react/24/outline'
 
 import {
@@ -145,6 +155,38 @@ const INITIAL_STATE = {
   adSets: INITIAL_ADSETS,
   ads: INITIAL_ADS,
   integrations: INITIAL_INTEGRATIONS,
+  ingestion: {
+    uploads: [
+      { id: 1, file: 'Q1_GoogleAds_Export.csv', platform: 'Google Ads', rows: 4521, status: 'Completed', time: '2 hrs ago' },
+      { id: 2, file: 'Meta_Leads_May.csv', platform: 'Meta Ads', rows: 1205, status: 'Completed', time: '5 hrs ago' }
+    ]
+  },
+  insights: {
+    alerts: [
+      { id: 1, severity: 'Critical', title: 'High CPA on TikTok', detail: 'Cost per acquisition has spiked 40% in the last 24h.', campaign: 'TikTok Brand Viral', platform: 'TikTok', time: '2m ago' },
+      { id: 2, severity: 'Warning', title: 'Ad fatigue detected', detail: 'Creative variation B is showing a CTR drop.', campaign: 'Meta Retargeting Q2', platform: 'Meta', time: '1h ago' }
+    ],
+    recommendations: [
+      { id: 1, title: 'Shift budget to Google Ads', category: 'Budget', body: 'Google Ads is performing 2x better than Meta. Shift $500/day.', campaign: 'Summer Performance Ads', impact: 'High Impact' },
+      { id: 2, title: 'Pause low-performing Ad Set', category: 'Optimization', body: 'Ad Set 3 has 0 conversions. Pause it to save budget.', campaign: 'Meta Retargeting Q2', impact: 'Medium Impact' }
+    ],
+    lastRefreshed: 'Just now',
+    isRefreshing: false
+  },
+  chat: {
+    messages: [
+      { role: 'model', parts: [{ text: 'Hello! I am your MarketMind AI Advisor. I monitor your campaign ROAS and budget allocation in real time. How can I help you scale today?' }] }
+    ],
+    isLoading: false,
+    geminiApiKey: ''
+  },
+  reports: {
+    history: [
+      { id: 1, name: 'Q1_Executive_Summary.pdf', type: 'PDF · 2.4 MB', date: 'May 14, 2026' },
+      { id: 2, name: 'Meta_Ads_Audit.pdf', type: 'PDF · 1.1 MB', date: 'May 12, 2026' }
+    ],
+    isGenerating: false
+  },
   ui: {
     activePanelType: null,
     editingItem: null,
@@ -284,6 +326,22 @@ function reducer(state, action) {
       return { ...state, reportProgress: action.payload }
     case 'SET_REPORT_LINK':
       return { ...state, generatedReportLink: action.payload }
+    case 'ADD_CHAT_MESSAGE_V2':
+      return { ...state, chat: { ...state.chat, messages: [...state.chat.messages, action.payload] } }
+    case 'SET_CHAT_LOADING':
+      return { ...state, chat: { ...state.chat, isLoading: action.payload } }
+    case 'SET_GEMINI_KEY':
+      return { ...state, chat: { ...state.chat, geminiApiKey: action.payload } }
+    case 'SET_GENERATING':
+      return { ...state, reports: { ...state.reports, isGenerating: action.payload } }
+    case 'ADD_REPORT_HISTORY':
+      return { ...state, reports: { ...state.reports, history: [action.payload, ...state.reports.history] } }
+    case 'ADD_UPLOAD':
+      return { ...state, ingestion: { ...state.ingestion, uploads: [action.payload, ...state.ingestion.uploads] } }
+    case 'DELETE_UPLOAD':
+      return { ...state, ingestion: { ...state.ingestion, uploads: state.ingestion.uploads.filter(u => u.id !== action.payload) } }
+    case 'SET_INSIGHTS_REFRESHING':
+      return { ...state, insights: { ...state.insights, isRefreshing: action.payload, lastRefreshed: action.payload ? state.insights.lastRefreshed : 'Just now' } }
     default:
       return state
   }
@@ -379,11 +437,13 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
   
   // Determine active view for sidebar highlighting
   const currentPath = location.pathname
-  let sidebarActive = 'dashboard'
-  if (currentPath.startsWith('/campaigns')) sidebarActive = 'campaigns'
-  else if (currentPath.startsWith('/advisor')) sidebarActive = 'advisor'
-  else if (currentPath.startsWith('/reports')) sidebarActive = 'reports'
-  else if (currentPath.startsWith('/integrations')) sidebarActive = 'integrations'
+  const sidebarActive = location.pathname.includes('/campaigns') ? 'campaigns' 
+                      : location.pathname.includes('/data') ? 'data'
+                      : location.pathname.includes('/insights') ? 'insights'
+                      : location.pathname.includes('/advisor') ? 'advisor' 
+                      : location.pathname.includes('/reports') ? 'reports' 
+                      : location.pathname.includes('/integrations') ? 'integrations' 
+                      : 'dashboard'
 
   // Extract params via matchPath since we are keeping the massive inline code intact 
   // as per "untouched" requirement for existing campaign list/detail.
@@ -470,6 +530,11 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
     if (!state.selectedCampaignId) return null
     return campaignStats.find(c => c.id === state.selectedCampaignId) || null
   }, [campaignStats, state.selectedCampaignId])
+
+  const selectedAdSet = useMemo(() => {
+    if (!selectedAdSetId) return null
+    return state.adSets.find(a => a.id === selectedAdSetId) || null
+  }, [state.adSets, selectedAdSetId])
 
   const consolidatedDailyChartData = useMemo(() => {
     const dailyMap = {}
@@ -620,12 +685,7 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
     setNewCampEnd('')
   }
 
-  const submitEditCampaign = (e) => {
-    e.preventDefault()
-    if (!editingCampaign) return
-    dispatch({ type: 'UPDATE_CAMPAIGN', payload: editingCampaign })
-    setEditingCampaign(null)
-  }
+
 
   const handleAddSnapshot = (e) => {
     e.preventDefault()
@@ -818,10 +878,12 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
           {/* Navigation Links */}
           <nav className="p-4 space-y-1">
             {[
-              { id: 'dashboard', path: '/dashboard', label: 'Overview Canvas', icon: PresentationChartLineIcon },
-              { id: 'campaigns', path: '/campaigns', label: 'Campaign Hub', icon: ChartBarIcon },
+              { id: 'dashboard', path: '/dashboard', label: 'Overview Canvas', icon: Squares2X2Icon },
+              { id: 'campaigns', path: '/campaigns', label: 'Campaign Hub', icon: MegaphoneIcon },
+              { id: 'data', path: '/data', label: 'Data Ingestion', icon: ArrowUpTrayIcon },
+              { id: 'insights', path: '/insights', label: 'AI Insights', icon: LightBulbIcon },
               { id: 'advisor', path: '/advisor', label: 'AI Advisor Chat', icon: ChatBubbleLeftRightIcon },
-              { id: 'reports', path: '/reports', label: 'Reports Export', icon: DocumentArrowDownIcon },
+              { id: 'reports', path: '/reports', label: 'Reports Export', icon: DocumentChartBarIcon },
               { id: 'integrations', path: '/integrations', label: 'Platform Integrations', icon: PuzzlePieceIcon }
             ].map(tab => (
               <button
@@ -1985,160 +2047,10 @@ export default function Dashboard({ onLogout, onOpenProfile, user }) {
               </motion.div>
             } />
 
-          {/* ==========================================
-              VIEW 3: AI ADVISOR CHAT
-              ========================================== */}
-          <Route path="/advisor" element={
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 text-left">
-              <div>
-                <h2 className="text-xl font-bold text-[#0F172A] font-mona leading-tight">Gemini Campaign Advisor</h2>
-                <p className="text-xs font-semibold text-[#94A3B8] mt-0.5">Ask about daily spends, campaign ROAS configurations, or split test results.</p>
-              </div>
-
-              {/* Chat Canvas Frame */}
-              <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col h-[480px]">
-                {/* Messages area */}
-                <div className="flex-1 p-5 overflow-y-auto space-y-4">
-                  {state.chatMessages.map((msg, idx) => (
-                    <div key={idx} className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
-                      {msg.sender !== 'user' && (
-                        <div className="w-7 h-7 rounded-lg bg-[#FF2D20] shrink-0 flex items-center justify-center font-bold text-white text-[9px] mt-0.5 shadow-sm shadow-[#FF2D20]/25">
-                          AI
-                        </div>
-                      )}
-                      
-                      <div className={`max-w-md p-3 rounded-2xl text-xs font-semibold leading-relaxed ${
-                        msg.sender === 'user' ? 'bg-[#FF2D20] text-white rounded-tr-none' : 'bg-[#F8FAFC] border border-[#E2E8F0] text-[#475569] rounded-bl-none'
-                      }`}>
-                        {msg.text}
-                      </div>
-
-                      {msg.sender === 'user' && (
-                        <div className="w-7 h-7 rounded-lg bg-[#FFF1F0] border border-[#FECACA] shrink-0 flex items-center justify-center font-bold text-[#FF2D20] text-[9px] mt-0.5">
-                          R
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Suggestions bar */}
-                <div className="px-5 py-2.5 border-t border-[#E2E8F0] bg-[#F8FAFC]/50 flex gap-1.5 overflow-x-auto no-scrollbar">
-                  <button 
-                    onClick={() => dispatch({ type: 'ADD_CHAT_MESSAGE', payload: { sender: 'user', text: 'Analyze Q2 Portfolio ROAS metrics' } })}
-                    className="text-[9px] font-bold text-[#475569] bg-white border border-[#E2E8F0] px-2.5 py-1 rounded-full hover:bg-[#F8FAFC] cursor-pointer shadow-sm"
-                  >
-                    Analyze Portfolio ROAS
-                  </button>
-                  <button 
-                    onClick={() => dispatch({ type: 'ADD_CHAT_MESSAGE', payload: { sender: 'user', text: 'Where is my ad budget burning?' } })}
-                    className="text-[9px] font-bold text-[#475569] bg-white border border-[#E2E8F0] px-2.5 py-1 rounded-full hover:bg-[#F8FAFC] cursor-pointer shadow-sm"
-                  >
-                    Check Budget Cap
-                  </button>
-                </div>
-
-                {/* Text entry field */}
-                <form onSubmit={handleSendMessage} className="p-3 border-t border-[#E2E8F0] bg-white flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Ask Gemini advisor about ad spend fatigue or CTR optimizations..."
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#FF2D20]"
-                  />
-                  <button 
-                    type="submit"
-                    className="bg-[#FF2D20] hover:bg-[#E5261A] text-white p-2 rounded-xl shrink-0 cursor-pointer transition-colors shadow-sm inline-flex items-center justify-center"
-                  >
-                    <PaperAirplaneIcon className="w-4.5 h-4.5 stroke-2" />
-                  </button>
-                </form>
-              </div>
-            </motion.div>
-          } />
-
-          {/* ==========================================
-              VIEW 4: REPORTS EXPORT
-              ========================================== */}
-          <Route path="/reports" element={
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 text-left">
-              <div>
-                <h2 className="text-xl font-bold text-[#0F172A] font-mona leading-tight">SaaS Performance Reports</h2>
-                <p className="text-xs font-semibold text-[#94A3B8] mt-0.5">Export current relational database entities in PDF scopes.</p>
-              </div>
-
-              <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm max-w-xl">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider block mb-4 font-mona">Export Configurations</span>
-                
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Time Range Scope</label>
-                      <select className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-bold text-slate-500 bg-white">
-                        <option>Last 7 Days (May 2026)</option>
-                        <option>Last 30 Days</option>
-                        <option>FYP Period (Year to Date)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Scope Channels</label>
-                      <select className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-bold text-slate-500 bg-white">
-                        <option>All Platforms</option>
-                        <option>Google Ads Network</option>
-                        <option>Meta Ads Network</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleGenerateReport}
-                    disabled={state.isGeneratingReport}
-                    className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-colors inline-flex items-center gap-1 shadow-sm disabled:opacity-50"
-                  >
-                    <DocumentArrowDownIcon className="w-4 h-4 stroke-2" />
-                    {state.isGeneratingReport ? 'Compiling PDF...' : 'Compile PDF Report'}
-                  </button>
-
-                  {/* Progress gauge */}
-                  {state.isGeneratingReport && (
-                    <div className="space-y-1.5 pt-2">
-                      <div className="flex justify-between text-[11px] font-bold text-[#0F172A]">
-                        <span>Analyzing campaign metrics...</span>
-                        <span>{state.reportProgress}%</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-[#FF2D20] rounded-full transition-all duration-200"
-                          style={{ width: `${state.reportProgress}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Complete status */}
-                  {state.generatedReportLink && (
-                    <div className="border border-green-200 rounded-xl p-3.5 bg-green-50/50 flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <CheckCircleIconSolid className="w-5 h-5 text-green-600 shrink-0" />
-                        <div>
-                          <span className="block text-xs font-bold text-green-950">PDF compiled successfully</span>
-                          <span className="block text-[10px] font-semibold text-green-700 mt-0.5">Size: 2.4 MB · Ready for presenter logs</span>
-                        </div>
-                      </div>
-                      <a
-                        href={state.generatedReportLink}
-                        download
-                        className="bg-green-600 hover:bg-green-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-                      >
-                        Download
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          } />
+          <Route path="/data" element={<DataIngestion state={state} dispatch={dispatch} />} />
+          <Route path="/insights" element={<AIInsights state={state} dispatch={dispatch} />} />
+          <Route path="/advisor" element={<AIAdvisorChat state={state} dispatch={dispatch} portfolioStats={portfolioStats} campaignStats={campaignStats} />} />
+          <Route path="/reports" element={<ReportsExport state={state} dispatch={dispatch} />} />
 
           {/* ==========================================
               VIEW 5: PLATFORM INTEGRATIONS
