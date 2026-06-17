@@ -15,8 +15,11 @@ import DataIngestion from './DataIngestion/DataIngestion'
 import AIInsights from './AIInsights/AIInsights'
 import AIAdvisorChat from './AIAdvisor/AIAdvisorChat'
 import ReportsExport from './ReportsExport/ReportsExport'
+import ContentStudio from './studio/ContentStudio'
+import CampaignSimulator from './simulator/CampaignSimulator'
 import {
   BoltIcon,
+  BeakerIcon,
   SparklesIcon,
   ArrowLeftOnRectangleIcon,
   PuzzlePieceIcon,
@@ -314,6 +317,8 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
                       : location.pathname.includes('/data') ? 'data'
                       : location.pathname.includes('/insights') ? 'insights'
                       : location.pathname.includes('/advisor') ? 'advisor' 
+                      : location.pathname.includes('/studio') ? 'studio'
+                      : location.pathname.includes('/simulator') ? 'simulator'
                       : location.pathname.includes('/reports') ? 'reports' 
                       : location.pathname.includes('/integrations') ? 'integrations' 
                       : 'dashboard'
@@ -521,6 +526,8 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
               { id: 'data', path: '/data', label: 'Data Ingestion', icon: ArrowUpTrayIcon },
               { id: 'insights', path: '/insights', label: 'AI Insights', icon: LightBulbIcon },
               { id: 'advisor', path: '/advisor', label: 'AI Advisor Chat', icon: SparklesIcon },
+              { id: 'studio', path: '/studio', label: 'Content Studio', icon: SparklesIcon },
+              { id: 'simulator', path: '/simulator', label: 'Campaign Simulator', icon: BeakerIcon },
               { id: 'reports', path: '/reports', label: 'Reports Export', icon: BoltIcon },
               { id: 'integrations', path: '/integrations', label: 'Platform Integrations', icon: PuzzlePieceIcon }
             ].map(tab => (
@@ -626,6 +633,8 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
             <Route path="/advisor" element={<AIAdvisorChat state={state} dispatch={dispatch} portfolioStats={portfolioStats} campaignStats={campaignStats} />} />
             <Route path="/reports" element={<ReportsExport state={state} dispatch={dispatch} />} />
             <Route path="/integrations" element={<IntegrationsView state={state} dispatch={dispatch} />} />
+            <Route path="/studio" element={<ContentStudio state={state} dispatch={dispatch} />} />
+            <Route path="/simulator" element={<CampaignSimulator state={state} dispatch={dispatch} />} />
           </Routes>
         </div>
       </main>

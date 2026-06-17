@@ -4,7 +4,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'rec
 import { 
   ArrowLeftIcon, PencilIcon, TrashIcon, ChevronRightIcon,
   ClipboardIcon, PlusIcon, CircleStackIcon,
-  ArrowTrendingUpIcon, ChartBarIcon, CursorArrowRaysIcon,
+  ArrowTrendingUpIcon, ChartBarIcon, CursorArrowRaysIcon, SparklesIcon
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartIconSolid, TrophyIcon } from '@heroicons/react/24/solid'
 import { HeartIcon } from '@heroicons/react/24/outline'
@@ -199,6 +199,13 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
             >
               <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
               Edit Settings
+            </button>
+            <button
+              onClick={() => navigate('/studio', { state: { preSelectedPlatform: selectedCampaign?.platform, campaignName: selectedCampaign?.name } })}
+              className="bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-semibold px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm inline-flex items-center gap-1"
+            >
+              <SparklesIcon className="w-3.5 h-3.5 stroke-[1.5]" />
+              Generate Ad Creative
             </button>
           </div>
         </div>
