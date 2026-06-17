@@ -15,7 +15,7 @@ export default function TwoFactorChallengeForm({ onSwitchView, onSuccess, pageVa
   const handleChallengeSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg('')
-    
+
     if (!useRecoveryCode && code.length < 6) {
       setErrorMsg('Please enter the complete 6 digit code.')
       return
@@ -26,7 +26,7 @@ export default function TwoFactorChallengeForm({ onSwitchView, onSuccess, pageVa
     }
 
     setLoading(true)
-    
+
     try {
       await axios.get('/sanctum/csrf-cookie');
       const payload = useRecoveryCode ? { recovery_code: recoveryCode } : { code }
@@ -36,7 +36,7 @@ export default function TwoFactorChallengeForm({ onSwitchView, onSuccess, pageVa
           'Content-Type': 'application/json'
         }
       });
-      
+
       setLoading(false)
       onSuccess()
     } catch (error) {
@@ -68,10 +68,10 @@ export default function TwoFactorChallengeForm({ onSwitchView, onSuccess, pageVa
         <ArrowLeftIcon className="w-3.5 h-3.5" /> Back to Login
       </button>
 
-      <h3 className="text-2xl font-semibold text-[#0F172A] tracking-tight mb-2 text-center font-poppins">Two-Factor Security</h3>
+      <h3 className="text-2xl font-semibold text-[#0F172A] tracking-tight mb-2 text-center font-poppins">Two Factor Security</h3>
       <p className="text-[#475569] text-sm mb-6 text-center font-medium">
-        {useRecoveryCode 
-          ? "Please confirm access to your account by entering one of your emergency recovery codes." 
+        {useRecoveryCode
+          ? "Please confirm access to your account by entering one of your emergency recovery codes."
           : "Please confirm access to your account by entering the authentication code provided by your authenticator application."}
       </p>
 
@@ -83,7 +83,7 @@ export default function TwoFactorChallengeForm({ onSwitchView, onSuccess, pageVa
             </motion.div>
           ) : (
             <motion.div key="recovery" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <label className="text-xs font-bold text-[#475569] uppercase tracking-wider block mb-1.5 font-poppins">Recovery Code</label>
+              <label className="text-[13px] text-[#475569] block mb-1.5">Recovery Code</label>
               <div className="relative">
                 <KeyIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -92,7 +92,7 @@ export default function TwoFactorChallengeForm({ onSwitchView, onSuccess, pageVa
                   value={recoveryCode}
                   onChange={(e) => setRecoveryCode(e.target.value)}
                   placeholder="e.g. xxxxxxxx-xxxxxxxx"
-                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-4 py-3 font-semibold transition-all duration-150"
+                  className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-4 py-2.5 transition-all duration-150"
                 />
               </div>
             </motion.div>

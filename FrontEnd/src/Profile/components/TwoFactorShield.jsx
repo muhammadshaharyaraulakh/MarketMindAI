@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ShieldCheckIcon, ArrowLeftIcon, QrCodeIcon, ArrowPathIcon, 
+import {
+  ShieldCheckIcon, ArrowLeftIcon, QrCodeIcon, ArrowPathIcon,
   ArrowRightIcon, ArrowDownTrayIcon, LockClosedIcon
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/solid';
@@ -75,13 +75,13 @@ export default function TwoFactorShield({ user, tabVariants, setErrorMsg, setSuc
       setLoading(false);
       setIs2FAEnabled(false);
       setSuccessMsg('Google Authenticator 2FA dismantled.');
-    } catch(err) {
+    } catch (err) {
       setLoading(false);
       if (err.response?.status === 423) {
-         setErrorMsg('Session locked. Please confirm your password by trying to enable 2FA again, or refresh the page.');
+        setErrorMsg('Session locked. Please confirm your password by trying to enable 2FA again, or refresh the page.');
       } else {
-         const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
-         setErrorMsg(firstError || 'Error disabling 2FA.');
+        const firstError = err.response?.data?.errors ? Object.values(err.response.data.errors)[0][0] : err.response?.data?.message;
+        setErrorMsg(firstError || 'Error disabling 2FA.');
       }
     }
   };
@@ -134,11 +134,10 @@ export default function TwoFactorShield({ user, tabVariants, setErrorMsg, setSuc
           <p className="text-xs text-[#64748B] font-semibold mt-1">Synchronize double-shield confirmation keys to insulate marketing databases.</p>
         </div>
 
-        <div className={`p-6 border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors ${
-          is2FAEnabled 
-            ? 'bg-green-50/50 border-green-200' 
-            : 'bg-red-50/50 border-red-100'
-        }`}>
+        <div className={`p-6 border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors ${is2FAEnabled
+          ? 'bg-green-50/50 border-green-200'
+          : 'bg-red-50/50 border-red-100'
+          }`}>
           <div className="flex items-center gap-3 text-center sm:text-left">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${is2FAEnabled ? 'bg-green-100' : 'bg-red-100'}`}>
               <ShieldCheckIcon className={`w-5 h-5 ${is2FAEnabled ? 'text-green-600' : 'text-red-500'}`} />
@@ -151,8 +150,8 @@ export default function TwoFactorShield({ user, tabVariants, setErrorMsg, setSuc
                 </span>
               </h4>
               <p className="text-[11px] text-[#64748B] font-semibold mt-0.5">
-                {is2FAEnabled 
-                  ? '2FA shield successfully locked onto this member ID.' 
+                {is2FAEnabled
+                  ? '2FA shield successfully locked onto this member ID.'
                   : 'Configure Authenticator to protect campaigns from phishing.'}
               </p>
             </div>
@@ -173,14 +172,14 @@ export default function TwoFactorShield({ user, tabVariants, setErrorMsg, setSuc
                 onClick={handleEnable2FA}
                 className="px-5 py-2.5 bg-[#FF2D20] hover:bg-[#E5261A] text-white rounded-lg text-xs font-bold shadow-sm transition-all cursor-pointer"
               >
-                Enroll Mobile Key
+                Add Google Authenticator
               </button>
             )}
           </div>
         </div>
 
         <div className="border border-[#E2E8F0] rounded-2xl p-5 bg-[#F8FAFC] space-y-2.5">
-          <h5 className="text-xs font-bold text-[#475569] uppercase tracking-wider">Double Shield Rules:</h5>
+          <h5 className="text-[13px] text-[#475569] mb-1">Double Shield Rules:</h5>
           <ul className="text-xs text-[#64748B] list-disc pl-4 space-y-1.5 font-medium">
             <li>Requires scanned key integration in standard mobile authenticator apps.</li>
             <li>Time tokens match server clock variables and refresh every 30 seconds.</li>
@@ -230,7 +229,7 @@ export default function TwoFactorShield({ user, tabVariants, setErrorMsg, setSuc
 
                     <form onSubmit={handleVerify2FA} className="space-y-5">
                       <div className="space-y-1.5">
-                        <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block">Confirm Authenticator Code</label>
+                        <label className="text-[13px] text-[#475569] block">Confirm Authenticator Code</label>
                         <div className="flex justify-between gap-1.5 max-w-[240px] mx-auto">
                           {twoFACode.map((num, idx) => (
                             <input
@@ -365,7 +364,7 @@ export default function TwoFactorShield({ user, tabVariants, setErrorMsg, setSuc
                     value={passwordToConfirm}
                     onChange={(e) => setPasswordToConfirm(e.target.value)}
                     placeholder="Enter current password"
-                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] pl-10 pr-4 py-3 font-normal transition-all"
+                    className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-4 py-2.5 transition-all duration-150"
                   />
                 </div>
 

@@ -32,7 +32,7 @@ export default function ProfilePage({ onClose, user }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#F8FAFC] flex flex-col font-mona select-none overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-[#F8FAFC] flex flex-col font-mona select-none overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <style>{`
         @keyframes scanLaser {
           0% { top: 0%; }
@@ -70,7 +70,7 @@ export default function ProfilePage({ onClose, user }) {
           Your Digital <span className="text-[#FF2D20]">Workspace Identity</span>
         </h1>
         <p className="text-[#475569] text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-12 font-medium">
-          Manage system coordinates, rotate password credentials, configure secondary recovery paths, and activate Google Authenticator protection.
+          Manage system coordinates, rotate password credentials, and activate Google Authenticator protection.
         </p>
 
         <div className="flex flex-wrap justify-center gap-2.5 mb-12 max-w-3xl mx-auto">

@@ -48,12 +48,20 @@ export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
       }
     } catch (error) {
       setLoading(false)
-      if (error.response && error.response.status === 422) {
+      if (error.response && error.response.status === 403 && error.response.data.email_unverified) {
+        localStorage.setItem('verify_context', 'login');
+        onSuccess({
+          title: 'Verification Required',
+          subtitle: `We've sent a new verification link to ${email}. Please check your inbox to activate your workspace.`,
+          actionText: 'Return to Homepage',
+          actionView: 'close' 
+        })
+      } else if (error.response && error.response.status === 422) {
         const errors = error.response.data.errors;
         const firstErrorMsg = errors ? Object.values(errors)[0][0] : error.response.data.message;
         setErrorMsg(firstErrorMsg || 'Invalid credentials');
       } else {
-        setErrorMsg('An error occurred during login. Please try again.');
+        setErrorMsg(error.response?.data?.message || 'An error occurred during login. Please try again.');
       }
     }
   }
@@ -75,7 +83,7 @@ export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
 
       <form onSubmit={handleLoginSubmit} className="space-y-4">
         <div>
-          <label className="text-xs font-bold text-[#475569] uppercase tracking-wider block mb-1.5 font-poppins">Business Email</label>
+          <label className="text-[13px] text-[#475569] block mb-1.5">Business Email</label>
           <div className="relative">
             <EnvelopeIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -84,14 +92,14 @@ export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="yourname@company.com"
-              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-4 py-3 font-semibold transition-all duration-150"
+              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-4 py-2.5 transition-all duration-150"
             />
           </div>
         </div>
 
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label className="text-xs font-bold text-[#475569] uppercase tracking-wider block font-poppins">Security Password</label>
+            <label className="text-[13px] text-[#475569] block mb-1.5">Security Password</label>
             <button
               type="button"
               onClick={() => onSwitchView('forgot-password')}
@@ -108,7 +116,7 @@ export default function LoginForm({ onSwitchView, onSuccess, pageVariants }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-10 py-3 font-semibold transition-all duration-150"
+              className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-10 py-2.5 transition-all duration-150"
             />
             <button
               type="button"

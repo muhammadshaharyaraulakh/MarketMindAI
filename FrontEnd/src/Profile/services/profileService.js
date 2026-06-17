@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const profileService = {
   updateProfile: async (data) => {
-    return axios.put('/api/profile', data);
+    return axios.put('/api/user/profile-information', data);
   },
   updatePassword: async (current_password, password, password_confirmation) => {
     return axios.put('/api/user/password', { current_password, password, password_confirmation });

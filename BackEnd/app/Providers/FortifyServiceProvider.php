@@ -24,14 +24,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(
-            \Laravel\Fortify\Contracts\LoginResponse::class,
-            \App\Http\Responses\LoginResponse::class
-        );
-        $this->app->singleton(
-            \Laravel\Fortify\Contracts\TwoFactorLoginResponse::class,
-            \App\Http\Responses\TwoFactorLoginResponse::class
-        );
+        // Removed custom Response bindings since we are using AuthController natively.
     }
 
     /**
@@ -45,23 +38,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
 
-        Fortify::authenticateUsing(function (Request $request) {
-            $user = User::where('email', $request->email)->first();
 
-            if ($user && Hash::check($request->password, $user->password)) {
-                if (! $user->hasVerifiedEmail()) {
-                    // Do NOT automatically resend verification on login attempts to
-                    // avoid account enumeration and spamming. Provide a separate
-                    // resend endpoint in the future if needed.
-                    throw ValidationException::withMessages([
-                        'email' => ['Please verify your email address. Check your inbox for the verification link.'],
-                    ]);
-                }
-                return $user;
-            }
-
-            return null;
-        });
 
         RateLimiter::for('login', function (Request $request) {
             $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());

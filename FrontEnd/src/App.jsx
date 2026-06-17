@@ -16,6 +16,7 @@ import CTASection from './components/CTASection';
 import Footer from './components/Footer';
 import AuthSystem from './Authentication/AuthSystem'
 import ProfilePage from './Profile/ProfilePage'
+import VerifyEmail from './Authentication/views/VerifyEmail'
 import { AnimatePresence } from 'framer-motion'
 
 function LandingPage({ onSignIn, onSignUp }) {
@@ -82,6 +83,12 @@ export default function App() {
     }
   }, [user, loadingUser, location.pathname, authView, navigate]);
 
+  React.useEffect(() => {
+    if (location.pathname === '/reset-password') {
+      setAuthView('forgot-password');
+    }
+  }, [location.pathname]);
+
   const handleLogout = async () => {
     try {
       await axios.post('/api/logout');
@@ -105,7 +112,27 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<LandingPage onSignIn={() => setAuthView('login')} onSignUp={() => setAuthView('signup')} />} />
+        <Route path="/" element={
+          user ? <Navigate to="/dashboard" replace /> : <LandingPage onSignIn={() => setAuthView('login')} onSignUp={() => setAuthView('signup')} />
+        } />
+        <Route path="/reset-password" element={
+          user ? <Navigate to="/dashboard" replace /> : <LandingPage onSignIn={() => setAuthView('login')} onSignUp={() => setAuthView('signup')} />
+        } />
+        <Route path="/verify-email" element={
+          <VerifyEmail onVerifySuccess={(destination) => {
+            if (destination === 'login') {
+              navigate('/');
+              setAuthView('login');
+            } else {
+              axios.get('/api/user').then(res => {
+                setUser(res.data);
+                navigate('/dashboard');
+              }).catch(() => {
+                navigate('/');
+              });
+            }
+          }} />
+        } />
         <Route path="/*" element={
           user ? (
             <Dashboard 
@@ -120,7 +147,7 @@ export default function App() {
       </Routes>
 
       <AnimatePresence>
-        {authView && (
+        {!user && authView && (
           <AuthSystem
             initialView={authView}
             onClose={(result) => {

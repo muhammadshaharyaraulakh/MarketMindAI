@@ -6,5 +6,8 @@ Route::get('/', function () {
     return response()->json(['status' => 'Backend is running successfully.']);
 });
 
-Route::get('/auth/{provider}/redirect', [\App\Http\Controllers\Auth\OAuthController::class, 'redirect']);
-Route::get('/auth/{provider}/callback', [\App\Http\Controllers\Auth\OAuthController::class, 'callback']);
+// OAuth Routes
+Route::get('/auth/{provider}/redirect', [\App\Http\Controllers\Api\Authentication\OAuthController::class, 'redirect']);
+Route::get('/auth/{provider}/callback', [\App\Http\Controllers\Api\Authentication\OAuthController::class, 'callback']);
+
+

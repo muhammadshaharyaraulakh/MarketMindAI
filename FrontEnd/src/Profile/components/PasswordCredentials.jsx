@@ -56,7 +56,7 @@ export default function PasswordCredentials({ tabVariants, setErrorMsg, setSucce
       <form onSubmit={handleSavePassword} className="space-y-5">
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Current Password</label>
+            <label className="text-[13px] text-[#475569] block mb-1.5">Current Password</label>
             <div className="relative">
               <LockClosedIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
               <input 
@@ -65,7 +65,7 @@ export default function PasswordCredentials({ tabVariants, setErrorMsg, setSucce
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] pl-10 pr-10 py-3 font-normal transition-all"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-10 py-2.5 transition-all duration-150"
               />
               <button
                 type="button"
@@ -78,7 +78,7 @@ export default function PasswordCredentials({ tabVariants, setErrorMsg, setSucce
           </div>
 
           <div>
-            <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">New Password</label>
+            <label className="text-[13px] text-[#475569] block mb-1.5">New Password</label>
             <div className="relative">
               <LockClosedIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
               <input 
@@ -87,7 +87,7 @@ export default function PasswordCredentials({ tabVariants, setErrorMsg, setSucce
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Minimum 8 symbols"
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] pl-10 pr-10 py-3 font-normal transition-all"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-10 py-2.5 transition-all duration-150"
               />
               <button
                 type="button"
@@ -100,7 +100,7 @@ export default function PasswordCredentials({ tabVariants, setErrorMsg, setSucce
           </div>
 
           <div>
-            <label className="text-xs font-medium text-[#475569] uppercase tracking-wider block mb-1.5">Confirm New Password</label>
+            <label className="text-[13px] text-[#475569] block mb-1.5">Confirm New Password</label>
             <div className="relative">
               <LockClosedIcon className="w-5 h-5 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
               <input 
@@ -109,7 +109,7 @@ export default function PasswordCredentials({ tabVariants, setErrorMsg, setSucce
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Re enter password"
-                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] pl-10 pr-10 py-3 font-normal transition-all"
+                className="w-full bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#FF2D20] focus:bg-white focus:outline-none rounded-lg text-sm text-[#0F172A] placeholder-[#94A3B8] pl-10 pr-10 py-2.5 transition-all duration-150"
               />
               <button
                 type="button"
