@@ -99,7 +99,7 @@ export default function App() {
   };
 
   if (loadingUser) {
-    return <div className="min-h-screen bg-white flex items-center justify-center">Loading...</div>;
+    return <div className="min-h-screen bg-white"></div>;
   }
 
   return (

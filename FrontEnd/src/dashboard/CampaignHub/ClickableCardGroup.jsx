@@ -25,7 +25,7 @@ export default function ClickableCardGroup({ options, selected, onChange, column
                 </div>
               )}
               <div>
-                <div className={`text-xs font-bold ${isSelected ? 'text-[#0F172A]' : 'text-[#475569]'}`}>
+                <div className={`text-xs font-medium ${isSelected ? 'text-[#0F172A]' : 'text-[#475569]'}`}>
                   {opt.label}
                 </div>
                 {opt.description && (

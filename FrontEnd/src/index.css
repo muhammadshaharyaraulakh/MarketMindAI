@@ -101,3 +101,12 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Remove focus outline from Recharts globally */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-responsive-container,
+.recharts-wrapper *:focus,
+.recharts-surface:focus {
+  outline: none !important;
+}

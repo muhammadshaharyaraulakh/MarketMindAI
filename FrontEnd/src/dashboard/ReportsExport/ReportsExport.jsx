@@ -17,8 +17,7 @@ export default function ReportsExport({ state, dispatch }) {
   const activeCampaignsCount = campaigns.length;
 
   const [reportType, setReportType] = useState('Performance Summary');
-  const [dateRange, setDateRange] = useState('Last 30 days');
-  const [selectedCampaigns, setSelectedCampaigns] = useState(campaigns.map(c => c.id));
+  const [selectedCampaign, setSelectedCampaign] = useState(campaigns.length > 0 ? campaigns[0].id : '');
   const [sections, setSections] = useState({
     executiveSummary: true,
     kpiOverview: true,
@@ -30,22 +29,6 @@ export default function ReportsExport({ state, dispatch }) {
   // Scheduled delivery state
   const [scheduledEnabled, setScheduledEnabled] = useState(false);
   const [scheduleFreq, setScheduleFreq] = useState('Weekly');
-
-  const toggleAllCampaigns = () => {
-    if (selectedCampaigns.length === campaigns.length) {
-      setSelectedCampaigns([]);
-    } else {
-      setSelectedCampaigns(campaigns.map(c => c.id));
-    }
-  };
-
-  const toggleCampaign = (id) => {
-    if (selectedCampaigns.includes(id)) {
-      setSelectedCampaigns(selectedCampaigns.filter(cId => cId !== id));
-    } else {
-      setSelectedCampaigns([...selectedCampaigns, id]);
-    }
-  };
 
   const handleGeneratePDF = () => {
     dispatch({ type: 'SET_GENERATING', payload: true });
@@ -71,11 +54,12 @@ export default function ReportsExport({ state, dispatch }) {
       doc.setFontSize(36);
       doc.text(reportTitle, 20, 70, { maxWidth: pageWidth - 40 });
 
+      const campaignName = campaigns.find(c => c.id === selectedCampaign)?.name || 'Unknown Campaign';
+
       doc.setFontSize(16);
       doc.setFont('helvetica', 'normal');
       doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 120);
-      doc.text(`Date Range: ${dateRange}`, 20, 130);
-      doc.text(`Campaigns Included: ${selectedCampaigns.length} active campaigns`, 20, 140);
+      doc.text(`Campaign Included: ${campaignName}`, 20, 130);
 
       // PAGE 2 - EXECUTIVE SUMMARY & KPI OVERVIEW
       doc.addPage();
@@ -87,7 +71,7 @@ export default function ReportsExport({ state, dispatch }) {
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(71, 85, 105);
-      const summaryText = `During the ${dateRange} period, the selected campaigns generated consistent engagement. The blended ROAS across your portfolio remains stable, with targeted AI optimizations resulting in a 12% improvement in cost-per-click efficiency. Your top performing platform continues to be Google Ads, while Meta Ads represents the largest volume of conversions.`;
+      const summaryText = `Recent performance for the selected campaign indicates consistent engagement. The ROAS remains stable, with targeted AI optimizations resulting in a 12% improvement in cost-per-click efficiency. Keep monitoring the ad sets closely to maintain this trajectory.`;
       doc.text(summaryText, 20, 45, { maxWidth: pageWidth - 40, lineHeightFactor: 1.5 });
 
       if (sections.kpiOverview) {
@@ -128,7 +112,7 @@ export default function ReportsExport({ state, dispatch }) {
         doc.text('Campaign Performance Breakdown', 20, 30);
 
         const tableBody = campaigns
-          .filter(c => selectedCampaigns.includes(c.id))
+          .filter(c => c.id === selectedCampaign)
           .map(c => [
             c.name,
             c.platform,
@@ -186,7 +170,7 @@ export default function ReportsExport({ state, dispatch }) {
           name: reportTitle,
           type: reportType,
           date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          campaigns: selectedCampaigns.length === campaigns.length ? 'All Campaigns' : `${selectedCampaigns.length} Campaigns`
+          campaigns: campaignName
         }
       });
       
@@ -230,58 +214,22 @@ export default function ReportsExport({ state, dispatch }) {
               </div>
             </div>
 
-            {/* Row 2 - Date Range */}
+            {/* Row 2 - Campaign Selection */}
             <div className="mb-6">
-              <label className="block text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Date Range</label>
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                {['Last 7 days', 'Last 30 days', 'This month', 'Custom'].map(range => (
-                  <button
-                    key={range}
-                    onClick={() => setDateRange(range)}
-                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
-                      dateRange === range
-                        ? 'bg-slate-100 border-slate-300 text-slate-800'
-                        : 'bg-white border-[#E2E8F0] text-[#94A3B8] hover:bg-[#F8FAFC]'
-                    }`}
-                  >
-                    {range}
-                  </button>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-4 max-w-sm">
-                <div className="relative">
-                  <CalendarIcon className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input type="text" placeholder="May 1, 2026" disabled={dateRange !== 'Custom'} className="w-full pl-9 pr-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#FF2D20] disabled:opacity-50 disabled:bg-[#F8FAFC]" />
-                </div>
-                <div className="relative">
-                  <CalendarIcon className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input type="text" placeholder="May 31, 2026" disabled={dateRange !== 'Custom'} className="w-full pl-9 pr-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#FF2D20] disabled:opacity-50 disabled:bg-[#F8FAFC]" />
-                </div>
-              </div>
-            </div>
-
-            {/* Row 3 - Campaigns */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">Campaigns to Include</label>
-                <button onClick={toggleAllCampaigns} className="text-[10px] font-bold text-[#FF2D20] hover:text-[#E5261A] cursor-pointer">
-                  {selectedCampaigns.length === activeCampaignsCount ? 'Deselect All' : 'Select All'}
-                </button>
-              </div>
-              <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4 max-h-48 overflow-y-auto space-y-2">
+              <label className="block text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider mb-2">Campaign to Include</label>
+              <select 
+                value={selectedCampaign}
+                onChange={(e) => setSelectedCampaign(Number(e.target.value))}
+                className="w-full px-4 py-2.5 border border-[#E2E8F0] rounded-xl text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#FF2D20] bg-white cursor-pointer"
+              >
                 {campaigns.length === 0 ? (
-                  <p className="text-xs text-slate-500 font-semibold">No active campaigns available.</p>
+                  <option disabled value="">No active campaigns available</option>
                 ) : (
                   campaigns.map(c => (
-                    <label key={c.id} className="flex items-center gap-3 cursor-pointer group">
-                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedCampaigns.includes(c.id) ? 'bg-[#FF2D20] border-[#FF2D20]' : 'bg-white border-[#CBD5E1] group-hover:border-[#94A3B8]'}`}>
-                        {selectedCampaigns.includes(c.id) && <CheckCircleIconSolid className="w-3 h-3 text-white" />}
-                      </div>
-                      <span className="text-xs font-semibold text-[#475569]">{c.name} <span className="text-[10px] text-[#94A3B8]">({c.platform})</span></span>
-                    </label>
+                    <option key={c.id} value={c.id}>{c.name} ({c.platform})</option>
                   ))
                 )}
-              </div>
+              </select>
             </div>
 
             {/* Row 4 - Sections */}
@@ -317,7 +265,7 @@ export default function ReportsExport({ state, dispatch }) {
 
             <button
               onClick={handleGeneratePDF}
-              disabled={isGenerating || selectedCampaigns.length === 0}
+              disabled={isGenerating || !selectedCampaign}
               className="w-full bg-[#FF2D20] hover:bg-[#E5261A] disabled:opacity-70 disabled:cursor-not-allowed text-white text-sm font-bold py-3.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               {isGenerating ? (
@@ -326,10 +274,7 @@ export default function ReportsExport({ state, dispatch }) {
                   Compiling PDF Report...
                 </>
               ) : (
-                <>
-                  <DocumentChartBarIcon className="w-5 h-5 stroke-2" />
-                  Generate & Download Report
-                </>
+                "Generate & Download Report"
               )}
             </button>
           </div>
@@ -377,36 +322,7 @@ export default function ReportsExport({ state, dispatch }) {
             )}
           </div>
 
-          {/* Report History */}
-          <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm overflow-hidden flex flex-col">
-            <h3 className="text-sm font-bold text-[#0F172A] font-mona mb-4">Recent Reports</h3>
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-              {history.map((report) => (
-                <div key={report.id} className="border border-[#E2E8F0] rounded-xl p-3 hover:border-[#CBD5E1] transition-colors group">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-[#F8FAFC] rounded-lg border border-[#E2E8F0] flex items-center justify-center shrink-0 mt-0.5">
-                        <DocumentIcon className="w-4 h-4 text-[#94A3B8]" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-[#0F172A] leading-tight truncate w-32 md:w-full">{report.name}</p>
-                        <p className="text-[9px] font-semibold text-[#475569] mt-1">{report.type}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="flex items-center gap-0.5 text-[9px] font-bold text-[#94A3B8]">
-                            <ClockIcon className="w-3 h-3" />
-                            {report.date}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <button className="p-1.5 text-[#94A3B8] hover:text-[#FF2D20] bg-white border border-transparent group-hover:border-[#E2E8F0] rounded-lg cursor-pointer transition-all">
-                      <ArrowDownTrayIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+
         </div>
       </div>
     </motion.div>

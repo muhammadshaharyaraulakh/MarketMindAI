@@ -16,7 +16,7 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
             <ArrowLeftIcon className="w-4 h-4 stroke-2" />
           </button>
           <div>
-            <h2 className="text-lg font-bold text-[#0F172A] font-mona leading-tight">
+            <h2 className="text-lg font-medium text-[#0F172A] font-mona leading-tight">
               <span className="text-[#94A3B8] font-semibold">Campaigns / {selectedCampaign?.name} / {selectedAdSet?.name} / </span> Ads
             </h2>
             <p className="text-[11px] font-semibold text-[#94A3B8] mt-0.5">Manage individual ads for this Ad Set.</p>
@@ -24,7 +24,7 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
         </div>
         <button
           onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })}
-          className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-bold px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+          className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-medium px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
         >
           <PlusIcon className="w-4 h-4 shrink-0" />
           Create Ad
@@ -37,7 +37,7 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
           {activeAds.filter(a => a.adSetId === selectedAdSetId).map(ad => (
             <div key={ad.id} className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm flex flex-col justify-between overflow-hidden">
               {ad.review_status === 'REJECTED' && (
-                <div className="bg-red-50 text-red-700 px-4 py-2.5 text-[10px] font-bold border-b border-red-100 flex justify-between items-center">
+                <div className="bg-red-50 text-red-700 px-4 py-2.5 text-[10px] font-medium border-b border-red-100 flex justify-between items-center">
                   <span>Rejected — {ad.rejection_reason}</span>
                   <button 
                     onClick={() => {
@@ -57,7 +57,7 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
                         <PhotoIcon className="w-5 h-5 text-[#94A3B8]" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-[#0F172A]">{ad.name}</h3>
+                        <h3 className="text-sm font-medium text-[#0F172A]">{ad.name}</h3>
                         <span className="text-[10px] font-semibold text-[#94A3B8] flex items-center">
                           {getPlatformIcon(ad.platform)} {ad.format} · {ad.platform}
                         </span>
@@ -77,29 +77,29 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
                     </div>
                 
                 <div className="bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0] mb-4 relative">
-                  <p className="text-[11px] font-bold text-[#0F172A] mb-1 pr-16">Headline: <span className="font-semibold text-[#475569]">{ad.headline}</span></p>
-                  <p className="text-[10px] text-[#475569] line-clamp-2 pr-16">{ad.description}</p>
-                  <span className="absolute top-3 right-3 bg-white border border-[#E2E8F0] text-[9px] font-bold text-[#0F172A] px-2 py-0.5 rounded shadow-sm">
+                  <p className="text-[11px] font-medium text-[#0F172A] mb-1 pr-16">Headline: <span className="font-semibold text-[#475569]">{ad.headline || ad.brandName || 'Untitled Ad'}</span></p>
+                  <p className="text-[10px] text-[#475569] line-clamp-2 pr-16">{ad.description || ad.primaryText || ad.attachment_url || 'No copy provided.'}</p>
+                  <span className="absolute top-3 right-3 bg-white border border-[#E2E8F0] text-[9px] font-medium text-[#0F172A] px-2 py-0.5 rounded shadow-sm">
                     {ad.cta_type || 'LEARN_MORE'}
                   </span>
                 </div>
                 
                 <div className="grid grid-cols-4 gap-2 mb-4 text-center">
                   <div className="bg-[#FFF1F0] p-2 rounded-lg">
-                    <span className="block text-[8px] font-bold text-[#FF2D20] uppercase">Spend</span>
-                    <span className="block text-xs font-extrabold text-[#0F172A]">${ad.metrics.spend}</span>
+                    <span className="block text-[8px] font-medium text-[#FF2D20] uppercase">Spend</span>
+                    <span className="block text-xs font-semibold text-[#0F172A]">${ad.metrics.spend}</span>
                   </div>
                   <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
-                    <span className="block text-[8px] font-bold text-[#94A3B8] uppercase">Impr.</span>
-                    <span className="block text-xs font-extrabold text-[#0F172A]">{ad.metrics.impressions}</span>
+                    <span className="block text-[8px] font-medium text-[#94A3B8] uppercase">Impr.</span>
+                    <span className="block text-xs font-semibold text-[#0F172A]">{ad.metrics.impressions}</span>
                   </div>
                   <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
-                    <span className="block text-[8px] font-bold text-[#94A3B8] uppercase">Clicks</span>
-                    <span className="block text-xs font-extrabold text-[#0F172A]">{ad.metrics.clicks}</span>
+                    <span className="block text-[8px] font-medium text-[#94A3B8] uppercase">Clicks</span>
+                    <span className="block text-xs font-semibold text-[#0F172A]">{ad.metrics.clicks}</span>
                   </div>
                   <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
-                    <span className="block text-[8px] font-bold text-[#94A3B8] uppercase">CTR</span>
-                    <span className="block text-xs font-extrabold text-[#0F172A]">
+                    <span className="block text-[8px] font-medium text-[#94A3B8] uppercase">CTR</span>
+                    <span className="block text-xs font-semibold text-[#0F172A]">
                       {ad.metrics.impressions > 0 ? ((ad.metrics.clicks / ad.metrics.impressions) * 100).toFixed(1) : '0.0'}%
                     </span>
                   </div>
@@ -109,7 +109,7 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
               <div className="flex gap-2">
                 <button
                   onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad', item: ad } })}
-                  className="flex-1 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-bold py-2 rounded-xl cursor-pointer transition-all shadow-sm"
+                  className="flex-1 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-medium py-2 rounded-xl cursor-pointer transition-all shadow-sm"
                 >
                   Edit
                 </button>
@@ -129,11 +129,11 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
           <div className="w-16 h-16 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl flex items-center justify-center mb-4 text-[#94A3B8]">
             <PhotoIcon className="w-8 h-8 stroke-[1.5]" />
           </div>
-          <h3 className="text-sm font-bold text-[#0F172A] font-mona mb-1">No Ads Created</h3>
+          <h3 className="text-sm font-medium text-[#0F172A] font-mona mb-1">No Ads Created</h3>
           <p className="text-xs font-semibold text-[#94A3B8] max-w-xs mb-6">Start building your creative variations for this ad set.</p>
           <button
             onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })}
-            className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
+            className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-medium px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
           >
             Create First Ad
           </button>

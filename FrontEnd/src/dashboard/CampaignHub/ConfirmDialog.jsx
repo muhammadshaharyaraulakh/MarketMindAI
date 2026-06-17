@@ -26,19 +26,19 @@ export default function ConfirmDialog({ isOpen, title, message, onConfirm, onCan
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-[#0F172A] mb-2">{title}</h3>
+                <h3 className="text-lg font-medium text-[#0F172A] mb-2">{title}</h3>
                 <p className="text-sm font-semibold text-[#475569]">{message}</p>
               </div>
               <div className="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-100">
                 <button
                   onClick={onCancel}
-                  className="px-4 py-2 text-sm font-bold text-[#475569] bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-[#475569] bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={onConfirm}
-                  className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
                 >
                   Delete
                 </button>

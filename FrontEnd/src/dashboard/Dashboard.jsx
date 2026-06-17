@@ -37,64 +37,59 @@ import {
 const INITIAL_CAMPAIGNS = [
   { id: 1, name: 'Summer Performance Ads', platform: 'Google', status: 'Active', budget: 5000, startDate: '2026-05-01', endDate: '2026-06-01', objective: 'SALES', budget_type: 'Daily', bid_strategy: 'Maximize Conversions', sync_status: 'SYNCED', deletedAt: null },
   { id: 2, name: 'Meta Retargeting Q2', platform: 'Meta', status: 'Active', budget: 4000, startDate: '2026-05-10', endDate: '2026-06-10', objective: 'LEADS', budget_type: 'Lifetime', bid_strategy: 'Lowest Cost', sync_status: 'SYNCED', deletedAt: null },
-  { id: 3, name: 'TikTok Brand Viral', platform: 'TikTok', status: 'Paused', budget: 2000, startDate: '2026-05-15', endDate: '2026-06-15', objective: 'AWARENESS', budget_type: 'Daily', bid_strategy: 'Cost Cap', sync_status: 'SYNCED', deletedAt: null },
-  { id: 4, name: 'Email Newsletter Nurture', platform: 'Email', status: 'Active', budget: 1000, startDate: '2026-05-01', endDate: '2026-08-30', objective: 'TRAFFIC', budget_type: 'Daily', bid_strategy: 'Manual', sync_status: 'SYNCED', deletedAt: null }
+  { id: 3, name: 'Snapchat Brand Viral', platform: 'Snapchat', status: 'Paused', budget: 2000, startDate: '2026-05-15', endDate: '2026-06-15', objective: 'AWARENESS', budget_type: 'Daily', bid_strategy: 'Cost Cap', sync_status: 'SYNCED', deletedAt: null }
 ]
 
-const INITIAL_ANALYTICS = [
-  // Campaign 1 Snapshots (Google)
-  { id: 101, campaignId: 1, date: '2026-05-20', spend: 350, revenue: 2450, impressions: 12000, clicks: 520, leads: 24 },
-  { id: 102, campaignId: 1, date: '2026-05-21', spend: 400, revenue: 3100, impressions: 14000, clicks: 590, leads: 28 },
-  { id: 103, campaignId: 1, date: '2026-05-22', spend: 450, revenue: 3200, impressions: 15000, clicks: 610, leads: 31 },
-  { id: 104, campaignId: 1, date: '2026-05-23', spend: 420, revenue: 3000, impressions: 13500, clicks: 570, leads: 26 },
-  { id: 105, campaignId: 1, date: '2026-05-24', spend: 500, revenue: 4100, impressions: 18000, clicks: 760, leads: 39 },
-  { id: 106, campaignId: 1, date: '2026-05-25', spend: 480, revenue: 3800, impressions: 16500, clicks: 690, leads: 34 },
-  { id: 107, campaignId: 1, date: '2026-05-26', spend: 520, revenue: 4300, impressions: 19000, clicks: 810, leads: 43 },
+const generateMockAnalytics = () => {
+  const data = []
+  let id = 100
+  // Helper for random variance
+  const rand = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
+  
+  for (let i = 1; i <= 30; i++) {
+    const day = i < 10 ? `0${i}` : `${i}`
+    const date = `2026-05-${day}`
+    
+    // Campaign 1: Google (All 30 days)
+    let spend1 = rand(300, 600)
+    data.push({ id: id++, campaignId: 1, date, spend: spend1, revenue: spend1 * (rand(40, 80)/10), impressions: spend1 * 35, clicks: spend1 * 1.5, leads: Math.floor(spend1 / rand(12, 18)) })
+    
+    // Campaign 2: Meta (Starts May 10)
+    if (i >= 10) {
+      let spend2 = rand(200, 450)
+      data.push({ id: id++, campaignId: 2, date, spend: spend2, revenue: spend2 * (rand(30, 90)/10), impressions: spend2 * 40, clicks: spend2 * 1.8, leads: Math.floor(spend2 / rand(10, 15)) })
+    }
+    
+    // Campaign 3: Snapchat (Starts May 15)
+    if (i >= 15) {
+      let spend3 = rand(150, 300)
+      data.push({ id: id++, campaignId: 3, date, spend: spend3, revenue: spend3 * (rand(20, 60)/10), impressions: spend3 * 50, clicks: spend3 * 2.5, leads: Math.floor(spend3 / rand(8, 12)) })
+    }
+  }
+  return data
+}
 
-  // Campaign 2 Snapshots (Meta)
-  { id: 201, campaignId: 2, date: '2026-05-20', spend: 200, revenue: 1300, impressions: 8000, clicks: 310, leads: 12 },
-  { id: 202, campaignId: 2, date: '2026-05-21', spend: 250, revenue: 1800, impressions: 9500, clicks: 380, leads: 16 },
-  { id: 203, campaignId: 2, date: '2026-05-22', spend: 300, revenue: 2100, impressions: 11000, clicks: 420, leads: 20 },
-  { id: 204, campaignId: 2, date: '2026-05-23', spend: 280, revenue: 1950, impressions: 10200, clicks: 390, leads: 18 },
-  { id: 205, campaignId: 2, date: '2026-05-24', spend: 350, revenue: 2500, impressions: 13000, clicks: 510, leads: 24 },
-  { id: 206, campaignId: 2, date: '2026-05-25', spend: 320, revenue: 2150, impressions: 12500, clicks: 470, leads: 22 },
-  { id: 207, campaignId: 2, date: '2026-05-26', spend: 400, revenue: 2900, impressions: 15500, clicks: 590, leads: 32 },
+const INITIAL_ANALYTICS = generateMockAnalytics()
 
-  // Campaign 3 Snapshots (TikTok)
-  { id: 301, campaignId: 3, date: '2026-05-22', spend: 150, revenue: 600, impressions: 6000, clicks: 120, leads: 6 },
-  { id: 302, campaignId: 3, date: '2026-05-23', spend: 180, revenue: 720, impressions: 7200, clicks: 150, leads: 8 },
-  { id: 303, campaignId: 3, date: '2026-05-24', spend: 200, revenue: 900, impressions: 8500, clicks: 180, leads: 11 },
-  { id: 304, campaignId: 3, date: '2026-05-25', spend: 220, revenue: 950, impressions: 9000, clicks: 190, leads: 12 },
-  { id: 305, campaignId: 3, date: '2026-05-26', spend: 250, revenue: 1100, impressions: 10500, clicks: 230, leads: 15 },
-
-  // Campaign 4 Snapshots (Email)
-  { id: 401, campaignId: 4, date: '2026-05-20', spend: 30, revenue: 600, impressions: 4000, clicks: 250, leads: 40 },
-  { id: 402, campaignId: 4, date: '2026-05-23', spend: 40, revenue: 900, impressions: 5000, clicks: 320, leads: 58 },
-  { id: 403, campaignId: 4, date: '2026-05-26', spend: 35, revenue: 850, impressions: 4800, clicks: 290, leads: 52 }
-]
-
-const INITIAL_CONTENT_PIECES = [
-  { id: 1, campaignId: 1, platform: 'Google', type: 'Ad Copy', title: 'Conversion Boost Headline', text: 'Struggling with low conversion rates? MarketMind AI uses deep performance predictions to optimize your search keywords instantly. Get a 7.3x average ROAS lift.', bookmarked: true },
-  { id: 2, campaignId: 2, platform: 'Meta', type: 'Caption', title: 'Ad Fatigue Solver Feed ad', text: 'Catch your ad fatigue before it burns your budget. Let our Gemini-powered engine design, execute, and scale high-performance ads on autopilot. ⚡ Click below for a free campaign audit!', bookmarked: false },
-  { id: 3, campaignId: 2, platform: 'Meta', type: 'Video Script', title: '30s Hook Script for Lead Gen', text: 'Visual: Host holds phone with declining charts. Hook: Stop throwing cash at Meta ads that fail. Here is the 2am budget alert engine that saved our agency $3K last week.', bookmarked: true },
-  { id: 4, campaignId: 3, platform: 'TikTok', type: 'Caption', title: 'Viral Spark Caption', text: 'Marketers are quiet about this AI hack 🤫 Stop guessing which video script converts. MarketMind predicted our target engagement score within 0.1%. #SaaS #GrowthHack', bookmarked: false },
-  { id: 5, campaignId: 4, platform: 'Email', type: 'Subject ', title: 'Q2 Newsletter Headline Option A', text: 'Stop burning ad budget (3 forecast models inside)', bookmarked: false }
-]
+const INITIAL_CONTENT_PIECES = []
 
 const INITIAL_AB_TESTS = [
   { id: 1, campaignId: 1, name: 'Google High Urgency Headline Test', variantA: 'Stop Wasting Ad Budget - Try predicted AI Keywords', variantB: 'The Only AI Keywords Guaranteed to Boost Conversion Rates', splitRatio: '50/50', clicksA: 340, clicksB: 180, impressionsA: 8000, impressionsB: 8500, status: 'Running', winner: null },
-  { id: 2, campaignId: 2, name: 'Meta Visual Ad-Copy Variant test', variantA: '⚡ Get a 2.4x ROAS increase in 7 days or your money back.', variantB: '⚡ Tired of low CTR? Let predicted AI build Meta creatives.', splitRatio: '60/40', clicksA: 410, clicksB: 480, impressionsA: 11000, impressionsB: 11500, status: 'Completed', winner: 'Variant B' },
-  { id: 3, campaignId: 4, name: 'Email subject lines - Value vs Urgency', variantA: 'MarketMind AI: Slash Customer Acquisition Costs by 38%', variantB: 'Unlock your marketing forecast metrics inside today!', splitRatio: '50/50', clicksA: 180, clicksB: 240, impressionsA: 3000, impressionsB: 3050, status: 'Running', winner: null }
+  { id: 2, campaignId: 2, name: 'Meta Visual Ad-Copy Variant test', variantA: '⚡ Get a 2.4x ROAS increase in 7 days or your money back.', variantB: '⚡ Tired of low CTR? Let predicted AI build Meta creatives.', splitRatio: '60/40', clicksA: 410, clicksB: 480, impressionsA: 11000, impressionsB: 11500, status: 'Completed', winner: 'Variant B' }
 ]
 
 const INITIAL_ADSETS = [
-  { id: 1, campaignId: 1, name: 'Search Broad Match', audienceType: 'Interest', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 150, billing_event: 'IMPRESSIONS', budget_type: 'Daily', start_time: '2026-05-01T00:00', end_time: '2026-06-01T23:59', frequency_cap: '3 per day', sync_status: 'SYNCED', targeting: { age_min: 18, age_max: 65, genders: ['All'], locations: ['US'], interests: ['SaaS'] }, deletedAt: null },
-  { id: 2, campaignId: 1, name: 'Search Exact Match', audienceType: 'Custom', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 200, billing_event: 'CLICKS', budget_type: 'Daily', start_time: '2026-05-01T00:00', end_time: '2026-06-01T23:59', frequency_cap: 'None', sync_status: 'SYNCED', targeting: { age_min: 25, age_max: 55, genders: ['All'], locations: ['US', 'CA'], interests: ['B2B'] }, deletedAt: null }
+  { id: 1, campaignId: 1, name: 'Search Broad Match', audienceType: 'Broad', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 150, billing_event: 'IMPRESSIONS', budget_type: 'Daily', start_time: '2026-05-01T00:00', end_time: '2026-06-01T23:59', frequency_cap: '3 per day', sync_status: 'SYNCED', targeting: { age_min: 18, age_max: 65, genders: ['All'], locations: ['US'], interests: ['SaaS'] }, deletedAt: null },
+  { id: 2, campaignId: 1, name: 'Search Exact Match', audienceType: 'Custom', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 200, billing_event: 'CLICKS', budget_type: 'Daily', start_time: '2026-05-01T00:00', end_time: '2026-06-01T23:59', frequency_cap: 'None', sync_status: 'SYNCED', targeting: { age_min: 25, age_max: 55, genders: ['All'], locations: ['US', 'CA'], interests: ['B2B'] }, deletedAt: null },
+  { id: 3, campaignId: 2, name: 'LAL 1% Purchasers', audienceType: 'Lookalike', platform: 'Meta', status: 'Active', budget: 4000, goal: 'CONVERSIONS', spendToday: 320, billing_event: 'IMPRESSIONS', budget_type: 'Lifetime', start_time: '2026-05-10T00:00', end_time: '2026-06-10T23:59', frequency_cap: 'None', sync_status: 'SYNCED', targeting: { age_min: 20, age_max: 50, genders: ['All'], locations: ['US', 'UK', 'CA'], interests: ['Marketing'] }, deletedAt: null },
+  { id: 4, campaignId: 3, name: 'Gen Z Outreach', audienceType: 'Broad', platform: 'Snapchat', status: 'Paused', budget: 2000, goal: 'IMPRESSIONS', spendToday: 0, billing_event: 'IMPRESSIONS', budget_type: 'Daily', start_time: '2026-05-15T00:00', end_time: '2026-06-15T23:59', frequency_cap: '1 per day', sync_status: 'SYNCED', targeting: { age_min: 13, age_max: 24, genders: ['All'], locations: ['US'], interests: ['Tech'] }, deletedAt: null }
 ]
 
 const INITIAL_ADS = [
-  { id: 1, adSetId: 1, name: 'Promo RSA 1', format: 'RESPONSIVE', platform: 'Google', status: 'Active', headline: 'Best SaaS Tools', description: 'Grow your business', cta: 'Sign Up', metrics: { impressions: 1200, clicks: 45, spend: 35 }, destination_url: 'https://marketmind.ai', cta_type: 'SIGN_UP', review_status: 'APPROVED', sync_status: 'SYNCED', ab_test_group: 'A', deletedAt: null },
-  { id: 2, adSetId: 1, name: 'Promo RSA 2', format: 'RESPONSIVE', platform: 'Google', status: 'Paused', headline: 'AI Marketing', description: 'Automate ads', cta: 'Learn More', metrics: { impressions: 800, clicks: 20, spend: 15 }, destination_url: 'https://marketmind.ai/features', cta_type: 'LEARN_MORE', review_status: 'PENDING', sync_status: 'SYNCED', ab_test_group: 'B', deletedAt: null }
+  { id: 1, adSetId: 1, name: 'Promo RSA 1', format: 'RESPONSIVE', platform: 'Google', status: 'Active', headline: 'Best SaaS Tools', description: 'Grow your business', cta: 'Sign Up', metrics: { impressions: 1200, clicks: 45, spend: 35, conversions: 2 }, destination_url: 'https://marketmind.ai', cta_type: 'SIGN_UP', review_status: 'APPROVED', sync_status: 'SYNCED', ab_test_group: 'A', deletedAt: null },
+  { id: 2, adSetId: 1, name: 'Promo RSA 2', format: 'RESPONSIVE', platform: 'Google', status: 'Paused', headline: 'AI Marketing', description: 'Automate ads', cta: 'Learn More', metrics: { impressions: 800, clicks: 20, spend: 15, conversions: 1 }, destination_url: 'https://marketmind.ai/features', cta_type: 'LEARN_MORE', review_status: 'PENDING', sync_status: 'SYNCED', ab_test_group: 'B', deletedAt: null },
+  { id: 3, adSetId: 3, name: 'Meta Lead Gen Image', format: 'Image', platform: 'Meta', status: 'Active', primaryText: 'Tired of high CPAs?', headline: 'Lower Your CPA Today', cta_type: 'LEARN_MORE', metrics: { spend: 150, impressions: 5000, clicks: 125, conversions: 10 }, instagram: true, review_status: 'APPROVED', sync_status: 'SYNCED', ab_test_group: 'A', deletedAt: null },
+  { id: 4, adSetId: 4, name: 'Snap Story Ad', format: 'Video', platform: 'Snapchat', status: 'Paused', brandName: 'MarketMind AI', headline: 'Viral Growth Hack', attachment_url: 'https://marketmind.ai', cta_type: 'SIGN_UP', metrics: { spend: 0, impressions: 0, clicks: 0, conversions: 0 }, review_status: 'APPROVED', sync_status: 'SYNCED', ab_test_group: 'A', deletedAt: null }
 ]
 
 const INITIAL_INTEGRATIONS = [
@@ -116,14 +111,11 @@ const INITIAL_STATE = {
   ads: INITIAL_ADS,
   integrations: INITIAL_INTEGRATIONS,
   ingestion: {
-    uploads: [
-      { id: 1, file: 'Q1_GoogleAds_Export.csv', platform: 'Google Ads', rows: 4521, status: 'Completed', time: '2 hrs ago' },
-      { id: 2, file: 'Meta_Leads_May.csv', platform: 'Meta Ads', rows: 1205, status: 'Completed', time: '5 hrs ago' }
-    ]
+    uploads: []
   },
   insights: {
     alerts: [
-      { id: 1, severity: 'Critical', title: 'High CPA on TikTok', detail: 'Cost per acquisition has spiked 40% in the last 24h.', campaign: 'TikTok Brand Viral', platform: 'TikTok', time: '2m ago' },
+      { id: 1, severity: 'Critical', title: 'High CPA on Snapchat', detail: 'Cost per acquisition has spiked 40% in the last 24h.', campaign: 'Snapchat Brand Viral', platform: 'Snapchat', time: '2m ago' },
       { id: 2, severity: 'Warning', title: 'Ad fatigue detected', detail: 'Creative variation B is showing a CTR drop.', campaign: 'Meta Retargeting Q2', platform: 'Meta', time: '1h ago' }
     ],
     recommendations: [
@@ -158,7 +150,7 @@ const INITIAL_STATE = {
   platformFilter: 'All',
   statusFilter: 'All',
   chatMessages: [
-    { sender: 'ai', text: 'Welcome Rashid! I have analyzed your 4 active marketing campaigns. Our average portfolio ROAS is outstanding at 8.08x. Ask me to diagnose daily snapshots, check A/B test results, or craft brand-new platform-native creatives!' }
+    { sender: 'ai', text: 'Welcome Rashid! I have analyzed your 3 active marketing campaigns. Our average portfolio ROAS is outstanding at 8.08x. Ask me to diagnose daily snapshots, check A/B test results, or craft brand-new platform-native creatives!' }
   ],
   isGeneratingContent: false,
   isGeneratingReport: false,
@@ -347,7 +339,6 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
       case 'Google': return <MagnifyingGlassIcon className="w-3 h-3 inline-block mr-1" />
       case 'Meta': return <ChatBubbleBottomCenterIcon className="w-3 h-3 inline-block mr-1" />
       case 'Snapchat': return <VideoCameraIcon className="w-3 h-3 inline-block mr-1" />
-      case 'Email': return <AtSymbolIcon className="w-3 h-3 inline-block mr-1" />
       default: return null
     }
   }
@@ -408,9 +399,9 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
   }, [campaignStats, state.campaigns])
 
   const selectedCampaign = useMemo(() => {
-    if (!state.selectedCampaignId) return null
-    return campaignStats.find(c => c.id === state.selectedCampaignId) || null
-  }, [campaignStats, state.selectedCampaignId])
+    if (!selectedCampaignId) return null
+    return campaignStats.find(c => c.id === selectedCampaignId) || null
+  }, [campaignStats, selectedCampaignId])
 
   const selectedAdSet = useMemo(() => {
     if (!selectedAdSetId) return null
@@ -430,7 +421,7 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
     return Object.values(dailyMap)
       .sort((a, b) => new Date(a.date) - new Date(b.date))
       .map(d => ({
-        day: new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' }),
+        day: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         dateStr: d.date,
         spend: d.spend,
         revenue: d.revenue,
@@ -448,7 +439,7 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
     })
 
     const total = Object.values(platformData).reduce((sum, val) => sum + val, 0) || 1
-    const colors = { Google: '#3B82F6', Meta: '#FF2D20', TikTok: '#8B5CF6', Email: '#22C55E' }
+    const colors = { Google: '#3B82F6', Meta: '#FF2D20', Snapchat: '#EAB308' }
     
     return Object.keys(platformData).map(plat => ({
       name: `${plat} Ads`,
@@ -456,6 +447,45 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
       color: colors[plat] || '#64748B'
     }))
   }, [campaignStats])
+
+  const platformComparisonData = useMemo(() => {
+    const platformData = {}
+    campaignStats.forEach(c => {
+      if (!platformData[c.platform]) {
+        platformData[c.platform] = { platform: c.platform, spend: 0, revenue: 0 }
+      }
+      platformData[c.platform].spend += c.totalSpend
+      platformData[c.platform].revenue += c.totalRevenue
+    })
+    return Object.values(platformData)
+  }, [campaignStats])
+
+  const bestROASPlatform = useMemo(() => {
+    if (platformComparisonData.length === 0) return { platform: 'N/A', roas: 0 }
+    return platformComparisonData.map(p => ({
+      ...p,
+      roas: p.spend > 0 ? p.revenue / p.spend : 0
+    })).reduce((prev, current) => (prev.roas > current.roas) ? prev : current)
+  }, [platformComparisonData])
+
+  const cpaTrendData = useMemo(() => {
+    const dailyMap = {}
+    state.analytics.forEach(snap => {
+      if (!dailyMap[snap.date]) {
+        dailyMap[snap.date] = { date: snap.date, spend: 0, leads: 0 }
+      }
+      dailyMap[snap.date].spend += snap.spend
+      dailyMap[snap.date].leads += (snap.leads || 0)
+    })
+
+    return Object.values(dailyMap)
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .map(d => ({
+        day: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        dateStr: d.date,
+        cpa: d.leads > 0 ? +(d.spend / d.leads).toFixed(2) : 0
+      }))
+  }, [state.analytics])
 
   const filteredCampaigns = useMemo(() => {
     return campaignStats.filter(c => {
@@ -536,7 +566,7 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
       {/* ==========================================
           MAIN CONTAINER
           ========================================== */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto relative h-screen">
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto relative h-screen [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
 
         {/* Content body padding container */}
@@ -551,6 +581,10 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
                 trafficShareData={trafficShareData}
                 showRevenue={showRevenue}
                 setShowRevenue={setShowRevenue}
+                activeCampaignsCount={activeCampaigns.length}
+                platformComparisonData={platformComparisonData}
+                bestROASPlatform={bestROASPlatform}
+                cpaTrendData={cpaTrendData}
               />
             } />
             <Route path="/campaigns" element={

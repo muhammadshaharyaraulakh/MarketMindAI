@@ -179,8 +179,8 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
             </button>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-[#0F172A] font-mona leading-tight">{selectedCampaign?.name}</h2>
-                <span className="px-2 py-0.5 border border-[#E2E8F0] bg-[#F8FAFC] text-[#94A3B8] font-bold text-[9px] uppercase tracking-wide rounded-md font-mona">
+                <h2 className="text-lg font-medium text-[#0F172A] font-mona leading-tight">{selectedCampaign?.name}</h2>
+                <span className="px-2 py-0.5 border border-[#E2E8F0] bg-[#F8FAFC] text-[#94A3B8] font-medium text-[9px] uppercase tracking-wide rounded-md font-mona">
                   {selectedCampaign?.platform} Ads
                 </span>
               </div>
@@ -216,20 +216,19 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
           {[
             { id: 'analytics', label: 'Analytics Logs', count: state.analytics.filter(a => a.campaignId === selectedCampaign?.id).length },
             { id: 'adsets', label: 'Ad Sets', count: activeAdSets.filter(a => a.campaignId === selectedCampaign?.id).length },
-            { id: 'content', label: 'AI Creative Studio', count: state.contentPieces.filter(cp => cp.campaignId === selectedCampaign?.id).length },
             { id: 'ab_testing', label: 'A/B Splitting', count: state.abTests.filter(t => t.campaignId === selectedCampaign?.id).length }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setWorkspaceTab(tab.id)}
-              className={`px-5 py-3.5 text-xs font-bold uppercase tracking-wider border-b-2 cursor-pointer transition-all ${
+              className={`px-5 py-3.5 text-xs font-medium uppercase tracking-wider border-b-2 cursor-pointer transition-all ${
                 workspaceTab === tab.id 
                   ? 'border-[#FF2D20] text-[#FF2D20]' 
                   : 'border-transparent text-[#94A3B8] hover:text-[#475569]'
               }`}
             >
               {tab.label}
-              <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${workspaceTab === tab.id ? 'bg-[#FFF1F0] text-[#FF2D20]' : 'bg-[#F8FAFC] text-[#94A3B8]'}`}>
+              <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-medium ${workspaceTab === tab.id ? 'bg-[#FFF1F0] text-[#FF2D20]' : 'bg-[#F8FAFC] text-[#94A3B8]'}`}>
                 {tab.count}
               </span>
             </button>
@@ -244,8 +243,8 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
             <div className="space-y-6 animate-fadeIn">
               {/* Area Chart trend */}
               <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider block mb-0.5">Workspace Analytics</span>
-                <span className="text-sm font-bold text-[#0F172A] block font-mona mb-4">Ad Spend vs Attributed Revenue</span>
+                <span className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider block mb-0.5">Workspace Analytics</span>
+                <span className="text-sm font-medium text-[#0F172A] block font-mona mb-4">Ad Spend vs Attributed Revenue</span>
                 <div className="w-full h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={
@@ -266,20 +265,20 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
               {/* Relational snap logs list */}
               <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-[#E2E8F0]">
-                  <span className="text-xs font-bold text-[#0F172A] block font-mona">Daily Relational Entries</span>
+                  <span className="text-xs font-medium text-[#0F172A] block font-mona">Daily Relational Entries</span>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                        <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase pl-6 font-mona">Date</th>
-                        <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase font-mona">Spend</th>
-                        <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase font-mona">Revenue</th>
-                        <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase font-mona">ROAS</th>
-                        <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase font-mona">Clicks / Imps</th>
-                        <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase font-mona">Leads</th>
-                        <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase pr-6 text-right font-mona">Actions</th>
+                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase pl-6 font-mona">Date</th>
+                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase font-mona">Spend</th>
+                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase font-mona">Revenue</th>
+                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase font-mona">ROAS</th>
+                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase font-mona">Clicks / Imps</th>
+                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase font-mona">Leads</th>
+                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase pr-6 text-right font-mona">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E2E8F0]">
@@ -292,7 +291,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
 
                           return (
                             <tr key={snap.id} className="hover:bg-[#F8FAFC]/50 transition-colors">
-                              <td className="p-4 pl-6 text-xs font-bold text-[#0F172A]">
+                              <td className="p-4 pl-6 text-xs font-medium text-[#0F172A]">
                                 {isEditing ? (
                                   <input 
                                     type="date" 
@@ -302,7 +301,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   />
                                 ) : snap.date}
                               </td>
-                              <td className="p-4 text-xs font-bold text-[#0F172A]">
+                              <td className="p-4 text-xs font-medium text-[#0F172A]">
                                 {isEditing ? (
                                   <input 
                                     type="number" 
@@ -312,7 +311,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   />
                                 ) : `$${snap.spend.toLocaleString()}`}
                               </td>
-                              <td className="p-4 text-xs font-bold text-[#0F172A]">
+                              <td className="p-4 text-xs font-medium text-[#0F172A]">
                                 {isEditing ? (
                                   <input 
                                     type="number" 
@@ -322,7 +321,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   />
                                 ) : `$${snap.revenue.toLocaleString()}`}
                               </td>
-                              <td className="p-4 text-xs font-extrabold text-[#0F172A]">{snapROAS}x</td>
+                              <td className="p-4 text-xs font-semibold text-[#0F172A]">{snapROAS}x</td>
                               <td className="p-4 text-xs font-semibold text-[#475569]">
                                 {isEditing ? (
                                   <div className="flex gap-1">
@@ -341,7 +340,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   </div>
                                 ) : `${snap.clicks.toLocaleString()} / ${snap.impressions.toLocaleString()}`}
                               </td>
-                              <td className="p-4 text-xs font-bold text-[#0F172A]">
+                              <td className="p-4 text-xs font-medium text-[#0F172A]">
                                 {isEditing ? (
                                   <input 
                                     type="number" 
@@ -356,13 +355,13 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   <div className="inline-flex gap-1">
                                     <button 
                                       onClick={saveEditedSnapshot}
-                                      className="bg-green-600 hover:bg-green-700 text-white font-bold text-[10px] uppercase px-2.5 py-1.5 rounded-lg cursor-pointer"
+                                      className="bg-green-600 hover:bg-green-700 text-white font-medium text-[10px] uppercase px-2.5 py-1.5 rounded-lg cursor-pointer"
                                     >
                                       Save
                                     </button>
                                     <button 
                                       onClick={() => setEditingSnapshotId(null)}
-                                      className="bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-slate-100 text-[#475569] font-bold text-[10px] uppercase px-2.5 py-1.5 rounded-lg cursor-pointer"
+                                      className="bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-slate-100 text-[#475569] font-medium text-[10px] uppercase px-2.5 py-1.5 rounded-lg cursor-pointer"
                                     >
                                       Cancel
                                     </button>
@@ -394,10 +393,10 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
 
               {/* Add Snap form */}
               <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider block mb-3 font-mona">Record Daily Performance Log</span>
+                <span className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider block mb-3 font-mona">Record Daily Performance Log</span>
                 <form onSubmit={handleAddSnapshot} className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
                   <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1.5">Date</label>
+                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Date</label>
                     <input 
                       type="date" 
                       value={newSnapDate}
@@ -407,7 +406,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                     />
                   </div>
                   <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1.5">Spend ($)</label>
+                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Spend ($)</label>
                     <input 
                       type="number" 
                       placeholder="150"
@@ -418,7 +417,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                     />
                   </div>
                   <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1.5">Revenue ($)</label>
+                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Revenue ($)</label>
                     <input 
                       type="number" 
                       placeholder="1200"
@@ -429,7 +428,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                     />
                   </div>
                   <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1.5">Impressions</label>
+                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Impressions</label>
                     <input 
                       type="number" 
                       placeholder="5000"
@@ -439,7 +438,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                     />
                   </div>
                   <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1.5">Clicks</label>
+                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Clicks</label>
                     <input 
                       type="number" 
                       placeholder="240"
@@ -450,7 +449,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1">
-                      <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1.5">Leads</label>
+                      <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Leads</label>
                       <input 
                         type="number" 
                         placeholder="18"
@@ -476,12 +475,12 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
             <div className="space-y-6 animate-fadeIn">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider block mb-0.5">Campaign Audiences</span>
-                  <span className="text-sm font-bold text-[#0F172A] block font-mona">Ad Sets Management</span>
+                  <span className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider block mb-0.5">Campaign Audiences</span>
+                  <span className="text-sm font-medium text-[#0F172A] block font-mona">Ad Sets Management</span>
                 </div>
                 <button
                   onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset' } })}
-                  className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-bold px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-medium px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
                 >
                   <PlusIcon className="w-4 h-4 shrink-0" />
                   Create Ad Set
@@ -494,13 +493,13 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                          <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider pl-6 font-mona">Ad Set Name</th>
-                          <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider font-mona">Audience Type</th>
-                          <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider font-mona">Status</th>
-                          <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider font-mona">Daily Budget</th>
-                          <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider font-mona">Spend Today</th>
-                          <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider font-mona">Goal</th>
-                          <th className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider text-right pr-6 font-mona">Actions</th>
+                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider pl-6 font-mona">Ad Set Name</th>
+                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Audience Type</th>
+                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Status</th>
+                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Daily Budget</th>
+                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Spend Today</th>
+                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Goal</th>
+                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider text-right pr-6 font-mona">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -508,17 +507,17 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                           .filter(a => a.campaignId === selectedCampaign?.id)
                           .map(adSet => (
                             <tr key={adSet.id} onClick={() => navigate(`/campaigns/${selectedCampaign?.id}/adsets/${adSet.id}/ads`)} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
-                              <td className="p-4 pl-6 text-xs font-bold text-[#0F172A]">
+                              <td className="p-4 pl-6 text-xs font-medium text-[#0F172A]">
                                 {adSet.name}
                                 <span className="block text-[10px] font-semibold text-[#94A3B8] mt-0.5">{adSet.platform}</span>
                               </td>
                               <td className="p-4 text-xs font-semibold text-[#475569]">{adSet.audienceType}</td>
                               <td className="p-4"><StatusBadge status={adSet.status} /><SyncBadge sync_status={adSet.sync_status} /></td>
-                              <td className="p-4 text-xs font-bold text-[#0F172A]">${adSet.budget.toLocaleString()}</td>
-                              <td className="p-4 text-xs font-bold text-[#FF2D20]">${adSet.spendToday.toLocaleString()}</td>
-                              <td className="p-4 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">{adSet.goal}</td>
+                              <td className="p-4 text-xs font-medium text-[#0F172A]">${adSet.budget.toLocaleString()}</td>
+                              <td className="p-4 text-xs font-medium text-[#FF2D20]">${adSet.spendToday.toLocaleString()}</td>
+                              <td className="p-4 text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider">{adSet.goal}</td>
                               <td className="p-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
-                                <div className="inline-flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="inline-flex items-center gap-1.5 transition-opacity">
                                   <button
                                     onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset', item: adSet } })}
                                     className="p-1.5 hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-blue-500 cursor-pointer transition-all shadow-sm"
@@ -549,11 +548,11 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                     <div className="w-16 h-16 bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl flex items-center justify-center mb-4 text-[#94A3B8]">
                       <CircleStackIcon className="w-8 h-8 stroke-[1.5]" />
                     </div>
-                    <h3 className="text-sm font-bold text-[#0F172A] font-mona mb-1">No Ad Sets Configured</h3>
+                    <h3 className="text-sm font-medium text-[#0F172A] font-mona mb-1">No Ad Sets Configured</h3>
                     <p className="text-xs font-semibold text-[#94A3B8] max-w-xs mb-6">Create an ad set to define audience targeting, platform networks, and daily optimization goals.</p>
                     <button
                       onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset' } })}
-                      className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
+                      className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-medium px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
                     >
                       Create First Ad Set
                     </button>
@@ -563,189 +562,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
             </div>
           )}
 
-          {/* SUB TAB 3: AI CREATIVE STUDIO */}
-          {workspaceTab === 'content' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fadeIn">
-              {/* Left Generator form */}
-              <div className="lg:col-span-5 bg-white border border-[#E2E8F0] p-5 rounded-2xl shadow-sm self-start">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider block mb-0.5">Studio Generator</span>
-                <span className="text-sm font-bold text-[#0F172A] block font-mona mb-5">Predictive AI Copywriter</span>
-                
-                <form onSubmit={handleAIContentGeneration} className="space-y-4">
-                  <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1.5">Platform Target Focus</label>
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {['Ad Copy', 'Caption', 'Video Script'].map((type, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => setGenType(type)}
-                          className={`py-2 rounded-lg text-[10px] font-bold transition-all cursor-pointer border ${
-                            genType === type 
-                              ? 'bg-[#FFF1F0] border-[#FF2D20]/20 text-[#FF2D20]' 
-                              : 'bg-white border-[#E2E8F0] text-[#475569] hover:bg-[#F8FAFC]'
-                          }`}
-                        >
-                          {type}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1.5">Copywriter Tone</label>
-                    <select 
-                      value={genTone}
-                      onChange={(e) => setGenTone(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-bold text-[#0F172A] bg-white focus:outline-none"
-                    >
-                      <option value="Persuasive">Persuasive Conversion</option>
-                      <option value="Urgent">High Urgency Spark</option>
-                      <option value="Educational">Educational Overview</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1.5">Core Product Keywords</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. ad fatigue, automated budget alerts"
-                      value={genKeywords}
-                      onChange={(e) => setGenKeywords(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
-                      required
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={state.isGeneratingContent}
-                    className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white text-xs font-bold py-3 rounded-xl cursor-pointer transition-all disabled:opacity-50 inline-flex items-center justify-center gap-1.5 shadow-sm"
-                  >
-                    {state.isGeneratingContent ? 'AI processing copy...' : 'Synthesize Copy Variation'}
-                  </button>
-                </form>
-              </div>
-
-              {/* Right Output variants */}
-              <div className="lg:col-span-7 space-y-4">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider block font-mona">Synthesized Copy Ad Variations</span>
-                
-                <AnimatePresence mode="wait">
-                  {state.isGeneratingContent ? (
-                    <motion.div 
-                      initial={{ opacity: 0 }} 
-                      animate={{ opacity: 1 }} 
-                      exit={{ opacity: 0 }}
-                      className="border border-[#E2E8F0] rounded-2xl p-5 bg-white animate-pulse space-y-3"
-                    >
-                      <div className="h-3 bg-slate-200 rounded w-1/4" />
-                      <div className="h-3.5 bg-slate-200 rounded w-5/6" />
-                      <div className="h-3 bg-slate-200 rounded w-1/2" />
-                    </motion.div>
-                  ) : (
-                    <div className="space-y-4">
-                      {state.contentPieces.filter(cp => cp.campaignId === selectedCampaign?.id).length === 0 ? (
-                        <div className="border border-dashed border-[#E2E8F0] rounded-2xl p-8 text-center text-[#94A3B8] font-semibold text-xs bg-white">
-                          No ad copywriting assets generated yet. Set keywords and synthesize now!
-                        </div>
-                      ) : (
-                        state.contentPieces
-                          .filter(cp => cp.campaignId === selectedCampaign?.id)
-                          .map(piece => {
-                            const isEditingContent = editingContentId === piece.id
-
-                            return (
-                              <div key={piece.id} className="border border-[#E2E8F0] rounded-2xl p-4 bg-white shadow-sm flex gap-4 hover:shadow-md transition-all">
-                                <div className="shrink-0 flex flex-col items-center">
-                                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-lg bg-[#FFF1F0] border border-[#FF2D20]/20 text-[#FF2D20]">
-                                    {piece.type}
-                                  </span>
-                                </div>
-
-                                <div className="flex-1 space-y-3">
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-[#0F172A]">{piece.title}</span>
-                                  </div>
-
-                                  {isEditingContent ? (
-                                    <div className="space-y-2">
-                                      <textarea 
-                                        value={editContentText}
-                                        onChange={(e) => setEditContentText(e.target.value)}
-                                        className="w-full border border-[#E2E8F0] rounded-xl p-2.5 text-xs font-semibold text-[#475569] focus:outline-none focus:border-[#FF2D20] h-20 bg-white"
-                                      />
-                                      <div className="flex gap-1.5">
-                                        <button 
-                                          onClick={() => saveContentEdit(piece)}
-                                          className="bg-green-600 hover:bg-green-700 text-white font-bold text-[9px] uppercase px-2.5 py-1.5 rounded-lg cursor-pointer"
-                                        >
-                                          Save Changes
-                                        </button>
-                                        <button 
-                                          onClick={() => setEditingContentId(null)}
-                                          className="bg-[#F8FAFC] border border-[#E2E8F0] text-[#475569] font-bold text-[9px] uppercase px-2.5 py-1.5 rounded-lg cursor-pointer"
-                                        >
-                                          Cancel
-                                        </button>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <p className="text-xs font-semibold leading-relaxed text-[#475569]">{piece.text}</p>
-                                  )}
-
-                                  {!isEditingContent && (
-                                    <div className="flex items-center justify-between border-t border-[#E2E8F0] pt-2.5">
-                                      <div className="flex items-center gap-3">
-                                        <button 
-                                          onClick={() => {
-                                            navigator.clipboard.writeText(piece.text)
-                                            alert('Copied to clipboard!')
-                                          }}
-                                          className="inline-flex items-center gap-1 text-[10px] font-bold text-[#94A3B8] hover:text-[#0F172A] cursor-pointer"
-                                        >
-                                          <ClipboardIcon className="w-3.5 h-3.5 stroke-[1.5]" />
-                                          Copy
-                                        </button>
-                                        <button 
-                                          onClick={() => dispatch({ type: 'TOGGLE_BOOKMARK_CONTENT', payload: piece.id })}
-                                          className="inline-flex items-center gap-1 text-[10px] font-bold text-[#94A3B8] hover:text-[#FF2D20] cursor-pointer"
-                                        >
-                                          {piece.bookmarked ? <HeartIconSolid className="w-3.5 h-3.5 text-red-500" /> : <HeartIcon className="w-3.5 h-3.5 stroke-[1.5]" />}
-                                          {piece.bookmarked ? 'Bookmarked' : 'Save'}
-                                        </button>
-                                      </div>
-                                      
-                                      <div className="inline-flex items-center gap-1">
-                                        <button
-                                          onClick={() => {
-                                            setEditingContentId(piece.id)
-                                            setEditContentText(piece.text)
-                                          }}
-                                          className="p-1 hover:bg-[#F8FAFC] rounded text-[#94A3B8] hover:text-blue-500 cursor-pointer"
-                                        >
-                                          <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
-                                        </button>
-                                        <button
-                                          onClick={() => dispatch({ type: 'DELETE_CONTENT', payload: piece.id })}
-                                          className="p-1 hover:bg-[#F8FAFC] rounded text-[#94A3B8] hover:text-red-500 cursor-pointer"
-                                        >
-                                          <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
-                                        </button>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )
-                          })
-                      )}
-                    </div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          )}
 
           {/* SUB TAB 3: A/B TESTING SPLITS CRUD */}
           {workspaceTab === 'ab_testing' && (
@@ -774,8 +591,8 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
 
                           <div>
                             <div className="flex items-center justify-between mb-4">
-                              <span className="text-xs font-bold text-[#0F172A] pr-16 leading-tight">{test.name}</span>
-                              <span className={`px-2 py-0.5 border rounded-lg text-[8px] font-extrabold uppercase ${test.status === 'Running' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-[#E2E8F0] text-slate-500'}`}>
+                              <span className="text-xs font-medium text-[#0F172A] pr-16 leading-tight">{test.name}</span>
+                              <span className={`px-2 py-0.5 border rounded-lg text-[8px] font-semibold uppercase ${test.status === 'Running' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-[#E2E8F0] text-slate-500'}`}>
                                 {test.status}
                               </span>
                             </div>
@@ -783,7 +600,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                             {/* Variant A comparison details */}
                             <div className="space-y-1.5 border-b border-slate-50 pb-3 mb-3 text-left">
                               <div className="flex justify-between text-[11px] font-semibold text-[#475569]">
-                                <span className={test.winner === 'Variant A' ? 'text-green-600 font-bold' : ''}>
+                                <span className={test.winner === 'Variant A' ? 'text-green-600 font-medium' : ''}>
                                   Variant A {test.winner === 'Variant A' && '🏆'}
                                 </span>
                                 <span>{test.clicksA} clicks ({ctrA}% CTR)</span>
@@ -797,7 +614,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                             {/* Variant B comparison details */}
                             <div className="space-y-1.5 pb-3 text-left">
                               <div className="flex justify-between text-[11px] font-semibold text-[#475569]">
-                                <span className={test.winner === 'Variant B' ? 'text-green-600 font-bold' : ''}>
+                                <span className={test.winner === 'Variant B' ? 'text-green-600 font-medium' : ''}>
                                   Variant B {test.winner === 'Variant B' && '🏆'}
                                 </span>
                                 <span>{test.clicksB} clicks ({ctrB}% CTR)</span>
@@ -815,19 +632,19 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                               <div className="inline-flex gap-2">
                                 <button
                                   onClick={() => handleSimulateSplitEngagement(test.id)}
-                                  className="bg-[#F8FAFC] hover:bg-slate-100 border border-[#E2E8F0] text-[#475569] text-[9px] font-bold px-2.5 py-1 rounded-lg cursor-pointer"
+                                  className="bg-[#F8FAFC] hover:bg-slate-100 border border-[#E2E8F0] text-[#475569] text-[9px] font-medium px-2.5 py-1 rounded-lg cursor-pointer"
                                 >
                                   Simulate
                                 </button>
                                 <button
                                   onClick={() => handleSetWinner(test.id, parseFloat(ctrA) >= parseFloat(ctrB) ? 'Variant A' : 'Variant B')}
-                                  className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[9px] font-bold px-2.5 py-1 rounded-lg cursor-pointer shadow-sm"
+                                  className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[9px] font-medium px-2.5 py-1 rounded-lg cursor-pointer shadow-sm"
                                 >
                                   Winner
                                 </button>
                               </div>
                             ) : (
-                              <span className="text-[9px] font-bold text-[#94A3B8] uppercase">Completed split</span>
+                              <span className="text-[9px] font-medium text-[#94A3B8] uppercase">Completed split</span>
                             )}
 
                             <button
@@ -845,10 +662,10 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
 
               {/* Create split test form panel */}
               <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm max-w-xl text-left">
-                <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider block mb-3 font-mona">Initiate A/B Performance Split</span>
+                <span className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider block mb-3 font-mona">Initiate A/B Performance Split</span>
                 <form onSubmit={handleAddABTest} className="space-y-3">
                   <div>
-                    <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Test Name</label>
+                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1">Test Name</label>
                     <input 
                       type="text" 
                       placeholder="Headline Urgent Hook Test"
@@ -860,7 +677,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Variant A hook copy</label>
+                      <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1">Variant A hook copy</label>
                       <textarea 
                         placeholder="Try predicted AI Keywords..."
                         value={newABVarA}
@@ -870,7 +687,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                       />
                     </div>
                     <div>
-                      <label className="block text-[9px] font-bold text-[#94A3B8] uppercase mb-1">Variant B hook copy</label>
+                      <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1">Variant B hook copy</label>
                       <textarea 
                         placeholder="Stop wasting ad spend guarantee..."
                         value={newABVarB}
@@ -882,7 +699,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                   </div>
                   <button
                     type="submit"
-                    className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[10px] font-bold px-3 py-2 rounded-xl cursor-pointer shadow-sm transition-all"
+                    className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[10px] font-medium px-3 py-2 rounded-xl cursor-pointer shadow-sm transition-all"
                   >
                     Launch Split Test
                   </button>

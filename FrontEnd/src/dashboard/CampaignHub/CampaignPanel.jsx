@@ -62,9 +62,9 @@ export default function CampaignPanel({ item, onClose, onSave }) {
         <div className="flex items-center justify-between p-6 border-b border-[#E2E8F0]">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold text-[#0F172A]">{item ? 'Edit Campaign' : 'Create Campaign'}</h2>
+              <h2 className="text-xl font-medium text-[#0F172A]">{item ? 'Edit Campaign' : 'Create Campaign'}</h2>
               {item && item.sync_status && (
-                <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded border ${
+                <span className={`px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider rounded border ${
                   item.sync_status === 'SYNCED' ? 'bg-[#F0FDF4] text-green-700 border-green-200' : 
                   item.sync_status === 'PENDING' ? 'bg-[#FFFBEB] text-amber-700 border-amber-200' :
                   'bg-[#F8FAFC] text-[#94A3B8] border-[#E2E8F0]'
@@ -85,20 +85,20 @@ export default function CampaignPanel({ item, onClose, onSave }) {
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Campaign Name</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Campaign Name</label>
                 <input 
                   type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
                   className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Status</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Status</label>
                 <div className="flex bg-[#F8FAFC] p-1 rounded-lg border border-[#E2E8F0]">
                   {['Active', 'Paused'].map(opt => (
                     <button
                       key={opt} type="button"
                       onClick={() => setFormData({...formData, status: opt})}
-                      className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${formData.status === opt ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}
+                      className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${formData.status === opt ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}
                     >
                       {opt}
                     </button>
@@ -108,7 +108,7 @@ export default function CampaignPanel({ item, onClose, onSave }) {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-2">Advertising Platform</label>
+              <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-2">Advertising Platform</label>
               <ClickableCardGroup 
                 options={platformOptions}
                 selected={formData.platform}
@@ -120,7 +120,7 @@ export default function CampaignPanel({ item, onClose, onSave }) {
             <hr className="border-[#E2E8F0]" />
 
             <div>
-              <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-2">Campaign Objective</label>
+              <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-2">Campaign Objective</label>
               <PillGroup 
                 options={objectiveOptions}
                 selected={formData.objective}
@@ -132,13 +132,13 @@ export default function CampaignPanel({ item, onClose, onSave }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Budget Type</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Budget Type</label>
                 <div className="flex bg-[#F8FAFC] p-1 rounded-lg border border-[#E2E8F0]">
                   {['Daily', 'Lifetime'].map(opt => (
                     <button
                       key={opt} type="button"
                       onClick={() => setFormData({...formData, budget_type: opt})}
-                      className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${formData.budget_type === opt ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}
+                      className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${formData.budget_type === opt ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}
                     >
                       {opt}
                     </button>
@@ -146,9 +146,9 @@ export default function CampaignPanel({ item, onClose, onSave }) {
                 </div>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Budget Amount</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Budget Amount</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2 text-[#94A3B8] font-bold">$</span>
+                  <span className="absolute left-3 top-2 text-[#94A3B8] font-medium">$</span>
                   <input 
                     type="number" min="0" required value={formData.budget} onChange={e => setFormData({...formData, budget: e.target.value})}
                     className="w-full pl-6 pr-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
@@ -159,7 +159,7 @@ export default function CampaignPanel({ item, onClose, onSave }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Bid Strategy</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Bid Strategy</label>
                 <select 
                   value={formData.bid_strategy} onChange={e => setFormData({...formData, bid_strategy: e.target.value})}
                   className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none bg-white"
@@ -173,14 +173,14 @@ export default function CampaignPanel({ item, onClose, onSave }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Start Date</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Start Date</label>
                 <input 
                   type="date" required value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})}
                   className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">End Date</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">End Date</label>
                 <input 
                   type="date" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})}
                   className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
@@ -192,7 +192,7 @@ export default function CampaignPanel({ item, onClose, onSave }) {
             <hr className="border-[#E2E8F0]" />
             
             <div>
-              <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Internal Notes</label>
+              <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Internal Notes</label>
               <textarea 
                 value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}
                 rows={3}
@@ -205,10 +205,10 @@ export default function CampaignPanel({ item, onClose, onSave }) {
         </div>
 
         <div className="p-6 border-t border-[#E2E8F0] flex justify-end gap-3 bg-[#F8FAFC]">
-          <button type="button" onClick={onClose} className="px-5 py-2.5 text-[13px] font-bold text-[#475569] hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg transition-colors cursor-pointer">
+          <button type="button" onClick={onClose} className="px-5 py-2.5 text-[13px] font-medium text-[#475569] hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg transition-colors cursor-pointer">
             Cancel
           </button>
-          <button type="submit" form="campaign-form" className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[13px] font-bold px-6 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer">
+          <button type="submit" form="campaign-form" className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[13px] font-medium px-6 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer">
             {item ? 'Save Changes' : 'Create Campaign'}
           </button>
         </div>

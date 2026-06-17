@@ -22,7 +22,7 @@ export default function TagInput({ tags, onChange, placeholder = 'Add tag...', l
 
   return (
     <div>
-      <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">{label}</label>
+      <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">{label}</label>
       <div className="flex flex-col gap-2 p-2 border border-[#E2E8F0] rounded-xl bg-white focus-within:border-[#FF2D20] transition-colors">
         <div className="flex flex-wrap gap-2 min-h-[28px]">
           {(tags || []).map((tag, idx) => (

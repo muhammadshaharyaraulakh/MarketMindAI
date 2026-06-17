@@ -79,9 +79,9 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
         <div className="flex items-center justify-between p-6 border-b border-[#E2E8F0]">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-xl font-bold text-[#0F172A]">{item ? 'Edit Ad Set' : 'Create Ad Set'}</h2>
+              <h2 className="text-xl font-medium text-[#0F172A]">{item ? 'Edit Ad Set' : 'Create Ad Set'}</h2>
               {item && item.sync_status && (
-                <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded border ${
+                <span className={`px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider rounded border ${
                   item.sync_status === 'SYNCED' ? 'bg-[#F0FDF4] text-green-700 border-green-200' : 
                   item.sync_status === 'PENDING' ? 'bg-[#FFFBEB] text-amber-700 border-amber-200' :
                   'bg-[#F8FAFC] text-[#94A3B8] border-[#E2E8F0]'
@@ -102,14 +102,14 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Ad Set Name</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Ad Set Name</label>
                 <input 
                   type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
                   className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Status</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Status</label>
                 <select 
                   value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}
                   className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none bg-white"
@@ -121,7 +121,7 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-2">Audience Type</label>
+              <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-2">Audience Type</label>
               <ClickableCardGroup 
                 options={audienceOptions}
                 selected={formData.audienceType}
@@ -134,7 +134,7 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-2">Optimization Goal</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-2">Optimization Goal</label>
                 <PillGroup 
                   options={goalOptions}
                   selected={formData.goal}
@@ -142,7 +142,7 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Billing Event</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Billing Event</label>
                 <select 
                   value={formData.billing_event} onChange={e => setFormData({...formData, billing_event: e.target.value})}
                   className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none bg-white"
@@ -157,17 +157,17 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
             <hr className="border-[#E2E8F0]" />
 
             <div>
-              <h3 className="text-[13px] font-bold text-[#0F172A] mb-4">Detailed Targeting</h3>
+              <h3 className="text-[13px] font-medium text-[#0F172A] mb-4">Detailed Targeting</h3>
               
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Age Range</label>
+                  <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Age Range</label>
                   <div className="flex items-center gap-2">
                     <input 
                       type="number" min="13" max="65" value={formData.targeting.age_min} onChange={e => setFormData({...formData, targeting: {...formData.targeting, age_min: parseInt(e.target.value)}})}
                       className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
                     />
-                    <span className="text-[#94A3B8] font-bold">-</span>
+                    <span className="text-[#94A3B8] font-medium">-</span>
                     <input 
                       type="number" min="13" max="65" value={formData.targeting.age_max} onChange={e => setFormData({...formData, targeting: {...formData.targeting, age_max: parseInt(e.target.value)}})}
                       className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
@@ -175,7 +175,7 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Genders</label>
+                  <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Genders</label>
                   <div className="flex bg-[#F8FAFC] p-1 rounded-lg border border-[#E2E8F0]">
                     {['All', 'Men', 'Women'].map(opt => {
                       const isSelected = formData.targeting.genders.includes(opt)
@@ -186,7 +186,7 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
                             if (opt === 'All') setFormData({...formData, targeting: {...formData.targeting, genders: ['All']}})
                             else setFormData({...formData, targeting: {...formData.targeting, genders: [opt]}})
                           }}
-                          className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-colors ${isSelected ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}
+                          className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${isSelected ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}
                         >
                           {opt}
                         </button>
@@ -222,7 +222,7 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
             <hr className="border-[#E2E8F0]" />
 
             <div>
-              <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-2">Placements</label>
+              <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-2">Placements</label>
               <PillGroup 
                 options={[
                   { value: 'Feed', label: 'Feeds' },
@@ -241,7 +241,7 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Budget Type</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Budget Type</label>
                 <select 
                   value={formData.budget_type} onChange={e => setFormData({...formData, budget_type: e.target.value})}
                   className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none bg-white"
@@ -251,9 +251,9 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Budget Amount</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Budget Amount</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2 text-[#94A3B8] font-bold">$</span>
+                  <span className="absolute left-3 top-2 text-[#94A3B8] font-medium">$</span>
                   <input 
                     type="number" min="0" required value={formData.budget} onChange={e => setFormData({...formData, budget: e.target.value})}
                     className="w-full pl-6 pr-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
@@ -264,14 +264,14 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Start Time</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Start Time</label>
                 <input 
                   type="datetime-local" required value={formData.start_time} onChange={e => setFormData({...formData, start_time: e.target.value})}
                   className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">End Time</label>
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">End Time</label>
                 <input 
                   type="datetime-local" value={formData.end_time} onChange={e => setFormData({...formData, end_time: e.target.value})}
                   className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
@@ -280,7 +280,7 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-[#94A3B8] uppercase mb-1.5">Frequency Cap</label>
+              <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Frequency Cap</label>
               <select 
                 value={formData.frequency_cap} onChange={e => setFormData({...formData, frequency_cap: e.target.value})}
                 className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none bg-white"
@@ -296,10 +296,10 @@ export default function AdSetPanel({ item, campaignId, onClose, onSave }) {
         </div>
 
         <div className="p-6 border-t border-[#E2E8F0] flex justify-end gap-3 bg-[#F8FAFC]">
-          <button type="button" onClick={onClose} className="px-5 py-2.5 text-[13px] font-bold text-[#475569] hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg transition-colors cursor-pointer">
+          <button type="button" onClick={onClose} className="px-5 py-2.5 text-[13px] font-medium text-[#475569] hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg transition-colors cursor-pointer">
             Cancel
           </button>
-          <button type="submit" form="adset-form" className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[13px] font-bold px-6 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer">
+          <button type="submit" form="adset-form" className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[13px] font-medium px-6 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer">
             {item ? 'Save Changes' : 'Create Ad Set'}
           </button>
         </div>
