@@ -66,6 +66,12 @@ return [
             'visibility' => 'private',
         ],
 
+        'data_ingestion' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/local/data_ingestion'),
+            'visibility' => 'private',
+        ],
+
     ],
 
     /*

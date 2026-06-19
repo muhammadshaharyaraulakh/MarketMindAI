@@ -7,4 +7,5 @@ return [
     AppServiceProvider::class,
     FortifyServiceProvider::class,
     App\Providers\ContentGenerationServiceProvider::class,
+    App\Providers\DataIngestionServiceProvider::class,
 ];

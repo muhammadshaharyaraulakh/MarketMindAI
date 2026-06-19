@@ -33,4 +33,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/library', [\App\Http\Controllers\Api\ContentGenerationController::class, 'library']);
         Route::delete('/library/{id}', [\App\Http\Controllers\Api\ContentGenerationController::class, 'destroy']);
     });
+
+    // Data Ingestion Routes
+    Route::prefix('data-ingestion')->group(function () {
+        Route::post('/upload', [\App\Http\Controllers\Api\DataIngestionController::class, 'upload']);
+        Route::get('/completed-campaigns', [\App\Http\Controllers\Api\DataIngestionController::class, 'completedCampaigns']);
+        Route::get('/campaign-context/{id}', [\App\Http\Controllers\Api\DataIngestionController::class, 'campaignContext']);
+        Route::get('/upload-history', [\App\Http\Controllers\Api\DataIngestionController::class, 'uploadHistory']);
+    });
 });
