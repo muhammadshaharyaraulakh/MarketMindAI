@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { ClipboardIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
+import { ClipboardIcon, DocumentCheckIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
 function CharBadge({ text, limit }) {
+  if (!text) return null;
   const count = text.length
   const nearLimit = count >= limit - 2 && count <= limit
   const overLimit = count > limit
@@ -16,7 +17,7 @@ function CharBadge({ text, limit }) {
         {count}/{limit}
       </span>
       {overLimit && (
-        <button className="text-red-500 hover:text-red-700 transition-colors" title="Regenerate this">
+        <button className="cursor-pointer text-red-500 hover:text-red-700 transition-colors" title="Regenerate this">
           <ArrowPathIcon className="w-3.5 h-3.5" />
         </button>
       )}
@@ -24,14 +25,52 @@ function CharBadge({ text, limit }) {
   )
 }
 
-function CopyCard({ title, children }) {
+function StoryboardList({ title, scripts }) {
+  if (!scripts || !Array.isArray(scripts) || scripts.length === 0) return null;
+  return (
+    <div className="mb-6 last:mb-0">
+      <h4 className="text-sm font-bold text-[#0F172A] mb-3">{title}</h4>
+      <div className="space-y-3">
+        {scripts.map((s, i) => (
+          <div key={i} className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex gap-3">
+            <div className="bg-purple-100 text-purple-700 font-mono text-xs px-2 py-1 rounded h-fit shrink-0">
+              {s.timestamp || `Scene ${i+1}`}
+            </div>
+            <div className="space-y-1.5 text-sm">
+              <p><strong className="text-gray-800">Visual:</strong> <span className="text-gray-600">{s.visual_cue || s}</span></p>
+              {s.voiceover && <p><strong className="text-gray-800">Voiceover:</strong> <span className="text-gray-600">"{s.voiceover}"</span></p>}
+              {s.other_details && <p><strong className="text-gray-800">Details:</strong> <span className="text-gray-500 text-xs">{s.other_details}</span></p>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CopyCard({ title, copyText, children }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    if (!copyText) return
+    navigator.clipboard.writeText(copyText)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mb-6">
       <div className="bg-gray-50 border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <h3 className="text-sm font-bold text-[#0F172A]">{title}</h3>
-        <button className="text-gray-400 hover:text-[#0F172A] transition-colors p-1" title="Copy All">
-          <ClipboardIcon className="w-4 h-4" />
-        </button>
+        {copyText && (
+          <button 
+            onClick={handleCopy}
+            className={`cursor-pointer ${copied ? 'text-green-500' : 'text-gray-400 hover:text-[#0F172A]'} transition-colors p-1`} 
+            title={copied ? "Copied!" : "Copy All"}
+          >
+            {copied ? <DocumentCheckIcon className="w-4 h-4" /> : <ClipboardIcon className="w-4 h-4" />}
+          </button>
+        )}
       </div>
       <div className="p-4">
         {children}
@@ -40,30 +79,15 @@ function CopyCard({ title, children }) {
   )
 }
 
-export default function CopyTab({ platform, aiAnalysis }) {
-  const prodName = aiAnalysis?.productName || 'Running Shoes'
+export default function CopyTab({ platform, aiAnalysis, generatedContent }) {
+  const prodName = aiAnalysis?.productName || 'Product'
+  const copy = generatedContent || {}
 
   const renderGoogle = () => (
     <>
-      <CopyCard title="RSA Headlines (Max 30 chars)">
+      <CopyCard title="RSA Headlines (Max 30 chars)" copyText={(copy.headlines || []).join('\n')}>
         <div className="space-y-3">
-          {[
-            `Best ${prodName}`,
-            `Shop ${prodName} Today`,
-            `Top Quality ${prodName}`,
-            `Buy ${prodName} Online`,
-            `${prodName} on Sale Now`,
-            `Upgrade Your Footwear`,
-            `Premium ${prodName}`,
-            `Affordable ${prodName}`,
-            `Your New Favorite Shoes`,
-            `Free Shipping on Shoes`,
-            `Comfortable ${prodName}`,
-            `Sporty ${prodName}`,
-            `Energetic ${prodName}`,
-            `Get ${prodName} Fast`,
-            `The Ultimate ${prodName} - This is way too long for a headline` // testing overflow
-          ].map((text, i) => (
+          {(copy.headlines || []).map((text, i) => (
             <div key={i} className="flex items-center justify-between pb-2 border-b border-gray-50 last:border-0 last:pb-0">
               <span className="text-sm text-gray-800">{text}</span>
               <CharBadge text={text} limit={30} />
@@ -72,14 +96,9 @@ export default function CopyTab({ platform, aiAnalysis }) {
         </div>
       </CopyCard>
 
-      <CopyCard title="RSA Descriptions (Max 90 chars)">
+      <CopyCard title="RSA Descriptions (Max 90 chars)" copyText={(copy.descriptions || []).join('\n')}>
         <div className="space-y-3">
-          {[
-            `Discover the best ${prodName} for your active lifestyle. Shop now for free shipping!`,
-            `Upgrade your workout with our premium ${prodName}. Designed for comfort and durability.`,
-            `Looking for ${prodName}? We have exactly what you need. Browse our massive selection today.`,
-            `Get ready to perform at your best with these energetic ${prodName}. Limited time offer.`
-          ].map((text, i) => (
+          {(copy.descriptions || []).map((text, i) => (
             <div key={i} className="flex items-center justify-between pb-2 border-b border-gray-50 last:border-0 last:pb-0">
               <span className="text-sm text-gray-800">{text}</span>
               <CharBadge text={text} limit={90} />
@@ -88,17 +107,17 @@ export default function CopyTab({ platform, aiAnalysis }) {
         </div>
       </CopyCard>
 
-      <CopyCard title="Sitelinks">
+      <CopyCard title="Sitelinks" copyText={(copy.sitelinks || []).join('\n')}>
         <div className="space-y-2">
-          {['Men\'s Collection', 'Women\'s Collection', 'Sale Items', 'New Arrivals'].map((text, i) => (
+          {(copy.sitelinks || []).map((text, i) => (
             <div key={i} className="text-sm text-blue-600 underline cursor-pointer">{text}</div>
           ))}
         </div>
       </CopyCard>
 
-      <CopyCard title="Callouts">
+      <CopyCard title="Callouts" copyText={(copy.callouts || []).join(', ')}>
         <div className="flex flex-wrap gap-2">
-          {['Free Shipping', '24/7 Support', 'Price Match', 'Easy Returns', 'Secure Checkout', 'Premium Quality', 'Top Rated', 'Fast Delivery'].map((text, i) => (
+          {(copy.callouts || []).map((text, i) => (
             <span key={i} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-medium">{text}</span>
           ))}
         </div>
@@ -108,151 +127,117 @@ export default function CopyTab({ platform, aiAnalysis }) {
 
   const renderMeta = () => (
     <>
-      <CopyCard title="Primary Text (3 Variants)">
+      <CopyCard title="Primary Text (3 Variants)" copyText={(copy.primary_texts || []).map(pt => pt.type.toUpperCase() + ':\n' + pt.text).join('\n\n')}>
         <div className="space-y-4">
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Emotional</span>
-            <p className="text-sm text-gray-800">Tired of shoes that just don't keep up? We've engineered the perfect {prodName} to match your energetic lifestyle. Feel the difference from the first step.</p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Offer-focused</span>
-            <p className="text-sm text-gray-800">Get 20% off our best-selling {prodName} this week only! Don't miss out on the ultimate comfort and style upgrade. Click to claim your discount.</p>
-          </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Problem-Solution</span>
-            <p className="text-sm text-gray-800">Foot pain ruining your run? Our new {prodName} features advanced cushioning technology designed to solve exactly that. Run longer, run better.</p>
-          </div>
+          {(copy.primary_texts || []).map((pt, i) => (
+            <div key={i} className="p-3 bg-gray-50 rounded-lg">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">{pt.type}</span>
+              <p className="text-sm text-gray-800">{pt.text}</p>
+            </div>
+          ))}
         </div>
       </CopyCard>
 
-      <CopyCard title="Headlines">
+      <CopyCard title="Headlines" copyText={(copy.headlines || []).join('\n')}>
         <ul className="list-disc pl-5 space-y-1">
-          {[
-            `Level Up Your Run with New ${prodName}`,
-            `The ${prodName} Everyone Is Talking About`,
-            `Say Goodbye to Foot Pain forever`,
-            `Get 20% Off ${prodName} Today`,
-            `Experience True Comfort with ${prodName}`
-          ].map((h, i) => (
+          {(copy.headlines || []).map((h, i) => (
             <li key={i} className="text-sm text-gray-800 font-semibold">{h}</li>
           ))}
         </ul>
       </CopyCard>
 
-      <CopyCard title="Carousel Copy">
-        <div className="flex overflow-x-auto gap-4 pb-2 snap-x">
-          {[1, 2, 3, 4, 5].map((cardNum) => (
-            <div key={cardNum} className="shrink-0 w-48 border border-gray-200 rounded-lg p-3 snap-start bg-white">
-              <div className="w-full h-24 bg-gray-100 rounded mb-2 flex items-center justify-center text-gray-400 text-xs">Image {cardNum}</div>
-              <div className="text-sm font-bold text-gray-900 mb-1">Feature {cardNum}</div>
-              <div className="text-xs text-gray-600">Discover why this makes our {prodName} better.</div>
+      <CopyCard title="Carousel Copy" copyText={(copy.carousel_cards || []).map((c, i) => 'Card ' + (i+1) + ':\n' + c.headline + '\n' + c.description).join('\n\n')}>
+        <div className="flex overflow-x-auto gap-4 pb-2 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {(copy.carousel_cards || []).map((card, i) => (
+            <div key={i} className="shrink-0 w-48 border border-gray-200 rounded-lg p-3 snap-start bg-white">
+              <div className="w-full h-24 bg-gray-100 rounded mb-2 flex items-center justify-center text-gray-400 text-xs">Image {i + 1}</div>
+              <div className="text-sm font-bold text-gray-900 mb-1">{card.headline}</div>
+              <div className="text-xs text-gray-600">{card.description}</div>
             </div>
           ))}
         </div>
       </CopyCard>
 
-      <CopyCard title="Video Scripts">
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-sm font-bold text-[#0F172A] mb-2">15-second Script</h4>
-            <div className="font-mono text-sm bg-gray-50 rounded-lg p-3 text-gray-700 whitespace-pre-wrap">
-{`[0:00] Hook: Quick zoom on the ${prodName} in action. Text: "Need an upgrade?"
-[0:05] Voiceover: "Meet the last pair you'll ever need."
-[0:10] Action: Show someone running effortlessly.
-[0:13] CTA: "Swipe up to shop the sale!"`}
-            </div>
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-[#0F172A] mb-2">30-second Script</h4>
-            <div className="font-mono text-sm bg-gray-50 rounded-lg p-3 text-gray-700 whitespace-pre-wrap">
-{`[0:00] Hook: "Stop scrolling if your feet hurt after a run."
-[0:05] Problem: Show a frustrated runner.
-[0:10] Solution: Introduce the ${prodName} with a sleek product shot.
-[0:15] Benefit 1: Highlight the premium cushioning.
-[0:20] Benefit 2: Highlight the breathable material.
-[0:25] Social Proof: "Join 10,000+ happy runners."
-[0:28] CTA: "Click the link below to get yours today."`}
-            </div>
-          </div>
-        </div>
+      <CopyCard title="Video Storyboard Scripts" copyText={JSON.stringify(copy.video_scripts, null, 2)}>
+        <StoryboardList title="15-second Script" scripts={copy.video_scripts?.fifteen_second} />
+        <StoryboardList title="30-second Script" scripts={copy.video_scripts?.thirty_second} />
+        {(!copy.video_scripts?.fifteen_second && !copy.video_scripts?.thirty_second) && (
+          <p className="text-sm text-gray-500">No storyboard generated.</p>
+        )}
       </CopyCard>
+
+
     </>
   )
 
   const renderSnapchat = () => (
     <>
-      <CopyCard title="Single Ad Copy">
+      <CopyCard title="Single Ad Copy" copyText={`Brand: ${copy.single_ad?.brand_name || ''}\nHeadline: ${copy.single_ad?.headline || ''}\nBody: ${copy.single_ad?.body || ''}\nCTA: ${copy.single_ad?.cta || ''}`}>
         <div className="space-y-4">
           <div>
             <div className="flex justify-between mb-1">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Headline</label>
-              <CharBadge text={`New ${prodName} Out Now - Grab Yours!`} limit={25} />
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Brand Name</label>
+              <CharBadge text={copy.single_ad?.brand_name || ''} limit={25} />
             </div>
             <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-800 font-semibold">
-              New {prodName} Out Now - Grab Yours!
+              {copy.single_ad?.brand_name}
+            </div>
+          </div>
+          <div>
+            <div className="flex justify-between mb-1">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Headline</label>
+              <CharBadge text={copy.single_ad?.headline || ''} limit={34} />
+            </div>
+            <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-800 font-semibold">
+              {copy.single_ad?.headline}
             </div>
           </div>
           <div>
             <div className="flex justify-between mb-1">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Body</label>
-              <CharBadge text={`Level up your fit with the latest ${prodName}. Unmatched comfort, sleek design. Don't sleep on this drop. 🔥`} limit={130} />
+              <CharBadge text={copy.single_ad?.body || ''} limit={130} />
             </div>
             <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-800">
-              Level up your fit with the latest {prodName}. Unmatched comfort, sleek design. Don't sleep on this drop. 🔥
+              {copy.single_ad?.body}
             </div>
           </div>
           <div>
              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">CTA</label>
-             <span className="bg-gray-100 px-3 py-1 rounded-full text-sm font-bold text-gray-800">SHOP NOW</span>
+             <span className="bg-gray-100 px-3 py-1 rounded-full text-sm font-bold text-gray-800">{copy.single_ad?.cta || 'Swipe Up'}</span>
           </div>
         </div>
       </CopyCard>
 
-      <CopyCard title="Story Sequence">
-        <div className="flex gap-4 overflow-x-auto pb-2 snap-x">
-          {[
-            { s: 1, copy: "Your old shoes are holding you back." },
-            { s: 2, copy: `Meet the new ${prodName}.` },
-            { s: 3, copy: "Built for speed. Styled for the streets." },
-            { s: 4, copy: "Swipe up to upgrade your rotation. 🚀" }
-          ].map((slide) => (
-            <div key={slide.s} className="shrink-0 w-40 h-64 border border-gray-200 rounded-xl p-3 snap-start bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col items-center justify-center text-center relative">
-              <span className="absolute top-2 left-2 bg-black/10 text-black/60 px-2 py-0.5 rounded text-[10px] font-bold">Slide {slide.s}</span>
-              <p className="text-sm font-bold text-gray-900 leading-snug">{slide.copy}</p>
+      <CopyCard title="Story Sequence" copyText={(copy.story_sequence || []).map((s, i) => 'Slide ' + (s.slide || (i+1)) + ':\n' + s.text).join('\n\n')}>
+        <div className="flex gap-4 overflow-x-auto pb-2 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {(copy.story_sequence || []).map((slide, i) => (
+            <div key={i} className="shrink-0 w-40 h-64 border border-gray-200 rounded-xl p-3 snap-start bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col items-center justify-center text-center relative">
+              <span className="absolute top-2 left-2 bg-black/10 text-black/60 px-2 py-0.5 rounded text-[10px] font-bold">Slide {slide.slide || (i + 1)}</span>
+              <p className="text-sm font-bold text-gray-900 leading-snug">{slide.text}</p>
             </div>
           ))}
         </div>
       </CopyCard>
 
-      <CopyCard title="Video Scripts">
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-sm font-bold text-[#0F172A] mb-2">3-second Hooks</h4>
-            <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-2 bg-purple-50 text-purple-700 text-sm font-medium rounded-lg border border-purple-100">" POV: You finally found the perfect shoes "</span>
-              <span className="px-3 py-2 bg-purple-50 text-purple-700 text-sm font-medium rounded-lg border border-purple-100">" Stop scrolling if you like running. "</span>
-              <span className="px-3 py-2 bg-purple-50 text-purple-700 text-sm font-medium rounded-lg border border-purple-100">" Unboxing the viral ${prodName} "</span>
-            </div>
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-[#0F172A] mb-2">10-second Full Script</h4>
-            <div className="font-mono text-sm bg-gray-50 rounded-lg p-3 text-gray-700 whitespace-pre-wrap">
-{`[0:00] "POV: You finally found the perfect shoes" (Text on screen, unboxing shot)
-[0:03] "These ${prodName} are literally insane." (Close up on texture)
-[0:06] "Most comfortable thing I've ever worn." (Quick wear-test shot)
-[0:08] "Swipe up before they sell out again!" (Point down, CTA arrow)`}
-            </div>
-          </div>
-        </div>
+      <CopyCard title="Video Storyboard Scripts" copyText={JSON.stringify(copy.video_scripts, null, 2)}>
+        <StoryboardList title="3-second Hooks" scripts={copy.video_scripts?.three_second_hooks} />
+        <StoryboardList title="10-second Full Script" scripts={copy.video_scripts?.ten_second_script} />
+        {(!copy.video_scripts?.three_second_hooks && !copy.video_scripts?.ten_second_script) && (
+          <p className="text-sm text-gray-500">No storyboard generated.</p>
+        )}
       </CopyCard>
+
+
     </>
   )
 
+  const normalizedPlatform = platform?.toLowerCase();
+
   return (
     <div className="py-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-      {platform === 'Google' && renderGoogle()}
-      {platform === 'Meta' && renderMeta()}
-      {platform === 'Snapchat' && renderSnapchat()}
+      {normalizedPlatform === 'google' && renderGoogle()}
+      {normalizedPlatform === 'meta' && renderMeta()}
+      {normalizedPlatform === 'snapchat' && renderSnapchat()}
     </div>
   )
 }

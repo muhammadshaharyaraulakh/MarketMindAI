@@ -16,14 +16,7 @@ export default function StepPlatform({ state, dispatch }) {
         <p className="text-gray-500 text-sm">Choose where you want to run these ads to tailor the content perfectly.</p>
       </div>
 
-      {state.selectedPlatform && (
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-start gap-2 mb-6">
-          <InformationCircleIcon className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-          <p className="text-sm text-blue-800">
-            You've created 3 ads for similar products before — I'll keep your brand voice consistent.
-          </p>
-        </div>
-      )}
+
 
       <ClickableCardGroup 
         options={platformOptions}

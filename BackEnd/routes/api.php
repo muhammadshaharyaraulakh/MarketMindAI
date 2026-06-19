@@ -23,4 +23,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/sessions', [\App\Http\Controllers\Api\Profile\ProfileController::class, 'getSessions']);
     Route::delete('/user/sessions', [\App\Http\Controllers\Api\Profile\ProfileController::class, 'logoutOtherDevices'])->middleware('password.confirm');
     Route::delete('/user/sessions/{id}', [\App\Http\Controllers\Api\Profile\ProfileController::class, 'logoutSpecificDevice']);
+
+    // Content Generation Routes
+    Route::prefix('content-generation')->group(function () {
+        Route::post('/analyze-image', [\App\Http\Controllers\Api\ContentGenerationController::class, 'analyzeImage']);
+
+        Route::post('/generate', [\App\Http\Controllers\Api\ContentGenerationController::class, 'generate']);
+        Route::post('/save', [\App\Http\Controllers\Api\ContentGenerationController::class, 'save']);
+        Route::get('/library', [\App\Http\Controllers\Api\ContentGenerationController::class, 'library']);
+        Route::delete('/library/{id}', [\App\Http\Controllers\Api\ContentGenerationController::class, 'destroy']);
+    });
 });

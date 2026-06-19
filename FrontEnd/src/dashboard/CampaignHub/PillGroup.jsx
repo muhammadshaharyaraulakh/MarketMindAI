@@ -30,7 +30,7 @@ export default function PillGroup({ options, selected, onChange, multiSelect = f
             key={opt.value}
             type="button"
             onClick={() => handleClick(opt.value)}
-            className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors border ${
+            className={`cursor-pointer px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors border ${
               active 
                 ? 'bg-[#0F172A] text-white border-[#0F172A]' 
                 : 'bg-white text-[#475569] border-[#E2E8F0] hover:border-[#94A3B8] hover:bg-[#F8FAFC]'

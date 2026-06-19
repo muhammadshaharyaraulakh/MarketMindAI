@@ -12,6 +12,7 @@ export default function StepUpload({ state, dispatch }) {
       dispatch({ 
         type: 'SET_UPLOADED_IMAGE', 
         payload: { 
+          file,
           url, 
           name: file.name, 
           size: (file.size / 1024 / 1024).toFixed(2) + ' MB' 
@@ -54,7 +55,7 @@ export default function StepUpload({ state, dispatch }) {
             </div>
             <button 
               onClick={() => dispatch({ type: 'SET_UPLOADED_IMAGE', payload: null })}
-              className="text-sm text-gray-500 hover:text-[#0F172A] underline underline-offset-2 transition-colors"
+              className="cursor-pointer text-sm text-gray-500 hover:text-[#0F172A] underline underline-offset-2 transition-colors"
             >
               Choose Different Image
             </button>

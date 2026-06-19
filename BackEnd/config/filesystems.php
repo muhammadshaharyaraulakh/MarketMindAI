@@ -60,6 +60,12 @@ return [
             'report' => false,
         ],
 
+        'content_generation' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/local/content_generation'),
+            'visibility' => 'private',
+        ],
+
     ],
 
     /*

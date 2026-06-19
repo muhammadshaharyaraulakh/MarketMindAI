@@ -186,14 +186,6 @@ export default function ContentStudio({ state: appState, dispatch: appDispatch }
       {state.currentStep < 5 && (
         <div className="mt-8 pt-4 border-t border-gray-100 flex items-center justify-between sticky bottom-0 bg-[#F8FAFC] pb-4 z-10">
           <div>
-            {state.currentStep > 1 && (
-              <button
-                onClick={handleBack}
-                className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-              >
-                Back
-              </button>
-            )}
           </div>
           
           <div className="text-xs text-gray-400 font-medium">
@@ -204,7 +196,7 @@ export default function ContentStudio({ state: appState, dispatch: appDispatch }
             {state.currentStep === 4 ? (
               <button
                 onClick={handleGenerate}
-                className="bg-[#FF2D20] hover:bg-red-600 text-white rounded-lg px-6 py-2 text-sm font-medium transition-colors shadow-sm"
+                className="cursor-pointer bg-[#FF2D20] hover:bg-red-600 text-white rounded-lg px-6 py-2 text-sm font-medium transition-colors shadow-sm"
               >
                 Generate Package
               </button>
@@ -212,7 +204,7 @@ export default function ContentStudio({ state: appState, dispatch: appDispatch }
               <button
                 onClick={handleNext}
                 disabled={isNextDisabled()}
-                className={`rounded-lg px-6 py-2 text-sm font-medium transition-colors shadow-sm ${
+                className={`cursor-pointer rounded-lg px-6 py-2 text-sm font-medium transition-colors shadow-sm ${
                   isNextDisabled() 
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     : 'bg-[#FF2D20] hover:bg-red-600 text-white'

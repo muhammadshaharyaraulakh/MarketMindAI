@@ -14,7 +14,7 @@ function ToggleSwitch({ value, onChange }) {
             key={opt} 
             type="button"
             onClick={() => onChange(opt === 'Yes')}
-            className={`px-4 py-1 text-xs font-medium rounded-md transition-colors ${isSelected ? 'bg-white text-[#0F172A] shadow-sm' : 'text-gray-500 hover:text-[#0F172A]'}`}
+            className={`cursor-pointer px-4 py-1 text-xs font-medium rounded-md transition-colors ${isSelected ? 'bg-white text-[#0F172A] shadow-sm' : 'text-gray-500 hover:text-[#0F172A]'}`}
           >
             {opt}
           </button>
@@ -47,7 +47,7 @@ export default function StepQuestions({ state, dispatch }) {
           type="text" 
           value={questionAnswers.googleKeyword || ''} 
           onChange={e => handleChange('googleKeyword', e.target.value)}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize"
         />
       </div>
       <div>
@@ -56,7 +56,7 @@ export default function StepQuestions({ state, dispatch }) {
           type="url" 
           value={questionAnswers.googleUrl || ''} 
           onChange={e => handleChange('googleUrl', e.target.value)}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize"
         />
       </div>
       <div>
@@ -72,7 +72,7 @@ export default function StepQuestions({ state, dispatch }) {
           label="Geographic Targeting"
           tags={questionAnswers.googleGeo || []}
           onChange={tags => handleChange('googleGeo', tags)}
-          placeholder="Add city or country..."
+          placeholder="Add city or country"
         />
       </div>
       <div>
@@ -81,7 +81,7 @@ export default function StepQuestions({ state, dispatch }) {
           type="text" 
           value={questionAnswers.googleCompetitors || ''} 
           onChange={e => handleChange('googleCompetitors', e.target.value)}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize"
         />
       </div>
       <div>
@@ -112,7 +112,7 @@ export default function StepQuestions({ state, dispatch }) {
                 placeholder="+1 (555) 000-0000"
                 value={questionAnswers.googlePhone || ''} 
                 onChange={e => handleChange('googlePhone', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize"
               />
             </motion.div>
           )}
@@ -150,7 +150,7 @@ export default function StepQuestions({ state, dispatch }) {
                 placeholder="What's the offer? e.g. 20% Off"
                 value={questionAnswers.metaOfferDetails || ''} 
                 onChange={e => handleChange('metaOfferDetails', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize"
               />
             </motion.div>
           )}
@@ -161,7 +161,7 @@ export default function StepQuestions({ state, dispatch }) {
           label="Target Location"
           tags={questionAnswers.metaLocation || []}
           onChange={tags => handleChange('metaLocation', tags)}
-          placeholder="Add location..."
+          placeholder="Add location"
         />
       </div>
       <div>
@@ -171,7 +171,7 @@ export default function StepQuestions({ state, dispatch }) {
           placeholder="e.g. $50 - $150"
           value={questionAnswers.metaPriceRange || ''} 
           onChange={e => handleChange('metaPriceRange', e.target.value)}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize"
         />
       </div>
       <div>
@@ -196,9 +196,9 @@ export default function StepQuestions({ state, dispatch }) {
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Top 3 USPs</label>
         <div className="space-y-2">
-          <input type="text" placeholder="USP 1" value={questionAnswers.metaUsp1 || ''} onChange={e => handleChange('metaUsp1', e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
-          <input type="text" placeholder="USP 2" value={questionAnswers.metaUsp2 || ''} onChange={e => handleChange('metaUsp2', e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
-          <input type="text" placeholder="USP 3" value={questionAnswers.metaUsp3 || ''} onChange={e => handleChange('metaUsp3', e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
+          <input type="text" placeholder="USP 1" value={questionAnswers.metaUsp1 || ''} onChange={e => handleChange('metaUsp1', e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize" />
+          <input type="text" placeholder="USP 2" value={questionAnswers.metaUsp2 || ''} onChange={e => handleChange('metaUsp2', e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize" />
+          <input type="text" placeholder="USP 3" value={questionAnswers.metaUsp3 || ''} onChange={e => handleChange('metaUsp3', e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize" />
         </div>
       </div>
       <div>
@@ -207,7 +207,7 @@ export default function StepQuestions({ state, dispatch }) {
           rows={2}
           value={questionAnswers.metaProblem || ''} 
           onChange={e => handleChange('metaProblem', e.target.value)}
-          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 resize-none"
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 resize-none capitalize"
         />
       </div>
     </div>
@@ -261,10 +261,10 @@ export default function StepQuestions({ state, dispatch }) {
             >
               <input 
                 type="text" 
-                placeholder="Detail the offer..."
+                placeholder="Detail the offer"
                 value={questionAnswers.snapOfferDetails || ''} 
                 onChange={e => handleChange('snapOfferDetails', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize"
               />
             </motion.div>
           )}
@@ -295,7 +295,7 @@ export default function StepQuestions({ state, dispatch }) {
           onChange={tags => {
             if (tags.length <= 3) handleChange('snapBrandWords', tags)
           }}
-          placeholder="Add word..."
+          placeholder="Add word"
         />
       </div>
       <div>

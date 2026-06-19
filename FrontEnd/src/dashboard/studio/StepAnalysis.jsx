@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import axios from 'axios'
 import PillGroup from '../CampaignHub/PillGroup'
 import TagInput from '../CampaignHub/TagInput'
 
@@ -15,31 +16,65 @@ export default function StepAnalysis({ state, dispatch, onNext }) {
   const [isLoading, setIsLoading] = useState(true)
   const [textIndex, setTextIndex] = useState(0)
 
+  const analyzedRef = React.useRef(false);
+
   useEffect(() => {
     const textInterval = setInterval(() => {
       setTextIndex(prev => (prev + 1) % LOADING_TEXTS.length)
     }, 600)
 
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-      // Pre-fill mock data if not already set
-      if (!state.aiAnalysis.productName) {
-        dispatch({ type: 'SET_AI_ANALYSIS', payload: {
-          productName: "Running Shoes",
-          category: "Sports / Footwear",
-          quality: "Mid-range",
-          vibe: ["Sporty", "Energetic"],
-          colors: ["#1A1A2E", "#E94560", "#FFFFFF"],
-          audience: "Males, 18-34"
-        }})
+    const analyzeImage = async () => {
+      if (!state.uploadedImage || !state.uploadedImage.file) {
+        setIsLoading(false);
+        return;
       }
-    }, 2400) // 4 * 600
+      
+      const formData = new FormData();
+      formData.append('image', state.uploadedImage.file);
+
+      try {
+        const res = await axios.post('/api/content-generation/analyze-image', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        const data = res.data;
+
+        if (data.success) {
+          const analysisPayload = {
+            productName: data.analysis.product_name || '',
+            category: data.analysis.category || 'General',
+            quality: data.analysis.quality_level || 'Mid-range',
+            vibe: data.analysis.vibe || [],
+            colors: (data.analysis.colors || []).map(c => typeof c === 'string' ? c : (c.hex || '#000000')),
+            audience: data.analysis.likely_audience || ''
+          };
+
+          dispatch({
+            type: 'SET_AI_ANALYSIS',
+            payload: analysisPayload,
+          });
+          dispatch({
+            type: 'SET_UPLOADED_IMAGE',
+            payload: { ...state.uploadedImage, path: data.image_path }
+          });
+        }
+      } catch (err) {
+        console.error('Image analysis failed:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isLoading && !state.aiAnalysis.productName && state.uploadedImage?.file && !analyzedRef.current) {
+      analyzedRef.current = true;
+      analyzeImage();
+    } else if (!state.uploadedImage?.file) {
+      setIsLoading(false);
+    }
 
     return () => {
       clearInterval(textInterval)
-      clearTimeout(timer)
     }
-  }, [dispatch, state.aiAnalysis.productName])
+  }, [])
 
   const handleChange = (key, value) => {
     dispatch({ type: 'SET_AI_ANALYSIS_FIELD', payload: { key, value } })
@@ -47,8 +82,8 @@ export default function StepAnalysis({ state, dispatch, onNext }) {
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl mx-auto flex items-center justify-center min-h-[300px]">
-        <div className="flex items-center gap-6 bg-white p-6 rounded-xl border border-gray-100 shadow-sm w-full">
+      <div className="max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[300px]">
+        <div className="flex items-center gap-6 bg-white p-6 rounded-xl border border-gray-100 shadow-sm w-full mb-4">
           {state.uploadedImage && (
             <img 
               src={state.uploadedImage.url} 
@@ -80,6 +115,12 @@ export default function StepAnalysis({ state, dispatch, onNext }) {
             </div>
           </div>
         </div>
+        <div className="text-sm text-amber-700 bg-amber-50 px-4 py-2.5 rounded-lg border border-amber-200 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          Please don't refresh or close this tab, or your progress will be lost.
+        </div>
       </div>
     )
   }
@@ -108,16 +149,12 @@ export default function StepAnalysis({ state, dispatch, onNext }) {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1.5">Category</label>
-              <select 
-                value={state.aiAnalysis.category}
+              <input 
+                type="text" 
+                value={state.aiAnalysis.category} 
                 onChange={e => handleChange('category', e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 bg-white"
-              >
-                <option>Sports / Footwear</option>
-                <option>Electronics</option>
-                <option>Apparel</option>
-                <option>Home & Garden</option>
-              </select>
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+              />
             </div>
           </div>
 
@@ -167,18 +204,6 @@ export default function StepAnalysis({ state, dispatch, onNext }) {
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
             />
           </div>
-        </div>
-
-        <div className="mt-8 pt-4 border-t border-gray-100 flex items-center gap-3">
-          <button 
-            onClick={onNext}
-            className="bg-[#FF2D20] hover:bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-          >
-            Looks Good, Continue
-          </button>
-          <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">
-            Edit Manually
-          </button>
         </div>
       </div>
     </div>

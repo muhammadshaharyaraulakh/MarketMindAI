@@ -12,7 +12,7 @@ export default function ClickableCardGroup({ options, selected, onChange, column
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
-            className={`p-3 rounded-xl border text-left transition-all ${
+            className={`cursor-pointer p-3 rounded-xl border text-left transition-all ${
               isSelected 
                 ? 'border-[#FF2D20] bg-red-50 shadow-[0_0_0_1px_rgba(255,45,32,0.1)]' 
                 : 'border-[#E2E8F0] bg-white hover:border-[#94A3B8] hover:bg-[#F8FAFC]'

@@ -1,18 +1,23 @@
 import React from 'react'
 
 export default function KeywordsTab({ state }) {
-  const prodName = state.aiAnalysis?.productName || 'Running Shoes'
-
-  const mockKeywords = [
-    { keyword: `buy ${prodName.toLowerCase()}`, match: 'Exact', vol: '12K' },
-    { keyword: `best ${prodName.toLowerCase()}`, match: 'Phrase', vol: '18K' },
-    { keyword: prodName.toLowerCase(), match: 'Broad', vol: '45K' },
-    { keyword: `${prodName.toLowerCase()} sale`, match: 'Phrase', vol: '8.5K' },
-    { keyword: `cheap ${prodName.toLowerCase()}`, match: 'Phrase', vol: '6.2K' },
-    { keyword: `premium ${prodName.toLowerCase()}`, match: 'Exact', vol: '3K' },
-    { keyword: `${prodName.toLowerCase()} online`, match: 'Broad', vol: '22K' },
-    { keyword: `where to buy ${prodName.toLowerCase()}`, match: 'Phrase', vol: '4.1K' }
-  ]
+  const clusters = state.generatedContent?.keyword_clusters || {}
+  
+  let keywordsList = []
+  if (clusters.broad || clusters.phrase || clusters.exact) {
+    if (clusters.broad) clusters.broad.forEach(k => keywordsList.push({ keyword: k, match: 'Broad', vol: '10K+' }))
+    if (clusters.phrase) clusters.phrase.forEach(k => keywordsList.push({ keyword: k, match: 'Phrase', vol: '5K+' }))
+    if (clusters.exact) clusters.exact.forEach(k => keywordsList.push({ keyword: k, match: 'Exact', vol: '1K+' }))
+  } else {
+    // fallback if not generated
+    const prodName = state.aiAnalysis?.productName || 'Running Shoes'
+    keywordsList = [
+      { keyword: `buy ${prodName.toLowerCase()}`, match: 'Exact', vol: '12K' },
+      { keyword: `best ${prodName.toLowerCase()}`, match: 'Phrase', vol: '18K' },
+      { keyword: prodName.toLowerCase(), match: 'Broad', vol: '45K' },
+      { keyword: `${prodName.toLowerCase()} sale`, match: 'Phrase', vol: '8.5K' },
+    ]
+  }
 
   const getMatchColor = (match) => {
     switch(match) {
@@ -35,9 +40,9 @@ export default function KeywordsTab({ state }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {mockKeywords.map((kw, i) => (
+            {keywordsList.map((kw, i) => (
               <tr key={i} className="hover:bg-gray-50 transition-colors">
-                <td className="py-3 px-4 text-sm font-semibold text-[#0F172A]">{kw.keyword}</td>
+                <td className="py-3 px-4 text-sm text-[#0F172A]">{kw.keyword}</td>
                 <td className="py-3 px-4">
                   <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${getMatchColor(kw.match)}`}>
                     {kw.match}
