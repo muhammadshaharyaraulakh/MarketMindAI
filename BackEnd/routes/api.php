@@ -50,4 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/download/{reportId}', [\App\Http\Controllers\Api\ReportController::class, 'download']);
         Route::get('/history', [\App\Http\Controllers\Api\ReportController::class, 'history']);
     });
+
+    // Overview Routes
+    Route::get('/overview/dashboard', [\App\Http\Controllers\Api\OverviewController::class, 'dashboard']);
 });
