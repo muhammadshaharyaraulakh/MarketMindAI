@@ -63,10 +63,14 @@ class DataIngestionController extends Controller
             $result = $this->csvService->insertRows($rows, $request->user()->id, $upload->id);
 
             if (!empty($result['new_campaign_ids'])) {
-                $this->pineconeService->upsertAllCampaigns($result['new_campaign_ids'], $request->user()->id);
+                try {
+                    $this->pineconeService->upsertAllCampaigns($result['new_campaign_ids'], $request->user()->id);
+                } catch (\Exception $pineconeEx) {
+                    \Illuminate\Support\Facades\Log::warning('Pinecone sync failed during ingestion: ' . $pineconeEx->getMessage());
+                }
             }
 
-            $this->csvUploadRepo->updateStatus($upload->id, 'completed', ['rows_processed' => $result['analytics_rows']]);
+            $this->csvUploadRepo->updateStatus($upload->id, 'ready', ['rows_processed' => $result['analytics_rows']]);
 
             return response()->json([
                 'success' => true,

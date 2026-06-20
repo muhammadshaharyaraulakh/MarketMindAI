@@ -82,19 +82,36 @@ class CsvParsingService implements CsvParsingServiceInterface
             ['account_name' => 'Imported Account', 'currency' => 'USD', 'timezone' => 'UTC']
         );
 
+        // To keep track of newly created campaigns and those to skip
+        $processedCampaigns = [];
+        $skippedCampaignNames = [];
+
         foreach ($rows as $row) {
             try {
                 $platform = in_array($row->platform, ['google', 'meta', 'snapchat']) ? $row->platform : 'google';
                 
-                // Campaign
-                $campaign = Campaign::firstOrCreate(
-                    [
+                if (in_array($row->campaignName, $skippedCampaignNames)) {
+                    continue;
+                }
+
+                if (!isset($processedCampaigns[$row->campaignName])) {
+                    $existingCampaign = Campaign::where([
                         'user_id' => $userId,
                         'name' => $row->campaignName,
                         'platform' => $platform,
                         'ad_account_id' => $adAccount->id,
-                    ],
-                    [
+                    ])->first();
+
+                    if ($existingCampaign) {
+                        $skippedCampaignNames[] = $row->campaignName;
+                        continue;
+                    }
+
+                    $campaign = Campaign::create([
+                        'user_id' => $userId,
+                        'name' => $row->campaignName,
+                        'platform' => $platform,
+                        'ad_account_id' => $adAccount->id,
                         'uuid' => (string) Str::uuid(),
                         'objective' => $row->campaignObjective,
                         'status' => 'completed',
@@ -103,13 +120,14 @@ class CsvParsingService implements CsvParsingServiceInterface
                         'currency' => $row->campaignCurrency ?: 'USD',
                         'bid_strategy' => $row->campaignBidStrategy,
                         'sync_status' => 'synced',
-                    ]
-                );
+                    ]);
 
-                if ($campaign->wasRecentlyCreated) {
+                    $processedCampaigns[$row->campaignName] = $campaign;
                     $campaignsCreated++;
                     $newCampaignIds[] = $campaign->id;
                 }
+
+                $campaign = $processedCampaigns[$row->campaignName];
 
                 // Ad Set
                 $adSet = AdSet::firstOrCreate(

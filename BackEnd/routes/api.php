@@ -41,4 +41,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/campaign-context/{id}', [\App\Http\Controllers\Api\DataIngestionController::class, 'campaignContext']);
         Route::get('/upload-history', [\App\Http\Controllers\Api\DataIngestionController::class, 'uploadHistory']);
     });
+
+    // Reports Routes
+    Route::prefix('reports')->group(function () {
+        Route::get('/campaigns', [\App\Http\Controllers\Api\ReportController::class, 'campaigns']);
+        Route::post('/generate', [\App\Http\Controllers\Api\ReportController::class, 'generate']);
+        Route::get('/status/{reportId}', [\App\Http\Controllers\Api\ReportController::class, 'status']);
+        Route::get('/download/{reportId}', [\App\Http\Controllers\Api\ReportController::class, 'download']);
+        Route::get('/history', [\App\Http\Controllers\Api\ReportController::class, 'history']);
+    });
 });

@@ -8,4 +8,5 @@ return [
     FortifyServiceProvider::class,
     App\Providers\ContentGenerationServiceProvider::class,
     App\Providers\DataIngestionServiceProvider::class,
+    App\Providers\ReportServiceProvider::class,
 ];
