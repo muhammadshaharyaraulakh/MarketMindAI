@@ -97,4 +97,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/recommendations/{id}/apply', [\App\Http\Controllers\Api\InsightsController::class, 'applyRecommendation']);
         Route::patch('/recommendations/{id}/dismiss', [\App\Http\Controllers\Api\InsightsController::class, 'dismissRecommendation']);
     });
+
+    Route::prefix('chatbot')->group(function () {
+        Route::post('/send', [\App\Http\Controllers\Api\ChatbotController::class, 'send']);
+        Route::get('/sessions', [\App\Http\Controllers\Api\ChatbotController::class, 'sessions']);
+        Route::get('/sessions/{sessionId}/messages', [\App\Http\Controllers\Api\ChatbotController::class, 'history']);
+        Route::delete('/sessions/{sessionId}', [\App\Http\Controllers\Api\ChatbotController::class, 'deleteSession']);
+    });
 });

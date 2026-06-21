@@ -19,7 +19,7 @@ class OverviewDashboardSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::where('name', 'like', '%Shaharyar%')->first() ?? User::first();
+        $user = User::latest()->first();
         if (!$user) {
             $this->command->error('No user found to seed data for.');
             return;

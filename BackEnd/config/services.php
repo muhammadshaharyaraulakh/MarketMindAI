@@ -51,4 +51,8 @@ return [
         'key' => env('GEMINI_API_KEY'),
     ],
 
+    'chatbot' => [
+        'key' => env('CHATBOT_API_KEY'),
+    ],
+
 ];

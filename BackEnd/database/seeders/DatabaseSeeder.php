@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Create a User
-        $user = User::first();
+        // 1. Get the latest user or create one
+        $user = User::latest()->first();
         if (!$user) {
             $user = User::factory()->create([
                 'name' => 'Muhammad Shaharyar Aulakh',
@@ -32,6 +32,20 @@ class DatabaseSeeder extends Seeder
 
         // 3. Seed underperforming campaigns directly in DatabaseSeeder
         $this->seedUnderperformingAds($user);
+
+        // 4. Sync Pinecone
+        $campaigns = \App\Models\Campaign::pluck('id')->toArray();
+        try {
+            app(\App\Domain\DataIngestion\Contracts\Services\PineconeServiceInterface::class)
+                ->upsertAllCampaigns($campaigns, $user->id);
+            $this->command->info('Synced campaigns to Pinecone.');
+        } catch (\Exception $e) {
+            $this->command->error('Failed to sync to Pinecone: ' . $e->getMessage());
+        }
+
+        // 5. Trigger Anomaly Detection to generate Insights
+        dispatch(new \App\Jobs\DetectAnomaliesJob($user->id));
+        $this->command->info('Dispatched DetectAnomaliesJob to generate insights.');
     }
 
     private function seedUnderperformingAds(User $user): void

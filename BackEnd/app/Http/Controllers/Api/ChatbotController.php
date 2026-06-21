@@ -2,77 +2,91 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Domain\DataIngestion\Contracts\Services\PineconeServiceInterface;
 use App\Http\Controllers\Controller;
+use Domain\ChatbotGeneral\Contracts\Repositories\ChatMessageRepositoryInterface;
+use Domain\ChatbotGeneral\Contracts\Repositories\ChatSessionRepositoryInterface;
+use Domain\ChatbotGeneral\Contracts\Services\ChatbotServiceInterface;
+use Domain\ChatbotGeneral\Requests\SendMessageRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class ChatbotController extends Controller
 {
     public function __construct(
-        private PineconeServiceInterface $pineconeService
+        private ChatbotServiceInterface $chatbotService,
+        private ChatSessionRepositoryInterface $sessionRepo,
+        private ChatMessageRepositoryInterface $messageRepo
     ) {}
 
-    public function chat(Request $request): JsonResponse
+    public function send(SendMessageRequest $request): JsonResponse
     {
-        $request->validate([
-            'message' => 'required|string',
-            'history' => 'array',
-        ]);
-
+        $userId = auth()->id();
         $message = $request->input('message');
-        $history = $request->input('history', []);
-        
-        $apiKey = $request->header('X-Gemini-Key') ?: env('GEMINI_API_KEY');
-
-        if (!$apiKey) {
-            return response()->json(['error' => 'API Key missing'], 400);
-        }
-
-        // 1. Get Pinecone Context
-        $contexts = $this->pineconeService->query($message, $request->user()->id, 5);
-        
-        $contextString = empty($contexts) ? "No uploaded campaign data found." : implode("\n\n", $contexts);
-
-        // 2. Build Prompt
-        $systemPrompt = "You are MarketMind AI Advisor, an expert digital marketing analyst. Answer questions using ONLY the following uploaded campaign data context.\n\nCONTEXT:\n" . $contextString;
-
-        $contents = [];
-        foreach ($history as $msg) {
-            // Gemini strictly expects 'user' or 'model' roles
-            $role = $msg['role'] === 'user' ? 'user' : 'model';
-            $contents[] = [
-                'role' => $role,
-                'parts' => [['text' => $msg['parts'][0]['text']]]
-            ];
-        }
-        $contents[] = [
-            'role' => 'user',
-            'parts' => [['text' => $message]]
-        ];
-
-        // 3. Call Gemini
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}";
+        $sessionId = $request->input('session_id');
 
         try {
-            $response = Http::post($url, [
-                'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
-                'contents' => $contents
-            ]);
+            $responseDto = $this->chatbotService->sendMessage($sessionId, $message, $userId);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? "I'm sorry, I couldn't generate a response.";
-                return response()->json(['reply' => $reply]);
-            } else {
-                Log::error('Chatbot Gemini Error', ['response' => $response->body()]);
-                return response()->json(['error' => 'Failed to reach AI provider: ' . $response->json('error.message', 'Unknown error')], 502);
-            }
+            return response()->json([
+                'success' => true,
+                'session_id' => $responseDto->sessionId,
+                'message' => [
+                    'role' => $responseDto->role,
+                    'content' => $responseDto->content,
+                    'created_at' => now()->toIso8601String()
+                ]
+            ]);
         } catch (\Exception $e) {
-            Log::error('Chatbot Exception', ['message' => $e->getMessage()]);
-            return response()->json(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], $e->getCode() === 404 ? 404 : 500);
         }
+    }
+
+    public function sessions(Request $request): JsonResponse
+    {
+        $userId = auth()->id();
+        $sessions = $this->sessionRepo->listForUser($userId);
+
+        return response()->json([
+            'success' => true,
+            'sessions' => $sessions
+        ]);
+    }
+
+    public function history(Request $request, int $sessionId): JsonResponse
+    {
+        $userId = auth()->id();
+        $session = $this->sessionRepo->findOwned($sessionId, $userId);
+
+        if (!$session) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        $messages = $this->messageRepo->getAllForSession($sessionId);
+
+        return response()->json([
+            'success' => true,
+            'messages' => $messages
+        ]);
+    }
+
+    public function deleteSession(Request $request, int $sessionId): JsonResponse
+    {
+        $userId = auth()->id();
+        $session = $this->sessionRepo->findOwned($sessionId, $userId);
+
+        if (!$session) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        // Manually delete messages then session
+        \App\Models\ChatMessage::where('chat_session_id', $sessionId)->delete();
+        $session->delete();
+
+        return response()->json([
+            'success' => true
+        ]);
     }
 }

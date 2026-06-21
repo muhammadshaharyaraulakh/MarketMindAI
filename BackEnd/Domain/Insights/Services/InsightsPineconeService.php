@@ -24,8 +24,8 @@ class InsightsPineconeService implements InsightsPineconeServiceInterface
             if (!$pineconeKey || !$pineconeHost) throw new \Exception('Pinecone credentials not configured.');
 
             // Get embedding
-            $embedResponse = Http::post("https://generativelanguage.googleapis.com/v1beta/models/text-embedding-001:embedContent?key={$geminiKey}", [
-                'model' => 'models/text-embedding-004',
+            $embedResponse = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={$geminiKey}", [
+                'model' => 'models/gemini-embedding-001',
                 'content' => [
                     'parts' => [['text' => $summaryText]]
                 ]

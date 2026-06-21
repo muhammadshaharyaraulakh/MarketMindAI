@@ -8,4 +8,5 @@ return [
     App\Providers\FortifyServiceProvider::class,
     App\Providers\InsightsServiceProvider::class,
     App\Providers\ReportServiceProvider::class,
+    App\Providers\ChatbotGeneralServiceProvider::class,
 ];
