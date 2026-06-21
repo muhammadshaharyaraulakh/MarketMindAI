@@ -131,7 +131,18 @@ class OverviewDashboardSeeder extends Seeder
                         'name' => "Ad Set " . ($s + 1) . " - " . ucfirst($config['platform']),
                         'status' => 'active',
                         'optimization_goal' => $config['objective'] === 'sales' ? 'conversions' : ($config['objective'] === 'leads' ? 'leads' : 'impressions'),
+                        'billing_event' => 'cpm',
                         'budget_amount' => 0, // Placeholder
+                    ]);
+
+                    \App\Models\AdSetTargeting::create([
+                        'ad_set_id' => $adSet->id,
+                        'audience_type' => 'broad',
+                        'age_min' => 18,
+                        'age_max' => 65,
+                        'genders' => ['All'],
+                        'locations' => ['US'],
+                        'interests' => ['marketing']
                     ]);
 
                     $adsCount = rand(2, 3);

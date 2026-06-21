@@ -159,9 +159,10 @@ function reducer(state, action) {
     case 'SET_ADSETS':
       return { ...state, adSets: action.payload }
     case 'ADD_ADSET':
-      return { ...state, adSets: [{...action.payload, sync_status: 'PENDING', deletedAt: null}, ...state.adSets], ui: { ...state.ui, activePanelType: null } }
+      const newAdSet = { ...action.payload, sync_status: 'PENDING', deletedAt: null, campaignId: action.payload.campaign_id, budget: action.payload.budget_amount || 0, spendToday: 0, audienceType: action.payload.targeting?.audience_type || 'Broad', goal: action.payload.optimization_goal }
+      return { ...state, adSets: [newAdSet, ...state.adSets], ui: { ...state.ui, activePanelType: null } }
     case 'UPDATE_ADSET':
-      return { ...state, adSets: state.adSets.map(a => a.id === action.payload.id ? { ...action.payload, sync_status: 'PENDING' } : a) }
+      return { ...state, adSets: state.adSets.map(a => a.id === action.payload.id ? { ...a, ...action.payload, sync_status: 'PENDING', campaignId: action.payload.campaign_id || a.campaignId, budget: action.payload.budget_amount || a.budget, audienceType: action.payload.targeting?.audience_type || a.audienceType, goal: action.payload.optimization_goal || a.goal } : a) }
     case 'DELETE_ADSET':
       return { ...state, adSets: state.adSets.map(a => a.id === action.payload ? { ...a, deletedAt: new Date().toISOString() } : a), ui: { ...state.ui, confirmDialog: { ...state.ui.confirmDialog, isOpen: false } } }
 
@@ -169,9 +170,10 @@ function reducer(state, action) {
     case 'SET_ADS':
       return { ...state, ads: action.payload }
     case 'ADD_AD':
-      return { ...state, ads: [{...action.payload, sync_status: 'PENDING', deletedAt: null}, ...state.ads], ui: { ...state.ui, activePanelType: null } }
+      const newAd = { ...action.payload, sync_status: 'PENDING', deletedAt: null, adSetId: action.payload.ad_set_id, spendToday: 0, clicks: 0, impressions: 0, conversions: 0 }
+      return { ...state, ads: [newAd, ...state.ads], ui: { ...state.ui, activePanelType: null } }
     case 'UPDATE_AD':
-      return { ...state, ads: state.ads.map(a => a.id === action.payload.id ? { ...action.payload, sync_status: 'PENDING' } : a) }
+      return { ...state, ads: state.ads.map(a => a.id === action.payload.id ? { ...a, ...action.payload, sync_status: 'PENDING', adSetId: action.payload.ad_set_id || a.adSetId } : a) }
     case 'DELETE_AD':
       return { ...state, ads: state.ads.map(a => a.id === action.payload ? { ...a, deletedAt: new Date().toISOString() } : a), ui: { ...state.ui, confirmDialog: { ...state.ui.confirmDialog, isOpen: false } } }
 
@@ -329,13 +331,46 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
       }
     }
     
-    // Add debounce for search query
+  // Add debounce for search query
     const delayDebounceFn = setTimeout(() => {
       fetchCampaigns()
     }, 300)
 
     return () => clearTimeout(delayDebounceFn)
   }, [state.searchQuery, state.platformFilter, state.statusFilter])
+
+  // Poll for PENDING sync status
+  useEffect(() => {
+    const hasPending = activeCampaigns.some(c => c.sync_status === 'PENDING') || 
+                       activeAdSets.some(a => a.sync_status === 'PENDING') ||
+                       activeAds.some(a => a.sync_status === 'PENDING') ||
+                       activeAds.some(a => a.review_status === 'PENDING')
+    
+    if (!hasPending) return
+
+    const fetchAll = async () => {
+      try {
+        const response = await axios.get('/api/campaigns')
+        if (response.data && response.data.status === 'success') {
+          dispatch({ type: 'SET_CAMPAIGNS', payload: response.data.data })
+        }
+        
+        // If we are deep inside a campaign view, refresh adsets too
+        if (selectedCampaignId) {
+          const adSetsRes = await axios.get(`/api/campaigns/${selectedCampaignId}/adsets`)
+          if (adSetsRes.data?.status === 'success') dispatch({ type: 'SET_ADSETS', payload: adSetsRes.data.data })
+        }
+
+        if (selectedAdSetId) {
+          const adsRes = await axios.get(`/api/adsets/${selectedAdSetId}/ads`)
+          if (adsRes.data?.status === 'success') dispatch({ type: 'SET_ADS', payload: adsRes.data.data })
+        }
+      } catch (err) {}
+    }
+
+    const interval = setInterval(fetchAll, 4000)
+    return () => clearInterval(interval)
+  }, [activeCampaigns, activeAdSets, activeAds, selectedCampaignId, selectedAdSetId])
 
   // Relational Campaign aggregators
   const campaignStats = useMemo(() => {
@@ -650,6 +685,7 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
                 dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
               } catch (e) {
                 console.error("Failed to save campaign", e)
+                throw e
               }
             }}
           />
@@ -666,12 +702,13 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
                   const res = await axios.put(`/api/adsets/${data.id}`, data)
                   dispatch({ type: 'UPDATE_ADSET', payload: res.data.data })
                 } else {
-                  const res = await axios.post(`/api/campaigns/${selectedCampaignId}/adsets`, data)
+                  const res = await axios.post(`/api/adsets`, data)
                   dispatch({ type: 'ADD_ADSET', payload: res.data.data })
                 }
                 dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
               } catch (e) {
                 console.error("Failed to save adset", e)
+                throw e
               }
             }}
           />
@@ -720,7 +757,7 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
                     data.initial_clicks = data.metrics.clicks;
                     data.initial_conversions = data.metrics.conversions;
                   }
-                  const res = await axios.post(`/api/adsets/${selectedAdSetId}/ads`, data)
+                  const res = await axios.post(`/api/ads`, data)
                   dispatch({ type: 'ADD_AD', payload: res.data.data })
                 }
                 dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
@@ -744,6 +781,13 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
               await axios.delete(`/api/adsets/${id}`);
             } else if (type === 'DELETE_AD') {
               await axios.delete(`/api/ads/${id}`);
+            } else if (type === 'DELETE_SNAPSHOT') {
+              const res = await axios.delete(`/api/campaigns/${selectedCampaignId}/daily-logs/${id}`);
+              if (res.data?.status === 'success') {
+                dispatch({ type: 'SET_ANALYTICS', payload: res.data.data });
+              }
+              dispatch({ type: 'CLOSE_CONFIRM' });
+              return;
             }
             dispatch({ type, payload: id });
           } catch (e) {

@@ -29,8 +29,8 @@ class AdSetController extends Controller
 
     public function store(StoreAdSetRequest $request): JsonResponse
     {
-        $data = $request->except(['audience_type', 'age_min', 'age_max', 'locations', 'interests']);
-        $targetingData = $request->only(['audience_type', 'age_min', 'age_max', 'locations', 'interests']);
+        $data = $request->only(['campaign_id', 'name', 'status', 'optimization_goal', 'billing_event', 'budget_type', 'budget_amount', 'start_time', 'end_time', 'placements']);
+        $targetingData = $request->only(['audience_type', 'age_min', 'age_max', 'locations', 'interests', 'genders']);
         
         $adSet = $this->adSetService->create($data, $targetingData, auth()->id());
 
@@ -42,8 +42,8 @@ class AdSetController extends Controller
 
     public function update(UpdateAdSetRequest $request, int $id): JsonResponse
     {
-        $data = $request->except(['audience_type', 'age_min', 'age_max', 'locations', 'interests']);
-        $targetingData = $request->only(['audience_type', 'age_min', 'age_max', 'locations', 'interests']);
+        $data = $request->only(['campaign_id', 'name', 'status', 'optimization_goal', 'billing_event', 'budget_type', 'budget_amount', 'start_time', 'end_time', 'placements']);
+        $targetingData = $request->only(['audience_type', 'age_min', 'age_max', 'locations', 'interests', 'genders']);
 
         $adSet = $this->adSetService->update($id, $data, $targetingData, auth()->id());
 

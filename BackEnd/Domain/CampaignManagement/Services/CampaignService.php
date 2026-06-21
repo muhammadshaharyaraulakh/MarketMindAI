@@ -22,6 +22,12 @@ class CampaignService implements CampaignServiceInterface
         $data['user_id'] = $userId;
         $data['status'] = 'draft';
         
+        $adAccount = \App\Models\AdAccount::firstOrCreate(
+            ['user_id' => $userId, 'platform' => strtolower($data['platform'])],
+            ['account_name' => ucfirst($data['platform']) . ' Main Account', 'status' => 'active']
+        );
+        $data['ad_account_id'] = $adAccount->id;
+        
         $autoSync = $data['auto_sync'] ?? false;
         if ($autoSync) {
             $data['sync_status'] = 'PENDING';

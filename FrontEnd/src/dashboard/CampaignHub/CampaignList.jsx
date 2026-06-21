@@ -29,7 +29,7 @@ export default function CampaignList({ state, dispatch, navigate, filteredCampai
             <MagnifyingGlassIcon className="w-4.5 h-4.5 text-[#94A3B8] absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search campaign label..."
+              placeholder="Search campaign label"
               value={state.searchQuery}
               onChange={(e) => dispatch({ type: 'SET_SEARCH', payload: e.target.value })}
               className="w-full pl-10 pr-4 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#FF2D20]"
@@ -59,21 +59,21 @@ export default function CampaignList({ state, dispatch, navigate, filteredCampai
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider pl-6 font-mona">Campaign Title</th>
-                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider font-mona">Status</th>
-                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider font-mona">Daily Spend</th>
-                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider font-mona">Revenue</th>
-                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider font-mona">Calculated ROAS</th>
-                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider font-mona">CTR Ratio</th>
-                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider pr-6 text-right font-mona">Actions</th>
+                  <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider pl-6 font-mona">Campaign Title</th>
+                  <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider font-mona">Status</th>
+                  <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider font-mona">Daily Spend</th>
+                  <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider font-mona">Revenue</th>
+                  <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider font-mona">Calculated ROAS</th>
+                  <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider font-mona">CTR Ratio</th>
+                  <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider pr-6 text-right font-mona">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E2E8F0]">
                 {filteredCampaigns.map((camp) => (
                   <tr key={camp.id} className="hover:bg-[#F8FAFC]/50 transition-colors cursor-pointer group">
                     <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4 pl-6">
-                      <span className="block text-xs font-medium text-[#0F172A] group-hover:text-[#FF2D20] transition-colors">{camp.name}</span>
-                      <span className="flex items-center text-[9px] font-medium text-[#94A3B8] uppercase tracking-widest mt-0.5 font-mona">
+                      <span className="block text-xs font-light text-[#0F172A] group-hover:text-[#FF2D20] transition-colors">{camp.name}</span>
+                      <span className="flex items-center text-[9px] font-light text-[#94A3B8] uppercase tracking-widest mt-0.5 font-mona">
                         {getPlatformIcon(camp.platform)} {camp.platform} Network
                       </span>
                     </td>
@@ -82,16 +82,16 @@ export default function CampaignList({ state, dispatch, navigate, filteredCampai
                       <SyncBadge sync_status={camp.sync_status} />
                     </td>
                     <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4 text-xs font-light text-[#0F172A]">
-                      ${camp.totalSpend.toLocaleString()}
+                      ${Number(camp.totalSpend).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                     </td>
                     <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4 text-xs font-light text-[#0F172A]">
-                      ${camp.totalRevenue.toLocaleString()}
+                      ${Number(camp.totalRevenue).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                     </td>
                     <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4">
-                      <span className="text-xs font-medium text-[#0F172A]">{camp.roas}x</span>
+                      <span className="text-xs font-light text-[#0F172A]">{Number(camp.roas).toFixed(2)}x</span>
                     </td>
                     <td onClick={() => navigate(`/campaigns/${camp.id}`)} className="p-4">
-                      <span className="text-xs font-medium text-[#FF2D20]">{camp.ctr}%</span>
+                      <span className="text-xs font-light text-[#FF2D20]">{Number(camp.ctr).toFixed(2)}%</span>
                     </td>
                     <td className="p-4 pr-6 text-right">
                       <div className="inline-flex items-center gap-1.5" onClick={e => e.stopPropagation()}>

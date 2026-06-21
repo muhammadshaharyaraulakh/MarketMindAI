@@ -25,7 +25,7 @@ class StoreCampaignRequest extends FormRequest
             'budget_amount' => $this->budget ?? $this->budget_amount,
             'objective' => $this->objective ? ($objectiveMap[strtolower($this->objective)] ?? strtolower($this->objective)) : null,
             'start_date' => $this->startDate ?? $this->start_date,
-            'end_date' => $this->endDate ?? $this->end_date,
+            'end_date' => empty($this->endDate) && empty($this->end_date) ? null : ($this->endDate ?? $this->end_date),
         ]);
     }
 

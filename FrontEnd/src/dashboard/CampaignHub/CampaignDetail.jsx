@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts'
 import { 
   ArrowLeftIcon, PencilIcon, TrashIcon, ChevronRightIcon,
@@ -20,6 +22,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
   
   // Snapshots form
   const [isSnapModalOpen, setIsSnapModalOpen] = useState(false)
+  const [snapError, setSnapError] = useState(null)
   const [newSnapDate, setNewSnapDate] = useState('')
   const [newSnapSpend, setNewSnapSpend] = useState('')
   const [newSnapRevenue, setNewSnapRevenue] = useState('')
@@ -43,16 +46,36 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
 
   const handleAddSnapshot = async (e) => {
     e.preventDefault()
+    setSnapError(null)
     if (!newSnapDate || !newSnapSpend || !newSnapRevenue) return
+
+    const spend = parseFloat(newSnapSpend)
+    const revenue = parseFloat(newSnapRevenue)
+    const impressions = parseInt(newSnapImpressions) || 0
+    const clicks = parseInt(newSnapClicks) || 0
+    const leads = parseInt(newSnapLeads) || 0
+
+    if (spend < 0 || revenue < 0 || impressions < 0 || clicks < 0 || leads < 0) {
+      setSnapError("Metrics cannot be negative.");
+      return;
+    }
+    if (new Date(newSnapDate) > new Date()) {
+      setSnapError("Date cannot be in the future.");
+      return;
+    }
+    if (clicks > impressions) {
+      setSnapError("Clicks cannot exceed impressions.");
+      return;
+    }
 
     try {
       const response = await axios.post(`/api/campaigns/${selectedCampaignId}/daily-logs`, {
         date: newSnapDate,
-        spend: parseFloat(newSnapSpend),
-        revenue: parseFloat(newSnapRevenue),
-        impressions: parseInt(newSnapImpressions) || 0,
-        clicks: parseInt(newSnapClicks) || 0,
-        leads: parseInt(newSnapLeads) || 0
+        spend,
+        revenue,
+        impressions,
+        clicks,
+        leads
       })
       if (response.data && response.data.status === 'success') {
         dispatch({ type: 'SET_ANALYTICS', payload: response.data.data })
@@ -62,9 +85,15 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
         setNewSnapImpressions('')
         setNewSnapClicks('')
         setNewSnapLeads('')
+        setSnapError(null)
         setIsSnapModalOpen(false)
       }
     } catch (err) {
+      if (err.response?.data?.message) {
+        setSnapError(err.response.data.message)
+      } else {
+        setSnapError('Failed to save snapshot due to a server error.')
+      }
       console.error('Failed to add snapshot', err)
     }
   }
@@ -75,6 +104,20 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
   }
 
   const saveEditedSnapshot = async () => {
+    // Strict logical validation
+    if (editSnapVal.spend < 0 || editSnapVal.revenue < 0 || editSnapVal.impressions < 0 || editSnapVal.clicks < 0 || editSnapVal.leads < 0) {
+      window.alert("Metrics cannot be negative.");
+      return;
+    }
+    if (new Date(editSnapVal.date) > new Date()) {
+      window.alert("Date cannot be in the future.");
+      return;
+    }
+    if (editSnapVal.clicks > editSnapVal.impressions) {
+      window.alert("Clicks cannot exceed impressions.");
+      return;
+    }
+
     try {
       const response = await axios.put(`/api/campaigns/${selectedCampaignId}/daily-logs/${editSnapVal.id}`, {
         date: editSnapVal.date,
@@ -89,6 +132,11 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
         setEditingSnapshotId(null)
       }
     } catch (err) {
+      if (err.response?.data?.message) {
+        window.alert(`Validation Error: ${err.response.data.message}`)
+      } else {
+        window.alert('Failed to save snapshot due to a server error.')
+      }
       console.error('Failed to update snapshot', err)
     }
   }
@@ -259,9 +307,9 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
             <SyncBadge sync_status={selectedCampaign?.sync_status} />
             <button 
               onClick={handleToggleCampaignStatus}
-              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${selectedCampaign?.status === 'active' ? 'bg-green-500' : 'bg-slate-300'}`}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${selectedCampaign?.status?.toLowerCase() === 'active' ? 'bg-green-500' : 'bg-slate-300'}`}
             >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${selectedCampaign?.status === 'active' ? 'translate-x-4' : 'translate-x-1'}`} />
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${selectedCampaign?.status?.toLowerCase() === 'active' ? 'translate-x-4' : 'translate-x-1'}`} />
             </button>
             <button
               onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'campaign', item: selectedCampaign } })}
@@ -277,8 +325,8 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <KPICard title="Revenue Generated" value={selectedCampaign?.totalRevenue || 0} change={12.4} isPositive={true} prefix="$" icon={ArrowTrendingUpIcon} color="text-green-600" />
           <KPICard title="Spend Logged" value={selectedCampaign?.totalSpend || 0} change={6.8} isPositive={false} prefix="$" icon={CircleStackIcon} color="text-blue-600" />
-          <KPICard title="Calculated ROAS" value={selectedCampaign?.roas || 0} change={15.2} isPositive={true} suffix="x" icon={ChartBarIcon} color="text-[#FF2D20]" />
-          <KPICard title="Platform CTR" value={selectedCampaign?.ctr || 0} change={9.5} isPositive={true} suffix="%" icon={CursorArrowRaysIcon} color="text-purple-600" />
+          <KPICard title="Calculated ROAS" value={selectedCampaign?.roas ? Number(selectedCampaign.roas).toFixed(2) : "0.00"} change={15.2} isPositive={true} suffix="x" icon={ChartBarIcon} color="text-[#FF2D20]" />
+          <KPICard title="Platform CTR" value={selectedCampaign?.ctr ? Number(selectedCampaign.ctr).toFixed(2) : "0.00"} change={9.5} isPositive={true} suffix="%" icon={CursorArrowRaysIcon} color="text-purple-600" />
         </div>
 
         {/* Inner Tab bar navigation */}
@@ -372,20 +420,20 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                         .sort((a,b) => new Date(b.date) - new Date(a.date))
                         .map(snap => {
                           const isEditing = editingSnapshotId === snap.id
-                          const snapROAS = snap.spend > 0 ? (snap.revenue / snap.spend).toFixed(1) : '0'
+                          const snapROAS = snap.spend > 0 ? (snap.revenue / snap.spend).toFixed(2) : '0.00'
 
                           return (
                             <tr key={snap.id} className="hover:bg-[#F8FAFC]/50 transition-colors">
-                              <td className="p-4 pl-6 text-xs font-light text-[#0F172A]">
-                                {isEditing ? (
-                                  <input 
-                                    type="date" 
-                                    value={editSnapVal.date} 
-                                    onChange={(e) => setEditSnapVal({ ...editSnapVal, date: e.target.value })}
-                                    className="border border-[#E2E8F0] rounded px-2 py-1 text-xs font-semibold focus:outline-none"
-                                  />
-                                ) : snap.date}
-                              </td>
+                                <td className="p-4 pl-6 text-xs font-light text-[#0F172A]">
+                                  {isEditing ? (
+                                    <DatePicker
+                                      selected={editSnapVal.date ? new Date(editSnapVal.date + 'T12:00:00Z') : new Date()}
+                                      onChange={(date) => setEditSnapVal({ ...editSnapVal, date: date.toISOString().split('T')[0] })}
+                                      className="border border-[#E2E8F0] rounded px-2 py-1 text-xs font-semibold focus:outline-none w-28"
+                                      dateFormat="yyyy-MM-dd"
+                                    />
+                                  ) : snap.date}
+                                </td>
                               <td className="p-4 text-xs font-light text-[#0F172A]">
                                 {isEditing ? (
                                   <input 
@@ -460,7 +508,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                       <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
                                     </button>
                                     <button
-                                      onClick={() => handleDeleteSnapshot(snap.id)}
+                                      onClick={() => dispatch({ type: 'OPEN_CONFIRM', payload: { type: 'DELETE_SNAPSHOT', id: snap.id, title: 'Delete Daily Log', message: 'Are you sure you want to delete this daily log? This action cannot be undone.' } })}
                                       className="p-1 hover:bg-[#F8FAFC] border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-red-500 cursor-pointer transition-all"
                                     >
                                       <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
@@ -489,28 +537,38 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
               <AnimatePresence>
                 {isSnapModalOpen && (
                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-                    <motion.div
+                    <motion.div 
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="bg-white rounded-2xl shadow-xl border border-[#E2E8F0] w-full max-w-sm overflow-hidden relative"
+                      className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative z-50"
+                      onClick={e => e.stopPropagation()}
                     >
-                      <div className="p-5 border-b border-[#E2E8F0] flex items-center justify-between">
-                        <span className="text-sm font-medium text-[#0F172A] font-mona">Record Daily Performance Log</span>
-                        <button onClick={() => setIsSnapModalOpen(false)} className="text-[#94A3B8] hover:text-[#0F172A] transition-colors cursor-pointer">
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      <div className="p-4 border-b border-[#E2E8F0] flex items-center justify-between">
+                        <span className="text-sm font-semibold text-[#0F172A]">Record Daily Performance Log</span>
+                        <button onClick={() => { setIsSnapModalOpen(false); setSnapError(null); }} className="p-1 hover:bg-[#F8FAFC] rounded-lg text-[#94A3B8] transition-colors cursor-pointer">
+                          <TrashIcon className="w-4 h-4 hidden" />
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                       </div>
+                      
                       <div className="p-6 bg-[#F8FAFC]">
+                        {snapError && (
+                          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex flex-col gap-1">
+                            <span className="text-xs font-semibold text-red-800">Validation Error</span>
+                            <span className="text-xs font-medium text-red-600">{snapError}</span>
+                          </div>
+                        )}
                         <form onSubmit={handleAddSnapshot} className="flex flex-col gap-4">
                           <div>
                             <label className="block text-[10px] font-medium text-[#475569] uppercase mb-1.5">Date</label>
-                            <input 
-                              type="date" 
-                              value={newSnapDate}
-                              onChange={(e) => setNewSnapDate(e.target.value)}
+                            <DatePicker
+                              selected={newSnapDate ? new Date(newSnapDate + 'T12:00:00Z') : null}
+                              onChange={(date) => setNewSnapDate(date ? date.toISOString().split('T')[0] : '')}
                               className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
+                              dateFormat="yyyy-MM-dd"
                               required
+                              placeholderText="Select a date"
                             />
                           </div>
                           <div>
@@ -603,13 +661,13 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider pl-6 font-mona">Ad Set Name</th>
-                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Audience Type</th>
-                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Status</th>
-                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Daily Budget</th>
-                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Spend Today</th>
-                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Goal</th>
-                          <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider text-right pr-6 font-mona">Actions</th>
+                          <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider pl-6 font-mona">Ad Set Name</th>
+                          <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider font-mona">Audience Type</th>
+                          <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider font-mona">Status</th>
+                          <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider font-mona">Daily Budget</th>
+                          <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider font-mona">Spend Today</th>
+                          <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider font-mona">Goal</th>
+                          <th className="p-4 text-[10px] font-light text-[#0F172A] uppercase tracking-wider text-right pr-6 font-mona">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -617,15 +675,15 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                           .filter(a => a.campaignId === selectedCampaign?.id)
                           .map(adSet => (
                             <tr key={adSet.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors group">
-                              <td className="p-4 pl-6 text-xs font-medium text-[#0F172A]">
+                              <td className="p-4 pl-6 text-xs font-light text-[#0F172A]">
                                 {adSet.name}
-                                <span className="block text-[10px] font-semibold text-[#94A3B8] mt-0.5">{adSet.platform}</span>
+                                <span className="block text-[10px] font-light text-[#94A3B8] mt-0.5">{adSet.platform}</span>
                               </td>
-                              <td className="p-4 text-xs font-semibold text-[#475569]">{adSet.audienceType}</td>
+                              <td className="p-4 text-xs font-light text-[#475569]">{adSet.audienceType}</td>
                               <td className="p-4"><StatusBadge status={adSet.status} /><SyncBadge sync_status={adSet.sync_status} /></td>
-                              <td className="p-4 text-xs font-medium text-[#0F172A]">${adSet.budget.toLocaleString()}</td>
-                              <td className="p-4 text-xs font-medium text-[#FF2D20]">${adSet.spendToday.toLocaleString()}</td>
-                              <td className="p-4 text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider">{adSet.goal}</td>
+                              <td className="p-4 text-xs font-light text-[#0F172A]">${adSet.budget.toLocaleString()}</td>
+                              <td className="p-4 text-xs font-light text-[#FF2D20]">${adSet.spendToday.toLocaleString()}</td>
+                              <td className="p-4 text-[10px] font-light text-[#94A3B8] uppercase tracking-wider">{adSet.goal}</td>
                               <td className="p-4 pr-6 text-right">
                                 <div className="inline-flex items-center gap-1.5 transition-opacity">
                                   <button

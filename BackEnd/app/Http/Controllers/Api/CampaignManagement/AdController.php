@@ -41,7 +41,7 @@ class AdController extends Controller
     public function store(StoreAdRequest $request): JsonResponse
     {
         $platformFields = $this->getPlatformFields();
-        $data = $request->except(array_merge($platformFields, ['initial_spend', 'initial_impressions', 'initial_clicks', 'initial_conversions']));
+        $data = $request->only(['ad_set_id', 'name', 'status', 'ad_format', 'headline', 'description', 'destination_url', 'cta_type', 'ab_test_group', 'url_custom_parameters', 'sync_status']);
         $platformData = $request->only($platformFields);
         
         $adSet = AdSet::with('campaign')->find($request->ad_set_id);
@@ -75,7 +75,7 @@ class AdController extends Controller
     public function update(UpdateAdRequest $request, int $id): JsonResponse
     {
         $platformFields = $this->getPlatformFields();
-        $data = $request->except($platformFields);
+        $data = $request->only(['ad_set_id', 'name', 'status', 'ad_format', 'headline', 'description', 'destination_url', 'cta_type', 'ab_test_group', 'url_custom_parameters', 'sync_status']);
         $platformData = $request->only($platformFields);
         
         $ad = \App\Models\Ad::with('adSet.campaign')->find($id);

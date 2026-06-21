@@ -22,11 +22,11 @@ class StoreAdSetRequest extends FormRequest
 
         $mergeData = [];
         if ($this->has('campaignId')) $mergeData['campaign_id'] = $this->campaignId;
-        if ($this->has('goal')) $mergeData['optimization_goal'] = $goalMap[strtolower($this->goal)] ?? strtolower($this->goal);
-        if ($this->has('audienceType')) $mergeData['audience_type'] = strtolower($this->audienceType);
-        if ($this->has('budget_type')) $mergeData['budget_type'] = strtolower($this->budget_type);
+        if ($this->has('goal')) $mergeData['optimization_goal'] = $this->goal ? ($goalMap[strtolower($this->goal)] ?? strtolower($this->goal)) : null;
+        if ($this->has('audienceType')) $mergeData['audience_type'] = $this->audienceType ? strtolower($this->audienceType) : null;
+        if ($this->has('budget_type')) $mergeData['budget_type'] = $this->budget_type ? strtolower($this->budget_type) : null;
         if ($this->has('budget')) $mergeData['budget_amount'] = $this->budget;
-        if ($this->has('billingEvent')) $mergeData['billing_event'] = strtolower($this->billingEvent);
+        if ($this->has('billingEvent')) $mergeData['billing_event'] = $this->billingEvent ? strtolower($this->billingEvent) : null;
         if ($this->has('locations') && is_string($this->locations)) {
             $mergeData['locations'] = array_map('trim', explode(',', $this->locations));
         }
@@ -59,8 +59,8 @@ class StoreAdSetRequest extends FormRequest
             'age_max' => 'required|integer|min:13|max:65|gte:age_min',
             'locations' => 'nullable|array',
             'interests' => 'nullable|array',
-            'budget_type' => 'required|in:daily,lifetime',
-            'budget_amount' => 'required|numeric|min:1',
+            'budget_type' => 'nullable|in:daily,lifetime',
+            'budget_amount' => 'nullable|numeric|min:1',
             'billing_event' => 'required|in:cpm,cpc,cpv,cpa,ocpm',
         ];
     }

@@ -25,7 +25,7 @@ class UpdateCampaignRequest extends FormRequest
         if ($this->has('budget')) $mergeData['budget_amount'] = $this->budget;
         if ($this->has('objective')) $mergeData['objective'] = $objectiveMap[strtolower($this->objective)] ?? strtolower($this->objective);
         if ($this->has('startDate')) $mergeData['start_date'] = $this->startDate;
-        if ($this->has('endDate')) $mergeData['end_date'] = $this->endDate;
+        if ($this->has('endDate')) $mergeData['end_date'] = empty($this->endDate) ? null : $this->endDate;
 
         $this->merge($mergeData);
     }

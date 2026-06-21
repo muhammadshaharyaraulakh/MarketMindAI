@@ -13,6 +13,15 @@ class AdSetTargeting extends Model
     protected $table = 'ad_set_targeting';
     protected $guarded = [];
 
+    protected $casts = [
+        'genders' => 'array',
+        'locations' => 'array',
+        'languages' => 'array',
+        'interests' => 'array',
+        'keywords' => 'array',
+        'negative_keywords' => 'array',
+    ];
+
     public function adSet()
     {
         return $this->belongsTo(AdSet::class);

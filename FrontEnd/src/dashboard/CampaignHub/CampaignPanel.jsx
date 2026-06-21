@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { XMarkIcon, MagnifyingGlassIcon, ChatBubbleBottomCenterIcon, VideoCameraIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, MagnifyingGlassIcon, ChatBubbleBottomCenterIcon, VideoCameraIcon, CalendarIcon } from '@heroicons/react/24/outline'
 import ClickableCardGroup from './ClickableCardGroup'
 import PillGroup from './PillGroup'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 
 export default function CampaignPanel({ item, onClose, onSave }) {
   const [formData, setFormData] = useState({
@@ -17,6 +19,8 @@ export default function CampaignPanel({ item, onClose, onSave }) {
     endDate: '',
     notes: ''
   })
+  const [error, setError] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (item) {
@@ -27,13 +31,25 @@ export default function CampaignPanel({ item, onClose, onSave }) {
     }
   }, [item])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    onSave({
-      ...formData,
-      id: item?.id || Date.now(),
-      budget: parseFloat(formData.budget) || 0
-    })
+    setError(null)
+    setIsSubmitting(true)
+    try {
+      await onSave({
+        ...formData,
+        id: item?.id || Date.now(),
+        budget: parseFloat(formData.budget) || 0
+      })
+    } catch (err) {
+      if (err.response?.status === 422) {
+        setError(err.response.data.message || 'Validation failed. Please check your inputs.')
+      } else {
+        setError(err.response?.data?.message || 'An unexpected error occurred while saving.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const platformOptions = [
@@ -75,12 +91,18 @@ export default function CampaignPanel({ item, onClose, onSave }) {
             </div>
             <p className="text-[11px] font-semibold text-[#94A3B8] mt-0.5">Configure high-level campaign settings.</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-[#F8FAFC] rounded-xl text-[#94A3B8] hover:text-[#0F172A] transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-[#F8FAFC] rounded-xl text-[#94A3B8] hover:text-[#0F172A] transition-colors cursor-pointer">
             <XMarkIcon className="w-5 h-5 stroke-2" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
+          {error && (
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl flex flex-col gap-1">
+              <span className="text-xs font-semibold text-red-800">Unable to save campaign</span>
+              <span className="text-xs font-medium text-red-600">{error}</span>
+            </div>
+          )}
           <form id="campaign-form" onSubmit={handleSubmit} className="space-y-6">
             
             <div className="grid grid-cols-2 gap-4">
@@ -88,7 +110,7 @@ export default function CampaignPanel({ item, onClose, onSave }) {
                 <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Campaign Name</label>
                 <input 
                   type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
                 />
               </div>
               <div>
@@ -98,7 +120,7 @@ export default function CampaignPanel({ item, onClose, onSave }) {
                     <button
                       key={opt} type="button"
                       onClick={() => setFormData({...formData, status: opt})}
-                      className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${formData.status === opt ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}
+                      className={`flex-1 py-1.5 text-xs font-medium rounded-md cursor-pointer transition-colors ${formData.status === opt ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}
                     >
                       {opt}
                     </button>
@@ -138,7 +160,7 @@ export default function CampaignPanel({ item, onClose, onSave }) {
                     <button
                       key={opt} type="button"
                       onClick={() => setFormData({...formData, budget_type: opt})}
-                      className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors ${formData.budget_type === opt ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}
+                      className={`flex-1 py-1.5 text-xs font-medium rounded-md cursor-pointer transition-colors ${formData.budget_type === opt ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}
                     >
                       {opt}
                     </button>
@@ -151,7 +173,7 @@ export default function CampaignPanel({ item, onClose, onSave }) {
                   <span className="absolute left-3 top-2 text-[#94A3B8] font-medium">$</span>
                   <input 
                     type="number" min="0" required value={formData.budget} onChange={e => setFormData({...formData, budget: e.target.value})}
-                    className="w-full pl-6 pr-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                    className="w-full pl-6 pr-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
                   />
                 </div>
               </div>
@@ -162,7 +184,7 @@ export default function CampaignPanel({ item, onClose, onSave }) {
                 <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Bid Strategy</label>
                 <select 
                   value={formData.bid_strategy} onChange={e => setFormData({...formData, bid_strategy: e.target.value})}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none bg-white"
+                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-light focus:border-[#FF2D20] focus:outline-none bg-white cursor-pointer"
                 >
                   <option>Auto</option>
                   <option>Max Clicks</option>
@@ -174,17 +196,31 @@ export default function CampaignPanel({ item, onClose, onSave }) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Start Date</label>
-                <input 
-                  type="date" required value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
-                />
+                <div className="relative">
+                  <DatePicker 
+                    selected={formData.startDate ? new Date(formData.startDate) : null} 
+                    onChange={date => setFormData({...formData, startDate: date ? date.toISOString().split('T')[0] : ''})}
+                    dateFormat="MMM d, yyyy"
+                    className="w-full pl-10 pr-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none cursor-pointer"
+                    placeholderText="Select start date"
+                  />
+                  <CalendarIcon className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               </div>
               <div>
                 <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">End Date</label>
-                <input 
-                  type="date" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
-                />
+                <div className="relative">
+                  <DatePicker 
+                    selected={formData.endDate ? new Date(formData.endDate) : null} 
+                    onChange={date => setFormData({...formData, endDate: date ? date.toISOString().split('T')[0] : ''})}
+                    dateFormat="MMM d, yyyy"
+                    minDate={formData.startDate ? new Date(formData.startDate) : null}
+                    isClearable
+                    className="w-full pl-10 pr-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none cursor-pointer"
+                    placeholderText="No end date"
+                  />
+                  <CalendarIcon className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               </div>
             </div>
 
@@ -196,8 +232,8 @@ export default function CampaignPanel({ item, onClose, onSave }) {
               <textarea 
                 value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}
                 rows={3}
-                placeholder="Add optional notes about this campaign strategy..."
-                className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none resize-none"
+                placeholder="Add optional notes about this campaign strategy"
+                className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none resize-none"
               />
             </div>
 
@@ -205,10 +241,16 @@ export default function CampaignPanel({ item, onClose, onSave }) {
         </div>
 
         <div className="p-6 border-t border-[#E2E8F0] flex justify-end gap-3 bg-[#F8FAFC]">
-          <button type="button" onClick={onClose} className="px-5 py-2.5 text-[13px] font-medium text-[#475569] hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg transition-colors cursor-pointer">
+          <button type="button" onClick={onClose} disabled={isSubmitting} className="px-5 py-2.5 text-[13px] font-medium text-[#475569] hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
             Cancel
           </button>
-          <button type="submit" form="campaign-form" className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[13px] font-medium px-6 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer">
+          <button type="submit" form="campaign-form" disabled={isSubmitting} className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[13px] font-medium px-6 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            {isSubmitting && (
+              <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
             {item ? 'Save Changes' : 'Create Campaign'}
           </button>
         </div>

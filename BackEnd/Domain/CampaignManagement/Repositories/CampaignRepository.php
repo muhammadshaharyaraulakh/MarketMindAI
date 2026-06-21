@@ -164,7 +164,7 @@ class CampaignRepository implements CampaignRepositoryInterface
                 'cpc' => $derived['cpc'],
                 'cpm' => $derived['cpm'],
                 'roas' => $derived['roas'],
-                'currency' => 'USD',
+                'platform' => $campaign->platform,
             ]
         );
 
@@ -201,6 +201,7 @@ class CampaignRepository implements CampaignRepositoryInterface
             'cpc' => $derived['cpc'],
             'cpm' => $derived['cpm'],
             'roas' => $derived['roas'],
+            'platform' => $campaign->platform,
         ]);
 
         return $this->getDailyLogs($campaignId, $userId);

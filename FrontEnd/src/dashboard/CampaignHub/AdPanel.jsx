@@ -38,6 +38,8 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
   })
 
   const [isUtmExpanded, setIsUtmExpanded] = useState(false)
+  const [error, setError] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     if (item) {
@@ -49,14 +51,27 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
     }
   }, [item, platform])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    onSave({
-      ...formData,
-      id: item?.id || Date.now(),
-      adSetId: item?.adSetId || adSetId,
-      metrics: item?.metrics || { spend: 0, impressions: 0, clicks: 0, conversions: 0 }
-    })
+    setError(null)
+    setIsSubmitting(true)
+    try {
+      await onSave({
+        ...formData,
+        brand_name: formData.brandName,
+        id: item?.id || Date.now(),
+        adSetId: item?.adSetId || adSetId,
+        metrics: item?.metrics || { spend: 0, impressions: 0, clicks: 0, conversions: 0 }
+      })
+    } catch (err) {
+      if (err.response?.status === 422) {
+        setError(err.response.data.message || 'Validation failed. Please check your inputs.')
+      } else {
+        setError(err.response?.data?.message || 'An unexpected error occurred while saving.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const generatedUrl = formData.destinationUrl 
@@ -84,7 +99,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
             <div className="flex justify-between items-end mb-1.5">
               <label className="block text-[10px] font-medium text-[#94A3B8] uppercase">Headlines ({formData.headlines.length}/5)</label>
               {formData.headlines.length < 5 && (
-                <button type="button" onClick={() => addArrayItem('headlines', 5)} className="text-[10px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+                <button type="button" onClick={() => addArrayItem('headlines', 5)} className="text-[10px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5 cursor-pointer">
                   <PlusIcon className="w-3 h-3 stroke-2" /> Add
                 </button>
               )}
@@ -94,7 +109,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
                 <input 
                   key={`hl-${i}`} type="text" value={hl} onChange={e => handleArrayChange('headlines', i, e.target.value)}
                   placeholder={`Headline ${i + 1}`} maxLength={30}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
                 />
               ))}
             </div>
@@ -104,7 +119,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
             <div className="flex justify-between items-end mb-1.5">
               <label className="block text-[10px] font-medium text-[#94A3B8] uppercase">Descriptions ({formData.descriptions.length}/3)</label>
               {formData.descriptions.length < 3 && (
-                <button type="button" onClick={() => addArrayItem('descriptions', 3)} className="text-[10px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5">
+                <button type="button" onClick={() => addArrayItem('descriptions', 3)} className="text-[10px] font-medium text-blue-600 hover:text-blue-700 flex items-center gap-0.5 cursor-pointer">
                   <PlusIcon className="w-3 h-3 stroke-2" /> Add
                 </button>
               )}
@@ -114,7 +129,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
                 <input 
                   key={`desc-${i}`} type="text" value={desc} onChange={e => handleArrayChange('descriptions', i, e.target.value)}
                   placeholder={`Description ${i + 1}`} maxLength={90}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
                 />
               ))}
             </div>
@@ -130,21 +145,21 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
             <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Primary Text</label>
             <textarea 
               value={formData.primaryText} onChange={e => setFormData({...formData, primaryText: e.target.value})} rows={3}
-              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
             />
           </div>
           <div>
             <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Headline</label>
             <input 
               type="text" value={formData.headline} onChange={e => setFormData({...formData, headline: e.target.value})} maxLength={255}
-              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
             />
           </div>
           <div>
             <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Link Description</label>
             <input 
               type="text" value={formData.linkDescription} onChange={e => setFormData({...formData, linkDescription: e.target.value})}
-              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -152,14 +167,14 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
               <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Facebook Page ID</label>
               <input 
                 type="text" value={formData.page_id} onChange={e => setFormData({...formData, page_id: e.target.value})}
-                className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
               />
             </div>
             <div>
               <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Instagram Placement</label>
               <div className="flex bg-[#F8FAFC] p-1 rounded-lg border border-[#E2E8F0] h-[38px]">
-                <button type="button" onClick={() => setFormData({...formData, instagram: true})} className={`flex-1 text-xs font-medium rounded-md transition-colors ${formData.instagram ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}>Enabled</button>
-                <button type="button" onClick={() => setFormData({...formData, instagram: false})} className={`flex-1 text-xs font-medium rounded-md transition-colors ${!formData.instagram ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}>Disabled</button>
+                <button type="button" onClick={() => setFormData({...formData, instagram: true})} className={`flex-1 text-xs font-medium rounded-md cursor-pointer transition-colors ${formData.instagram ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}>Enabled</button>
+                <button type="button" onClick={() => setFormData({...formData, instagram: false})} className={`flex-1 text-xs font-medium rounded-md cursor-pointer transition-colors ${!formData.instagram ? 'bg-white text-[#0F172A] shadow-sm' : 'text-[#475569] hover:text-[#0F172A]'}`}>Disabled</button>
               </div>
             </div>
           </div>
@@ -199,7 +214,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
             <div className="relative">
               <input 
                 type="text" value={formData.brandName} onChange={e => setFormData({...formData, brandName: e.target.value})} maxLength={25}
-                className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
               />
               <span className="absolute right-3 top-2.5 text-[10px] font-medium text-[#94A3B8]">{formData.brandName.length}/25</span>
             </div>
@@ -209,7 +224,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
             <div className="relative">
               <input 
                 type="text" value={formData.headline} onChange={e => setFormData({...formData, headline: e.target.value})} maxLength={34}
-                className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
               />
               <span className="absolute right-3 top-2.5 text-[10px] font-medium text-[#94A3B8]">{formData.headline.length}/34</span>
             </div>
@@ -219,7 +234,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
             <input 
               type="url" value={formData.attachment_url} onChange={e => setFormData({...formData, attachment_url: e.target.value})}
               placeholder="https://"
-              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
             />
           </div>
 
@@ -300,12 +315,18 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
             </div>
             <p className="text-[11px] font-semibold text-[#94A3B8] mt-0.5">Define ad creatives and copy.</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-[#F8FAFC] rounded-xl text-[#94A3B8] hover:text-[#0F172A] transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-[#F8FAFC] rounded-xl text-[#94A3B8] hover:text-[#0F172A] transition-colors cursor-pointer">
             <XMarkIcon className="w-5 h-5 stroke-2" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 bg-[#F8FAFC]/50">
+          {error && (
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl flex flex-col gap-1">
+              <span className="text-xs font-semibold text-red-800">Unable to save ad</span>
+              <span className="text-xs font-medium text-red-600">{error}</span>
+            </div>
+          )}
           <form id="ad-form" onSubmit={handleSubmit} className="space-y-6">
             
             {item && item.review_status === 'REJECTED' && (
@@ -330,7 +351,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
                 <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Ad Name</label>
                 <input 
                   type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
                 />
               </div>
             </div>
@@ -371,14 +392,14 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
                 <input 
                   type="url" required value={formData.destinationUrl} onChange={e => setFormData({...formData, destinationUrl: e.target.value})}
                   placeholder="https://"
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
                 />
               </div>
               <div>
                 <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Call to Action</label>
                 <select 
                   value={formData.ctaType} onChange={e => setFormData({...formData, ctaType: e.target.value})}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none bg-white cursor-pointer"
+                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-medium focus:border-[#FF2D20] focus:outline-none bg-white cursor-pointer"
                 >
                   <option value="LEARN_MORE">Learn More</option>
                   <option value="SIGN_UP">Sign Up</option>
@@ -393,7 +414,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
               <button 
                 type="button"
                 onClick={() => setIsUtmExpanded(!isUtmExpanded)}
-                className="w-full px-4 py-3 bg-[#F8FAFC] flex justify-between items-center text-sm font-medium text-[#0F172A]"
+                className="w-full px-4 py-3 bg-[#F8FAFC] flex justify-between items-center text-sm font-medium text-[#0F172A] cursor-pointer"
               >
                 URL Parameters (UTM)
                 {isUtmExpanded ? <ChevronUpIcon className="w-4 h-4 stroke-2 text-[#94A3B8]" /> : <ChevronDownIcon className="w-4 h-4 stroke-2 text-[#94A3B8]" />}
@@ -412,14 +433,14 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
                         <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Source (utm_source)</label>
                         <input 
                           type="text" value={formData.utmSource} onChange={e => setFormData({...formData, utmSource: e.target.value})} placeholder="google"
-                          className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                          className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
                         />
                       </div>
                       <div>
                         <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Medium (utm_medium)</label>
                         <input 
                           type="text" value={formData.utmMedium} onChange={e => setFormData({...formData, utmMedium: e.target.value})} placeholder="cpc"
-                          className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                          className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
                         />
                       </div>
                     </div>
@@ -427,7 +448,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
                       <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Campaign (utm_campaign)</label>
                       <input 
                         type="text" value={formData.utmCampaign} onChange={e => setFormData({...formData, utmCampaign: e.target.value})} placeholder="summer_sale"
-                        className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold focus:border-[#FF2D20] focus:outline-none"
+                        className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
                       />
                     </div>
                     {generatedUrl && (
@@ -454,11 +475,17 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
         </div>
 
         <div className="p-6 border-t border-[#E2E8F0] flex justify-end gap-3 bg-[#F8FAFC]">
-          <button type="button" onClick={onClose} className="px-5 py-2.5 text-[13px] font-medium text-[#475569] hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg transition-colors cursor-pointer">
+          <button type="button" onClick={onClose} disabled={isSubmitting} className="px-5 py-2.5 text-[13px] font-medium text-[#475569] hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
             Cancel
           </button>
-          <button type="submit" form="ad-form" className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[13px] font-medium px-6 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer">
-            {item ? 'Save Changes' : 'Create Ad'}
+          <button type="submit" form="ad-form" disabled={isSubmitting} className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[13px] font-medium px-6 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            {isSubmitting && (
+              <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            {item ? 'Save Ad' : 'Create Ad'}
           </button>
         </div>
       </motion.div>
