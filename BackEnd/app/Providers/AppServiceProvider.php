@@ -21,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
             \Domain\Overview\Contracts\Services\OverviewServiceInterface::class,
             \Domain\Overview\Services\OverviewService::class
         );
+        $this->app->bind(
+            \Domain\CampaignManagement\Contracts\Services\CampaignServiceInterface::class,
+            \Domain\CampaignManagement\Services\CampaignService::class
+        );
     }
 
     /**

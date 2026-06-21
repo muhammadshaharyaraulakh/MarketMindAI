@@ -53,4 +53,39 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Overview Routes
     Route::get('/overview/dashboard', [\App\Http\Controllers\Api\OverviewController::class, 'dashboard']);
+
+    // Campaign Management Routes
+    Route::prefix('campaigns')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\CampaignManagement\CampaignController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\CampaignManagement\CampaignController::class, 'store']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\CampaignManagement\CampaignController::class, 'show']);
+        Route::put('/{id}', [\App\Http\Controllers\Api\CampaignManagement\CampaignController::class, 'update']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\CampaignManagement\CampaignController::class, 'destroy']);
+        Route::patch('/{id}/toggle-status', [\App\Http\Controllers\Api\CampaignManagement\CampaignController::class, 'toggleStatus']);
+        
+        Route::get('/{id}/daily-logs', [\App\Http\Controllers\Api\CampaignManagement\CampaignController::class, 'getDailyLogs']);
+        Route::post('/{id}/daily-logs', [\App\Http\Controllers\Api\CampaignManagement\CampaignController::class, 'recordDailyLog']);
+        Route::put('/{id}/daily-logs/{logId}', [\App\Http\Controllers\Api\CampaignManagement\CampaignController::class, 'updateDailyLog']);
+        Route::delete('/{id}/daily-logs/{logId}', [\App\Http\Controllers\Api\CampaignManagement\CampaignController::class, 'deleteDailyLog']);
+
+        Route::get('/{campaignId}/adsets', [\App\Http\Controllers\Api\CampaignManagement\AdSetController::class, 'index']);
+    });
+
+    Route::prefix('adsets')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Api\CampaignManagement\AdSetController::class, 'store']);
+        Route::put('/{id}', [\App\Http\Controllers\Api\CampaignManagement\AdSetController::class, 'update']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\CampaignManagement\AdSetController::class, 'destroy']);
+        Route::patch('/{id}/toggle-status', [\App\Http\Controllers\Api\CampaignManagement\AdSetController::class, 'toggleStatus']);
+        
+        Route::get('/{adSetId}/ads', [\App\Http\Controllers\Api\CampaignManagement\AdController::class, 'index']);
+    });
+
+    Route::prefix('ads')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Api\CampaignManagement\AdController::class, 'store']);
+        Route::put('/{id}', [\App\Http\Controllers\Api\CampaignManagement\AdController::class, 'update']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\CampaignManagement\AdController::class, 'destroy']);
+        Route::patch('/{id}/toggle-status', [\App\Http\Controllers\Api\CampaignManagement\AdController::class, 'toggleStatus']);
+        Route::post('/{id}/resubmit', [\App\Http\Controllers\Api\CampaignManagement\AdController::class, 'resubmit']);
+        Route::post('/{id}/metrics', [\App\Http\Controllers\Api\CampaignManagement\AdController::class, 'recordMetrics']);
+    });
 });

@@ -1,4 +1,5 @@
-import { useState, useMemo, useReducer } from 'react'
+import { useState, useMemo, useReducer, useEffect } from 'react'
+import axios from 'axios'
 import { Routes, Route, useNavigate, useLocation, Navigate, matchPath } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 
@@ -16,7 +17,6 @@ import AIInsights from './AIInsights/AIInsights'
 import AIAdvisorChat from './AIAdvisor/AIAdvisorChat'
 import ReportsExport from './ReportsExport/ReportsExport'
 import ContentStudio from './studio/ContentStudio'
-import CampaignSimulator from './simulator/CampaignSimulator'
 import {
   BoltIcon,
   BeakerIcon,
@@ -37,42 +37,9 @@ import {
 // RELATIONAL INITIAL MOCK DATA
 // ==========================================
 
-const INITIAL_CAMPAIGNS = [
-  { id: 1, name: 'Summer Performance Ads', platform: 'Google', status: 'Active', budget: 5000, startDate: '2026-05-01', endDate: '2026-06-01', objective: 'SALES', budget_type: 'Daily', bid_strategy: 'Maximize Conversions', sync_status: 'SYNCED', deletedAt: null },
-  { id: 2, name: 'Meta Retargeting Q2', platform: 'Meta', status: 'Active', budget: 4000, startDate: '2026-05-10', endDate: '2026-06-10', objective: 'LEADS', budget_type: 'Lifetime', bid_strategy: 'Lowest Cost', sync_status: 'SYNCED', deletedAt: null },
-  { id: 3, name: 'Snapchat Brand Viral', platform: 'Snapchat', status: 'Paused', budget: 2000, startDate: '2026-05-15', endDate: '2026-06-15', objective: 'AWARENESS', budget_type: 'Daily', bid_strategy: 'Cost Cap', sync_status: 'SYNCED', deletedAt: null }
-]
+const INITIAL_CAMPAIGNS = []
 
-const generateMockAnalytics = () => {
-  const data = []
-  let id = 100
-  // Helper for random variance
-  const rand = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
-  
-  for (let i = 1; i <= 30; i++) {
-    const day = i < 10 ? `0${i}` : `${i}`
-    const date = `2026-05-${day}`
-    
-    // Campaign 1: Google (All 30 days)
-    let spend1 = rand(300, 600)
-    data.push({ id: id++, campaignId: 1, date, spend: spend1, revenue: spend1 * (rand(40, 80)/10), impressions: spend1 * 35, clicks: spend1 * 1.5, leads: Math.floor(spend1 / rand(12, 18)) })
-    
-    // Campaign 2: Meta (Starts May 10)
-    if (i >= 10) {
-      let spend2 = rand(200, 450)
-      data.push({ id: id++, campaignId: 2, date, spend: spend2, revenue: spend2 * (rand(30, 90)/10), impressions: spend2 * 40, clicks: spend2 * 1.8, leads: Math.floor(spend2 / rand(10, 15)) })
-    }
-    
-    // Campaign 3: Snapchat (Starts May 15)
-    if (i >= 15) {
-      let spend3 = rand(150, 300)
-      data.push({ id: id++, campaignId: 3, date, spend: spend3, revenue: spend3 * (rand(20, 60)/10), impressions: spend3 * 50, clicks: spend3 * 2.5, leads: Math.floor(spend3 / rand(8, 12)) })
-    }
-  }
-  return data
-}
-
-const INITIAL_ANALYTICS = generateMockAnalytics()
+const INITIAL_ANALYTICS = []
 
 const INITIAL_CONTENT_PIECES = []
 
@@ -81,19 +48,8 @@ const INITIAL_AB_TESTS = [
   { id: 2, campaignId: 2, name: 'Meta Visual Ad-Copy Variant test', variantA: '⚡ Get a 2.4x ROAS increase in 7 days or your money back.', variantB: '⚡ Tired of low CTR? Let predicted AI build Meta creatives.', splitRatio: '60/40', clicksA: 410, clicksB: 480, impressionsA: 11000, impressionsB: 11500, status: 'Completed', winner: 'Variant B' }
 ]
 
-const INITIAL_ADSETS = [
-  { id: 1, campaignId: 1, name: 'Search Broad Match', audienceType: 'Broad', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 150, billing_event: 'IMPRESSIONS', budget_type: 'Daily', start_time: '2026-05-01T00:00', end_time: '2026-06-01T23:59', frequency_cap: '3 per day', sync_status: 'SYNCED', targeting: { age_min: 18, age_max: 65, genders: ['All'], locations: ['US'], interests: ['SaaS'] }, deletedAt: null },
-  { id: 2, campaignId: 1, name: 'Search Exact Match', audienceType: 'Custom', platform: 'Google', status: 'Active', budget: 2500, goal: 'CONVERSIONS', spendToday: 200, billing_event: 'CLICKS', budget_type: 'Daily', start_time: '2026-05-01T00:00', end_time: '2026-06-01T23:59', frequency_cap: 'None', sync_status: 'SYNCED', targeting: { age_min: 25, age_max: 55, genders: ['All'], locations: ['US', 'CA'], interests: ['B2B'] }, deletedAt: null },
-  { id: 3, campaignId: 2, name: 'LAL 1% Purchasers', audienceType: 'Lookalike', platform: 'Meta', status: 'Active', budget: 4000, goal: 'CONVERSIONS', spendToday: 320, billing_event: 'IMPRESSIONS', budget_type: 'Lifetime', start_time: '2026-05-10T00:00', end_time: '2026-06-10T23:59', frequency_cap: 'None', sync_status: 'SYNCED', targeting: { age_min: 20, age_max: 50, genders: ['All'], locations: ['US', 'UK', 'CA'], interests: ['Marketing'] }, deletedAt: null },
-  { id: 4, campaignId: 3, name: 'Gen Z Outreach', audienceType: 'Broad', platform: 'Snapchat', status: 'Paused', budget: 2000, goal: 'IMPRESSIONS', spendToday: 0, billing_event: 'IMPRESSIONS', budget_type: 'Daily', start_time: '2026-05-15T00:00', end_time: '2026-06-15T23:59', frequency_cap: '1 per day', sync_status: 'SYNCED', targeting: { age_min: 13, age_max: 24, genders: ['All'], locations: ['US'], interests: ['Tech'] }, deletedAt: null }
-]
-
-const INITIAL_ADS = [
-  { id: 1, adSetId: 1, name: 'Promo RSA 1', format: 'RESPONSIVE', platform: 'Google', status: 'Active', headline: 'Best SaaS Tools', description: 'Grow your business', cta: 'Sign Up', metrics: { impressions: 1200, clicks: 45, spend: 35, conversions: 2 }, destination_url: 'https://marketmind.ai', cta_type: 'SIGN_UP', review_status: 'APPROVED', sync_status: 'SYNCED', ab_test_group: 'A', deletedAt: null },
-  { id: 2, adSetId: 1, name: 'Promo RSA 2', format: 'RESPONSIVE', platform: 'Google', status: 'Paused', headline: 'AI Marketing', description: 'Automate ads', cta: 'Learn More', metrics: { impressions: 800, clicks: 20, spend: 15, conversions: 1 }, destination_url: 'https://marketmind.ai/features', cta_type: 'LEARN_MORE', review_status: 'PENDING', sync_status: 'SYNCED', ab_test_group: 'B', deletedAt: null },
-  { id: 3, adSetId: 3, name: 'Meta Lead Gen Image', format: 'Image', platform: 'Meta', status: 'Active', primaryText: 'Tired of high CPAs?', headline: 'Lower Your CPA Today', cta_type: 'LEARN_MORE', metrics: { spend: 150, impressions: 5000, clicks: 125, conversions: 10 }, instagram: true, review_status: 'APPROVED', sync_status: 'SYNCED', ab_test_group: 'A', deletedAt: null },
-  { id: 4, adSetId: 4, name: 'Snap Story Ad', format: 'Video', platform: 'Snapchat', status: 'Paused', brandName: 'MarketMind AI', headline: 'Viral Growth Hack', attachment_url: 'https://marketmind.ai', cta_type: 'SIGN_UP', metrics: { spend: 0, impressions: 0, clicks: 0, conversions: 0 }, review_status: 'APPROVED', sync_status: 'SYNCED', ab_test_group: 'A', deletedAt: null }
-]
+const INITIAL_ADSETS = []
+const INITIAL_ADS = []
 
 const INITIAL_INTEGRATIONS = [
   { platform: 'Google', accounts: [{ name: 'MarketMind Main', id: '123-456-7890', currency: 'USD', status: 'Connected' }], syncSettings: { frequency: '1 hour', duration: '30 days' } },
@@ -179,6 +135,8 @@ function reducer(state, action) {
       return { ...state, ui: { ...state.ui, oauthStep: action.payload } }
 
     // Campaigns CRUD
+    case 'SET_CAMPAIGNS':
+      return { ...state, campaigns: action.payload }
     case 'ADD_CAMPAIGN':
       return { 
         ...state, 
@@ -198,6 +156,8 @@ function reducer(state, action) {
       }
 
     // AdSets CRUD
+    case 'SET_ADSETS':
+      return { ...state, adSets: action.payload }
     case 'ADD_ADSET':
       return { ...state, adSets: [{...action.payload, sync_status: 'PENDING', deletedAt: null}, ...state.adSets], ui: { ...state.ui, activePanelType: null } }
     case 'UPDATE_ADSET':
@@ -206,6 +166,8 @@ function reducer(state, action) {
       return { ...state, adSets: state.adSets.map(a => a.id === action.payload ? { ...a, deletedAt: new Date().toISOString() } : a), ui: { ...state.ui, confirmDialog: { ...state.ui.confirmDialog, isOpen: false } } }
 
     // Ads CRUD
+    case 'SET_ADS':
+      return { ...state, ads: action.payload }
     case 'ADD_AD':
       return { ...state, ads: [{...action.payload, sync_status: 'PENDING', deletedAt: null}, ...state.ads], ui: { ...state.ui, activePanelType: null } }
     case 'UPDATE_AD':
@@ -240,6 +202,8 @@ function reducer(state, action) {
       return { ...state, integrations: state.integrations.map(i => i.platform === action.payload.platform ? { ...i, syncSettings: action.payload.syncSettings } : i) }
 
     // Analytics CRUD
+    case 'SET_ANALYTICS':
+      return { ...state, analytics: action.payload }
     case 'ADD_SNAPSHOT':
       return { ...state, analytics: [action.payload, ...state.analytics] }
     case 'UPDATE_SNAPSHOT':
@@ -318,7 +282,6 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
                       : location.pathname.includes('/insights') ? 'insights'
                       : location.pathname.includes('/advisor') ? 'advisor' 
                       : location.pathname.includes('/studio') ? 'studio'
-                      : location.pathname.includes('/simulator') ? 'simulator'
                       : location.pathname.includes('/reports') ? 'reports' 
                       : location.pathname.includes('/integrations') ? 'integrations' 
                       : 'dashboard'
@@ -348,9 +311,38 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
     }
   }
 
+  // Fetch Campaigns
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const params = new URLSearchParams()
+        if (state.searchQuery) params.append('search', state.searchQuery)
+        if (state.platformFilter && state.platformFilter !== 'All') params.append('platform', state.platformFilter)
+        if (state.statusFilter && state.statusFilter !== 'All') params.append('status', state.statusFilter)
+        
+        const response = await axios.get(`/api/campaigns?${params.toString()}`)
+        if (response.data && response.data.status === 'success') {
+          dispatch({ type: 'SET_CAMPAIGNS', payload: response.data.data })
+        }
+      } catch (err) {
+        console.error("Failed to load campaigns", err)
+      }
+    }
+    
+    // Add debounce for search query
+    const delayDebounceFn = setTimeout(() => {
+      fetchCampaigns()
+    }, 300)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [state.searchQuery, state.platformFilter, state.statusFilter])
+
   // Relational Campaign aggregators
   const campaignStats = useMemo(() => {
     return activeCampaigns.map(camp => {
+      // If the backend has pre-calculated the stats, use them
+      if (camp.totalSpend !== undefined) return camp;
+
       const relatedAnalytics = state.analytics.filter(a => a.campaignId === camp.id)
       
       const totalSpend = relatedAnalytics.reduce((sum, a) => sum + a.spend, 0)
@@ -495,8 +487,8 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
   const filteredCampaigns = useMemo(() => {
     return campaignStats.filter(c => {
       const matchesSearch = c.name.toLowerCase().includes(state.searchQuery.toLowerCase())
-      const matchesPlatform = state.platformFilter === 'All' || c.platform === state.platformFilter
-      const matchesStatus = state.statusFilter === 'All' || c.status === state.statusFilter
+      const matchesPlatform = state.platformFilter === 'All' || c.platform?.toLowerCase() === state.platformFilter.toLowerCase()
+      const matchesStatus = state.statusFilter === 'All' || c.status?.toLowerCase() === state.statusFilter.toLowerCase()
       return matchesSearch && matchesPlatform && matchesStatus
     })
   }, [campaignStats, state.searchQuery, state.platformFilter, state.statusFilter])
@@ -527,7 +519,6 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
               { id: 'insights', path: '/insights', label: 'AI Insights', icon: LightBulbIcon },
               { id: 'advisor', path: '/advisor', label: 'AI Advisor Chat', icon: SparklesIcon },
               { id: 'studio', path: '/studio', label: 'Content Studio', icon: SparklesIcon },
-              { id: 'simulator', path: '/simulator', label: 'Campaign Simulator', icon: BeakerIcon },
               { id: 'reports', path: '/reports', label: 'Reports Export', icon: BoltIcon },
               { id: 'integrations', path: '/integrations', label: 'Platform Integrations', icon: PuzzlePieceIcon }
             ].map(tab => (
@@ -634,7 +625,6 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
             <Route path="/reports" element={<ReportsExport state={state} dispatch={dispatch} />} />
             <Route path="/integrations" element={<IntegrationsView state={state} dispatch={dispatch} />} />
             <Route path="/studio" element={<ContentStudio state={state} dispatch={dispatch} />} />
-            <Route path="/simulator" element={<CampaignSimulator state={state} dispatch={dispatch} />} />
           </Routes>
         </div>
       </main>
@@ -646,51 +636,97 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
       <AnimatePresence>
         {state.ui.activePanelType === 'campaign' && (
           <CampaignPanel 
-            item={state.ui.activePanelItem}
+            item={state.ui.editingItem}
             onClose={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })}
-            onSave={(data) => {
-              dispatch({ type: state.ui.activePanelItem ? 'UPDATE_CAMPAIGN' : 'ADD_CAMPAIGN', payload: data })
-              setTimeout(() => dispatch({ type: 'SYNC_SUCCESS', payload: { entityType: 'campaigns', id: data.id } }), 1500)
-              dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
+            onSave={async (data) => {
+              try {
+                if (state.ui.editingItem) {
+                  const res = await axios.put(`/api/campaigns/${data.id}`, data)
+                  dispatch({ type: 'UPDATE_CAMPAIGN', payload: res.data.data })
+                } else {
+                  const res = await axios.post('/api/campaigns', data)
+                  dispatch({ type: 'ADD_CAMPAIGN', payload: res.data.data })
+                }
+                dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
+              } catch (e) {
+                console.error("Failed to save campaign", e)
+              }
             }}
           />
         )}
         
         {state.ui.activePanelType === 'adset' && (
           <AdSetPanel 
-            item={state.ui.activePanelItem}
+            item={state.ui.editingItem}
             campaignId={selectedCampaignId}
             onClose={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })}
-            onSave={(data) => {
-              dispatch({ type: state.ui.activePanelItem ? 'UPDATE_ADSET' : 'ADD_ADSET', payload: data })
-              setTimeout(() => dispatch({ type: 'SYNC_SUCCESS', payload: { entityType: 'adSets', id: data.id } }), 1500)
-              dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
+            onSave={async (data) => {
+              try {
+                if (state.ui.editingItem) {
+                  const res = await axios.put(`/api/adsets/${data.id}`, data)
+                  dispatch({ type: 'UPDATE_ADSET', payload: res.data.data })
+                } else {
+                  const res = await axios.post(`/api/campaigns/${selectedCampaignId}/adsets`, data)
+                  dispatch({ type: 'ADD_ADSET', payload: res.data.data })
+                }
+                dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
+              } catch (e) {
+                console.error("Failed to save adset", e)
+              }
             }}
           />
         )}
         
         {state.ui.activePanelType === 'ad' && (
           <AdPanel 
-            item={state.ui.activePanelItem}
+            item={state.ui.editingItem}
             adSetId={selectedAdSetId}
             platform={selectedCampaign?.platform}
             onClose={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })}
-            onSave={(data) => {
-              dispatch({ type: state.ui.activePanelItem ? 'UPDATE_AD' : 'ADD_AD', payload: data })
-              setTimeout(() => {
-                dispatch({ type: 'SYNC_SUCCESS', payload: { entityType: 'ads', id: data.id } })
-                setTimeout(() => {
-                  const isApproved = Math.random() < 0.8
-                  if (isApproved) {
-                    dispatch({ type: 'SET_AD_APPROVED', payload: data.id })
-                  } else {
-                    const reasons = ["Image text exceeds 20% coverage", "Landing page mismatch", "Missing privacy policy link"]
-                    const reason = reasons[Math.floor(Math.random() * reasons.length)]
-                    dispatch({ type: 'SET_AD_REJECTED', payload: { id: data.id, reason } })
+            onSave={async (data) => {
+              try {
+                if (state.ui.editingItem) {
+                  // If it's a resubmission (rejected previously)
+                  const isResubmit = state.ui.editingItem.review_status === 'REJECTED';
+                  const endpoint = isResubmit ? `/api/ads/${data.id}/resubmit` : `/api/ads/${data.id}`;
+                  
+                  const res = await axios.put(endpoint, data)
+                  
+                  // Save manual metrics
+                  if (data.metrics) {
+                    await axios.post(`/api/ads/${data.id}/metrics`, {
+                      date: new Date().toISOString().split('T')[0],
+                      spend: data.metrics.spend,
+                      revenue: data.metrics.conversions * 10, // dummy revenue or just 0, backend handles default
+                      impressions: data.metrics.impressions,
+                      clicks: data.metrics.clicks,
+                      conversions: data.metrics.conversions
+                    })
                   }
-                }, 2000)
-              }, 1500)
-              dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
+                  
+                  // Dispatch update but wait we need the latest metrics, let's just trigger a refetch of ads?
+                  // The easiest way is to fetch ads for the adset again to get the latest metrics merged by backend.
+                  axios.get(`/api/adsets/${selectedAdSetId}/ads`).then(response => {
+                    if (response.data.status === 'success') {
+                      dispatch({ type: 'SET_ADS', payload: response.data.data })
+                    }
+                  });
+                  
+                } else {
+                  // Map initial metrics for store
+                  if (data.metrics) {
+                    data.initial_spend = data.metrics.spend;
+                    data.initial_impressions = data.metrics.impressions;
+                    data.initial_clicks = data.metrics.clicks;
+                    data.initial_conversions = data.metrics.conversions;
+                  }
+                  const res = await axios.post(`/api/adsets/${selectedAdSetId}/ads`, data)
+                  dispatch({ type: 'ADD_AD', payload: res.data.data })
+                }
+                dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
+              } catch (e) {
+                console.error("Failed to save ad", e)
+              }
             }}
           />
         )}
@@ -699,8 +735,21 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
         isOpen={state.ui.confirmDialog.isOpen}
         title={state.ui.confirmDialog.title}
         message={state.ui.confirmDialog.message}
-        onConfirm={() => {
-          dispatch({ type: state.ui.confirmDialog.type, payload: state.ui.confirmDialog.id });
+        onConfirm={async () => {
+          try {
+            const { type, id } = state.ui.confirmDialog;
+            if (type === 'DELETE_CAMPAIGN') {
+              await axios.delete(`/api/campaigns/${id}`);
+            } else if (type === 'DELETE_ADSET') {
+              await axios.delete(`/api/adsets/${id}`);
+            } else if (type === 'DELETE_AD') {
+              await axios.delete(`/api/ads/${id}`);
+            }
+            dispatch({ type, payload: id });
+          } catch (e) {
+            console.error("Failed to delete entity", e);
+            dispatch({ type: 'CLOSE_CONFIRM' });
+          }
         }}
         onCancel={() => dispatch({ type: 'CLOSE_CONFIRM' })}
       />

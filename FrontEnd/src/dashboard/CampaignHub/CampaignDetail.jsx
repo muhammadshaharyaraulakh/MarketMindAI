@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts'
 import { 
@@ -18,6 +19,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
   const [workspaceTab, setWorkspaceTab] = useState('analytics')
   
   // Snapshots form
+  const [isSnapModalOpen, setIsSnapModalOpen] = useState(false)
   const [newSnapDate, setNewSnapDate] = useState('')
   const [newSnapSpend, setNewSnapSpend] = useState('')
   const [newSnapRevenue, setNewSnapRevenue] = useState('')
@@ -39,28 +41,32 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
   const [newABVarA, setNewABVarA] = useState('')
   const [newABVarB, setNewABVarB] = useState('')
 
-  const handleAddSnapshot = (e) => {
+  const handleAddSnapshot = async (e) => {
     e.preventDefault()
     if (!newSnapDate || !newSnapSpend || !newSnapRevenue) return
 
-    const newSnap = {
-      id: Date.now(),
-      campaignId: selectedCampaignId,
-      date: newSnapDate,
-      spend: parseFloat(newSnapSpend),
-      revenue: parseFloat(newSnapRevenue),
-      impressions: parseInt(newSnapImpressions) || 0,
-      clicks: parseInt(newSnapClicks) || 0,
-      leads: parseInt(newSnapLeads) || 0
+    try {
+      const response = await axios.post(`/api/campaigns/${selectedCampaignId}/daily-logs`, {
+        date: newSnapDate,
+        spend: parseFloat(newSnapSpend),
+        revenue: parseFloat(newSnapRevenue),
+        impressions: parseInt(newSnapImpressions) || 0,
+        clicks: parseInt(newSnapClicks) || 0,
+        leads: parseInt(newSnapLeads) || 0
+      })
+      if (response.data && response.data.status === 'success') {
+        dispatch({ type: 'SET_ANALYTICS', payload: response.data.data })
+        setNewSnapDate('')
+        setNewSnapSpend('')
+        setNewSnapRevenue('')
+        setNewSnapImpressions('')
+        setNewSnapClicks('')
+        setNewSnapLeads('')
+        setIsSnapModalOpen(false)
+      }
+    } catch (err) {
+      console.error('Failed to add snapshot', err)
     }
-
-    dispatch({ type: 'ADD_SNAPSHOT', payload: newSnap })
-    setNewSnapDate('')
-    setNewSnapSpend('')
-    setNewSnapRevenue('')
-    setNewSnapImpressions('')
-    setNewSnapClicks('')
-    setNewSnapLeads('')
   }
 
   const startEditSnapshot = (snap) => {
@@ -68,9 +74,34 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
     setEditSnapVal({ ...snap })
   }
 
-  const saveEditedSnapshot = () => {
-    dispatch({ type: 'UPDATE_SNAPSHOT', payload: editSnapVal })
-    setEditingSnapshotId(null)
+  const saveEditedSnapshot = async () => {
+    try {
+      const response = await axios.put(`/api/campaigns/${selectedCampaignId}/daily-logs/${editSnapVal.id}`, {
+        date: editSnapVal.date,
+        spend: parseFloat(editSnapVal.spend),
+        revenue: parseFloat(editSnapVal.revenue),
+        impressions: parseInt(editSnapVal.impressions) || 0,
+        clicks: parseInt(editSnapVal.clicks) || 0,
+        leads: parseInt(editSnapVal.leads) || 0
+      })
+      if (response.data && response.data.status === 'success') {
+        dispatch({ type: 'SET_ANALYTICS', payload: response.data.data })
+        setEditingSnapshotId(null)
+      }
+    } catch (err) {
+      console.error('Failed to update snapshot', err)
+    }
+  }
+
+  const handleDeleteSnapshot = async (logId) => {
+    try {
+      const response = await axios.delete(`/api/campaigns/${selectedCampaignId}/daily-logs/${logId}`)
+      if (response.data && response.data.status === 'success') {
+        dispatch({ type: 'SET_ANALYTICS', payload: response.data.data })
+      }
+    } catch (err) {
+      console.error('Failed to delete snapshot', err)
+    }
   }
 
   const handleAIContentGeneration = (e) => {
@@ -165,6 +196,39 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
     })
   }
 
+  useEffect(() => {
+    if (!selectedCampaignId) return
+    const fetchCampaignDetails = async () => {
+      try {
+        const [adSetsRes, logsRes] = await Promise.all([
+          axios.get(`/api/campaigns/${selectedCampaignId}/adsets`),
+          axios.get(`/api/campaigns/${selectedCampaignId}/daily-logs`)
+        ])
+        
+        if (adSetsRes.data?.status === 'success') {
+          dispatch({ type: 'SET_ADSETS', payload: adSetsRes.data.data })
+        }
+        if (logsRes.data?.status === 'success') {
+          dispatch({ type: 'SET_ANALYTICS', payload: logsRes.data.data })
+        }
+      } catch (err) {
+        console.error('Failed to load campaign details', err)
+      }
+    }
+    fetchCampaignDetails()
+  }, [selectedCampaignId, dispatch])
+
+  const handleToggleCampaignStatus = async () => {
+    try {
+      const response = await axios.patch(`/api/campaigns/${selectedCampaignId}/toggle-status`)
+      if (response.data && response.data.status === 'success') {
+        dispatch({ type: 'UPDATE_CAMPAIGN', payload: response.data.data })
+      }
+    } catch (err) {
+      console.error('Failed to toggle campaign status', err)
+    }
+  }
+
   return (
     <AnimatePresence mode="wait">
       <motion.div key="hub_workspace" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
@@ -193,19 +257,18 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
           <div className="flex items-center gap-2">
             <StatusBadge status={selectedCampaign?.status} />
             <SyncBadge sync_status={selectedCampaign?.sync_status} />
+            <button 
+              onClick={handleToggleCampaignStatus}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${selectedCampaign?.status === 'active' ? 'bg-green-500' : 'bg-slate-300'}`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${selectedCampaign?.status === 'active' ? 'translate-x-4' : 'translate-x-1'}`} />
+            </button>
             <button
               onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'campaign', item: selectedCampaign } })}
               className="bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-semibold px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm inline-flex items-center gap-1"
             >
               <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
               Edit Settings
-            </button>
-            <button
-              onClick={() => navigate('/studio', { state: { preSelectedPlatform: selectedCampaign?.platform, campaignName: selectedCampaign?.name } })}
-              className="bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-semibold px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm inline-flex items-center gap-1"
-            >
-              <SparklesIcon className="w-3.5 h-3.5 stroke-[1.5]" />
-              Generate Ad Creative
             </button>
           </div>
         </div>
@@ -222,8 +285,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
         <div className="flex overflow-x-auto no-scrollbar border-b border-[#E2E8F0]">
           {[
             { id: 'analytics', label: 'Analytics Logs', count: state.analytics.filter(a => a.campaignId === selectedCampaign?.id).length },
-            { id: 'adsets', label: 'Ad Sets', count: activeAdSets.filter(a => a.campaignId === selectedCampaign?.id).length },
-            { id: 'ab_testing', label: 'A/B Splitting', count: state.abTests.filter(t => t.campaignId === selectedCampaign?.id).length }
+            { id: 'adsets', label: 'Ad Sets', count: activeAdSets.filter(a => a.campaignId === selectedCampaign?.id).length }
           ].map(tab => (
             <button
               key={tab.id}
@@ -252,40 +314,56 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
               <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
                 <span className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider block mb-0.5">Workspace Analytics</span>
                 <span className="text-sm font-medium text-[#0F172A] block font-mona mb-4">Ad Spend vs Attributed Revenue</span>
-                <div className="w-full h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={
-                      state.analytics
-                        .filter(a => a.campaignId === selectedCampaign?.id)
-                        .sort((a,b) => new Date(a.date) - new Date(b.date))
-                    } margin={{ top: 10, right: 0, left: -25, bottom: 0 }}>
-                      <XAxis dataKey="date" stroke="#94A3B8" fontSize={9} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#94A3B8" fontSize={9} tickLine={false} axisLine={false} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area type="monotone" dataKey="revenue" name="Daily Revenue" stroke="#FF2D20" strokeWidth={1.5} fill="#FFF1F0" fillOpacity={0.4} />
-                      <Area type="monotone" dataKey="spend" name="Daily Spend" stroke="#3B82F6" strokeWidth={1.5} fill="none" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
+                {state.analytics.filter(a => a.campaignId === selectedCampaign?.id).length > 0 ? (
+                  <div className="w-full h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={
+                        state.analytics
+                          .filter(a => a.campaignId === selectedCampaign?.id)
+                          .sort((a,b) => new Date(a.date) - new Date(b.date))
+                      } margin={{ top: 10, right: 0, left: -25, bottom: 0 }}>
+                        <XAxis dataKey="date" stroke="#94A3B8" fontSize={9} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#94A3B8" fontSize={9} tickLine={false} axisLine={false} />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Area type="monotone" dataKey="revenue" name="Daily Revenue" stroke="#FF2D20" strokeWidth={1.5} fill="#FFF1F0" fillOpacity={0.4} />
+                        <Area type="monotone" dataKey="spend" name="Daily Spend" stroke="#3B82F6" strokeWidth={1.5} fill="none" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="w-full h-64 flex flex-col items-center justify-center border border-dashed border-[#E2E8F0] rounded-xl bg-[#F8FAFC]">
+                    <ChartBarIcon className="w-8 h-8 text-[#94A3B8] mb-2 stroke-[1.5]" />
+                    <p className="text-xs font-medium text-[#475569]">No graph data available</p>
+                    <p className="text-[10px] font-medium text-[#94A3B8] mt-1 text-center max-w-[200px]">Add daily relational logs to generate ROAS and performance trends.</p>
+                  </div>
+                )}
               </div>
 
               {/* Relational snap logs list */}
               <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-[#E2E8F0]">
+                <div className="p-4 border-b border-[#E2E8F0] flex items-center justify-between">
                   <span className="text-xs font-medium text-[#0F172A] block font-mona">Daily Relational Entries</span>
+                  <button
+                    onClick={() => setIsSnapModalOpen(true)}
+                    className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[10px] font-medium px-3 py-1.5 rounded-xl cursor-pointer shadow-sm transition-all inline-flex items-center gap-1"
+                  >
+                    <PlusIcon className="w-3.5 h-3.5" />
+                    Record Daily Log
+                  </button>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                {state.analytics.filter(a => a.campaignId === selectedCampaign?.id).length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase pl-6 font-mona">Date</th>
-                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase font-mona">Spend</th>
-                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase font-mona">Revenue</th>
-                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase font-mona">ROAS</th>
-                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase font-mona">Clicks / Imps</th>
-                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase font-mona">Leads</th>
-                        <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase pr-6 text-right font-mona">Actions</th>
+                        <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase pl-6 font-mona">Date</th>
+                        <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase font-mona">Spend</th>
+                        <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase font-mona">Revenue</th>
+                        <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase font-mona">ROAS</th>
+                        <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase font-mona">Clicks / Imps</th>
+                        <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase font-mona">Leads</th>
+                        <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase pr-6 text-right font-mona">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E2E8F0]">
@@ -298,7 +376,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
 
                           return (
                             <tr key={snap.id} className="hover:bg-[#F8FAFC]/50 transition-colors">
-                              <td className="p-4 pl-6 text-xs font-medium text-[#0F172A]">
+                              <td className="p-4 pl-6 text-xs font-light text-[#0F172A]">
                                 {isEditing ? (
                                   <input 
                                     type="date" 
@@ -308,7 +386,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   />
                                 ) : snap.date}
                               </td>
-                              <td className="p-4 text-xs font-medium text-[#0F172A]">
+                              <td className="p-4 text-xs font-light text-[#0F172A]">
                                 {isEditing ? (
                                   <input 
                                     type="number" 
@@ -318,7 +396,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   />
                                 ) : `$${snap.spend.toLocaleString()}`}
                               </td>
-                              <td className="p-4 text-xs font-medium text-[#0F172A]">
+                              <td className="p-4 text-xs font-light text-[#0F172A]">
                                 {isEditing ? (
                                   <input 
                                     type="number" 
@@ -328,8 +406,8 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   />
                                 ) : `$${snap.revenue.toLocaleString()}`}
                               </td>
-                              <td className="p-4 text-xs font-semibold text-[#0F172A]">{snapROAS}x</td>
-                              <td className="p-4 text-xs font-semibold text-[#475569]">
+                              <td className="p-4 text-xs font-light text-[#0F172A]">{snapROAS}x</td>
+                              <td className="p-4 text-xs font-light text-[#475569]">
                                 {isEditing ? (
                                   <div className="flex gap-1">
                                     <input 
@@ -347,7 +425,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   </div>
                                 ) : `${snap.clicks.toLocaleString()} / ${snap.impressions.toLocaleString()}`}
                               </td>
-                              <td className="p-4 text-xs font-medium text-[#0F172A]">
+                              <td className="p-4 text-xs font-light text-[#0F172A]">
                                 {isEditing ? (
                                   <input 
                                     type="number" 
@@ -382,7 +460,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                       <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
                                     </button>
                                     <button
-                                      onClick={() => dispatch({ type: 'DELETE_SNAPSHOT', payload: snap.id })}
+                                      onClick={() => handleDeleteSnapshot(snap.id)}
                                       className="p-1 hover:bg-[#F8FAFC] border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-red-500 cursor-pointer transition-all"
                                     >
                                       <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
@@ -396,84 +474,109 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                     </tbody>
                   </table>
                 </div>
+                ) : (
+                  <div className="p-10 flex flex-col items-center justify-center text-center">
+                    <div className="w-12 h-12 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl flex items-center justify-center mb-3 text-[#94A3B8]">
+                      <CircleStackIcon className="w-6 h-6 stroke-[1.5]" />
+                    </div>
+                    <h3 className="text-[13px] font-medium text-[#0F172A] font-mona mb-1">No analytics logs recorded</h3>
+                    <p className="text-[11px] font-semibold text-[#94A3B8] max-w-[250px]">Click 'Record Daily Log' to add your daily ad performance metrics.</p>
+                  </div>
+                )}
               </div>
 
-              {/* Add Snap form */}
-              <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm">
-                <span className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider block mb-3 font-mona">Record Daily Performance Log</span>
-                <form onSubmit={handleAddSnapshot} className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
-                  <div>
-                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Date</label>
-                    <input 
-                      type="date" 
-                      value={newSnapDate}
-                      onChange={(e) => setNewSnapDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Spend ($)</label>
-                    <input 
-                      type="number" 
-                      placeholder="150"
-                      value={newSnapSpend}
-                      onChange={(e) => setNewSnapSpend(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Revenue ($)</label>
-                    <input 
-                      type="number" 
-                      placeholder="1200"
-                      value={newSnapRevenue}
-                      onChange={(e) => setNewSnapRevenue(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Impressions</label>
-                    <input 
-                      type="number" 
-                      placeholder="5000"
-                      value={newSnapImpressions}
-                      onChange={(e) => setNewSnapImpressions(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Clicks</label>
-                    <input 
-                      type="number" 
-                      placeholder="240"
-                      value={newSnapClicks}
-                      onChange={(e) => setNewSnapClicks(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1.5">Leads</label>
-                      <input 
-                        type="number" 
-                        placeholder="18"
-                        value={newSnapLeads}
-                        onChange={(e) => setNewSnapLeads(e.target.value)}
-                        className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none"
-                      />
-                    </div>
-                    <button 
-                      type="submit"
-                      className="bg-[#FF2D20] hover:bg-[#E5261A] text-white p-2 rounded-xl cursor-pointer transition-colors shrink-0 shadow-sm inline-flex items-center justify-center"
+              {/* Add Snap form Modal */}
+              <AnimatePresence>
+                {isSnapModalOpen && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="bg-white rounded-2xl shadow-xl border border-[#E2E8F0] w-full max-w-sm overflow-hidden relative"
                     >
-                      <PlusIcon className="w-4.5 h-4.5" />
-                    </button>
+                      <div className="p-5 border-b border-[#E2E8F0] flex items-center justify-between">
+                        <span className="text-sm font-medium text-[#0F172A] font-mona">Record Daily Performance Log</span>
+                        <button onClick={() => setIsSnapModalOpen(false)} className="text-[#94A3B8] hover:text-[#0F172A] transition-colors cursor-pointer">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
+                      <div className="p-6 bg-[#F8FAFC]">
+                        <form onSubmit={handleAddSnapshot} className="flex flex-col gap-4">
+                          <div>
+                            <label className="block text-[10px] font-medium text-[#475569] uppercase mb-1.5">Date</label>
+                            <input 
+                              type="date" 
+                              value={newSnapDate}
+                              onChange={(e) => setNewSnapDate(e.target.value)}
+                              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-medium text-[#475569] uppercase mb-1.5">Spend ($)</label>
+                            <input 
+                              type="number" 
+                              placeholder="150"
+                              value={newSnapSpend}
+                              onChange={(e) => setNewSnapSpend(e.target.value)}
+                              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-medium text-[#475569] uppercase mb-1.5">Revenue ($)</label>
+                            <input 
+                              type="number" 
+                              placeholder="1200"
+                              value={newSnapRevenue}
+                              onChange={(e) => setNewSnapRevenue(e.target.value)}
+                              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-medium text-[#475569] uppercase mb-1.5">Impressions</label>
+                            <input 
+                              type="number" 
+                              placeholder="5000"
+                              value={newSnapImpressions}
+                              onChange={(e) => setNewSnapImpressions(e.target.value)}
+                              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-medium text-[#475569] uppercase mb-1.5">Clicks</label>
+                            <input 
+                              type="number" 
+                              placeholder="240"
+                              value={newSnapClicks}
+                              onChange={(e) => setNewSnapClicks(e.target.value)}
+                              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-medium text-[#475569] uppercase mb-1.5">Leads</label>
+                            <input 
+                              type="number" 
+                              placeholder="18"
+                              value={newSnapLeads}
+                              onChange={(e) => setNewSnapLeads(e.target.value)}
+                              className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none bg-white"
+                            />
+                          </div>
+                          <button 
+                            type="submit"
+                            className="bg-[#FF2D20] hover:bg-[#E5261A] text-white py-2.5 px-4 mt-2 rounded-xl text-xs font-semibold tracking-wide cursor-pointer transition-colors shadow-sm w-full"
+                          >
+                            Save Performance Log
+                          </button>
+                        </form>
+                      </div>
+                    </motion.div>
                   </div>
-                </form>
-              </div>
+                )}
+              </AnimatePresence>
             </div>
           )}
 
@@ -513,7 +616,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                         {activeAdSets
                           .filter(a => a.campaignId === selectedCampaign?.id)
                           .map(adSet => (
-                            <tr key={adSet.id} onClick={() => navigate(`/campaigns/${selectedCampaign?.id}/adsets/${adSet.id}/ads`)} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
+                            <tr key={adSet.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors group">
                               <td className="p-4 pl-6 text-xs font-medium text-[#0F172A]">
                                 {adSet.name}
                                 <span className="block text-[10px] font-semibold text-[#94A3B8] mt-0.5">{adSet.platform}</span>
@@ -523,7 +626,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                               <td className="p-4 text-xs font-medium text-[#0F172A]">${adSet.budget.toLocaleString()}</td>
                               <td className="p-4 text-xs font-medium text-[#FF2D20]">${adSet.spendToday.toLocaleString()}</td>
                               <td className="p-4 text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider">{adSet.goal}</td>
-                              <td className="p-4 pr-6 text-right" onClick={(e) => e.stopPropagation()}>
+                              <td className="p-4 pr-6 text-right">
                                 <div className="inline-flex items-center gap-1.5 transition-opacity">
                                   <button
                                     onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset', item: adSet } })}
@@ -539,9 +642,9 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   </button>
                                   <button
                                     onClick={() => navigate(`/campaigns/${selectedCampaign?.id}/adsets/${adSet.id}/ads`)}
-                                    className="p-1.5 bg-[#FFF1F0] hover:bg-[#FF2D20] border border-transparent rounded-lg text-[#FF2D20] hover:text-white cursor-pointer transition-all ml-1 shadow-[0_1px_2px_rgba(255,45,32,0.1)]"
+                                    className="p-1.5 hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-[#0F172A] cursor-pointer transition-all shadow-sm"
                                   >
-                                    <ChevronRightIcon className="w-3.5 h-3.5 stroke-2" />
+                                    <ChevronRightIcon className="w-3.5 h-3.5 stroke-[2]" />
                                   </button>
                                 </div>
                               </td>
@@ -571,149 +674,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
 
 
 
-          {/* SUB TAB 3: A/B TESTING SPLITS CRUD */}
-          {workspaceTab === 'ab_testing' && (
-            <div className="space-y-6 animate-fadeIn">
-              {/* A/B splits list */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {state.abTests.filter(t => t.campaignId === selectedCampaign?.id).length === 0 ? (
-                  <div className="col-span-2 border border-dashed border-[#E2E8F0] rounded-2xl p-8 text-center text-[#94A3B8] font-semibold text-xs bg-white">
-                    No A/B split performance tests registered. Create one below!
-                  </div>
-                ) : (
-                  state.abTests
-                    .filter(t => t.campaignId === selectedCampaign?.id)
-                    .map(test => {
-                      const ctrA = test.impressionsA > 0 ? ((test.clicksA / test.impressionsA) * 100).toFixed(2) : '0.00'
-                      const ctrB = test.impressionsB > 0 ? ((test.clicksB / test.impressionsB) * 100).toFixed(2) : '0.00'
 
-                      return (
-                        <div key={test.id} className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:shadow-md transition-all relative overflow-hidden">
-                          {test.winner && (
-                            <span className="absolute top-0 right-0 bg-[#FF2D20] text-white text-[8px] font-black px-2.5 py-1.5 uppercase tracking-wider rounded-bl-xl inline-flex items-center gap-0.5 shadow">
-                              <TrophyIcon className="w-2.5 h-2.5" />
-                              Winner: {test.winner}
-                            </span>
-                          )}
-
-                          <div>
-                            <div className="flex items-center justify-between mb-4">
-                              <span className="text-xs font-medium text-[#0F172A] pr-16 leading-tight">{test.name}</span>
-                              <span className={`px-2 py-0.5 border rounded-lg text-[8px] font-semibold uppercase ${test.status === 'Running' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-[#E2E8F0] text-slate-500'}`}>
-                                {test.status}
-                              </span>
-                            </div>
-
-                            {/* Variant A comparison details */}
-                            <div className="space-y-1.5 border-b border-slate-50 pb-3 mb-3 text-left">
-                              <div className="flex justify-between text-[11px] font-semibold text-[#475569]">
-                                <span className={test.winner === 'Variant A' ? 'text-green-600 font-medium' : ''}>
-                                  Variant A {test.winner === 'Variant A' && '🏆'}
-                                </span>
-                                <span>{test.clicksA} clicks ({ctrA}% CTR)</span>
-                              </div>
-                              <p className="text-[10px] font-semibold text-[#94A3B8] italic">"{test.variantA}"</p>
-                              <div className="w-full h-1.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-full overflow-hidden">
-                                <div className={`h-full rounded-full ${test.winner === 'Variant A' ? 'bg-green-500' : 'bg-slate-400'}`} style={{ width: `${Math.min(100, parseFloat(ctrA) * 12)}%` }} />
-                              </div>
-                            </div>
-
-                            {/* Variant B comparison details */}
-                            <div className="space-y-1.5 pb-3 text-left">
-                              <div className="flex justify-between text-[11px] font-semibold text-[#475569]">
-                                <span className={test.winner === 'Variant B' ? 'text-green-600 font-medium' : ''}>
-                                  Variant B {test.winner === 'Variant B' && '🏆'}
-                                </span>
-                                <span>{test.clicksB} clicks ({ctrB}% CTR)</span>
-                              </div>
-                              <p className="text-[10px] font-semibold text-[#94A3B8] italic">"{test.variantB}"</p>
-                              <div className="w-full h-1.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-full overflow-hidden">
-                                <div className={`h-full rounded-full ${test.winner === 'Variant B' ? 'bg-green-500' : 'bg-[#FF2D20]'}`} style={{ width: `${Math.min(100, parseFloat(ctrB) * 12)}%` }} />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Action bar triggers */}
-                          <div className="border-t border-[#E2E8F0] pt-3.5 flex items-center justify-between">
-                            {test.status === 'Running' ? (
-                              <div className="inline-flex gap-2">
-                                <button
-                                  onClick={() => handleSimulateSplitEngagement(test.id)}
-                                  className="bg-[#F8FAFC] hover:bg-slate-100 border border-[#E2E8F0] text-[#475569] text-[9px] font-medium px-2.5 py-1 rounded-lg cursor-pointer"
-                                >
-                                  Simulate
-                                </button>
-                                <button
-                                  onClick={() => handleSetWinner(test.id, parseFloat(ctrA) >= parseFloat(ctrB) ? 'Variant A' : 'Variant B')}
-                                  className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[9px] font-medium px-2.5 py-1 rounded-lg cursor-pointer shadow-sm"
-                                >
-                                  Winner
-                                </button>
-                              </div>
-                            ) : (
-                              <span className="text-[9px] font-medium text-[#94A3B8] uppercase">Completed split</span>
-                            )}
-
-                            <button
-                              onClick={() => dispatch({ type: 'DELETE_ABTEST', payload: test.id })}
-                              className="p-1 text-[#94A3B8] hover:text-red-500 hover:bg-[#F8FAFC] border border-transparent hover:border-[#E2E8F0] rounded-lg cursor-pointer transition-all"
-                            >
-                              <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    })
-                )}
-              </div>
-
-              {/* Create split test form panel */}
-              <div className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm max-w-xl text-left">
-                <span className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider block mb-3 font-mona">Initiate A/B Performance Split</span>
-                <form onSubmit={handleAddABTest} className="space-y-3">
-                  <div>
-                    <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1">Test Name</label>
-                    <input 
-                      type="text" 
-                      placeholder="Headline Urgent Hook Test"
-                      value={newABName}
-                      onChange={(e) => setNewABName(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] bg-white"
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1">Variant A hook copy</label>
-                      <textarea 
-                        placeholder="Try predicted AI Keywords..."
-                        value={newABVarA}
-                        onChange={(e) => setNewABVarA(e.target.value)}
-                        className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] h-16 bg-white"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[9px] font-medium text-[#94A3B8] uppercase mb-1">Variant B hook copy</label>
-                      <textarea 
-                        placeholder="Stop wasting ad spend guarantee..."
-                        value={newABVarB}
-                        onChange={(e) => setNewABVarB(e.target.value)}
-                        className="w-full px-3 py-2 border border-[#E2E8F0] rounded-xl text-xs font-semibold focus:outline-none focus:border-[#FF2D20] h-16 bg-white"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="submit"
-                    className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[10px] font-medium px-3 py-2 rounded-xl cursor-pointer shadow-sm transition-all"
-                  >
-                    Launch Split Test
-                  </button>
-                </form>
-              </div>
-            </div>
-          )}
         </div>
       </motion.div>
     </AnimatePresence>

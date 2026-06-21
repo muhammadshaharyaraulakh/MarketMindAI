@@ -59,13 +59,13 @@ export default function CampaignList({ state, dispatch, navigate, filteredCampai
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                  <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider pl-6 font-mona">Campaign Title</th>
-                  <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Status</th>
-                  <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Daily Spend</th>
-                  <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Revenue</th>
-                  <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">Calculated ROAS</th>
-                  <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider font-mona">CTR Ratio</th>
-                  <th className="p-4 text-[10px] font-medium text-[#FF2D20] uppercase tracking-wider pr-6 text-right font-mona">Actions</th>
+                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider pl-6 font-mona">Campaign Title</th>
+                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider font-mona">Status</th>
+                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider font-mona">Daily Spend</th>
+                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider font-mona">Revenue</th>
+                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider font-mona">Calculated ROAS</th>
+                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider font-mona">CTR Ratio</th>
+                  <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase tracking-wider pr-6 text-right font-mona">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E2E8F0]">
@@ -81,10 +81,10 @@ export default function CampaignList({ state, dispatch, navigate, filteredCampai
                       <StatusBadge status={camp.status} />
                       <SyncBadge sync_status={camp.sync_status} />
                     </td>
-                    <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4 text-xs font-medium text-[#0F172A]">
+                    <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4 text-xs font-light text-[#0F172A]">
                       ${camp.totalSpend.toLocaleString()}
                     </td>
-                    <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4 text-xs font-medium text-[#0F172A]">
+                    <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4 text-xs font-light text-[#0F172A]">
                       ${camp.totalRevenue.toLocaleString()}
                     </td>
                     <td onClick={() => dispatch({ type: 'ZOOM_CAMPAIGN', payload: camp.id })} className="p-4">

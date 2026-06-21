@@ -1,9 +1,50 @@
-
+import { useEffect } from 'react'
+import axios from 'axios'
 import { motion } from 'framer-motion'
 import { PlusIcon, ArrowLeftIcon, PhotoIcon, TrashIcon } from '@heroicons/react/24/outline'
 import AdStatusBadge from './AdStatusBadge'
 
 export default function AdsScreen({ dispatch, navigate, selectedCampaign, selectedCampaignId, selectedAdSet, selectedAdSetId, activeAds, getPlatformIcon }) {
+  useEffect(() => {
+    if (selectedAdSetId) {
+      axios.get(`/api/adsets/${selectedAdSetId}/ads`)
+        .then(response => {
+          if (response.data.status === 'success') {
+            dispatch({ type: 'SET_ADS', payload: response.data.data })
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching ads:", error)
+        })
+    }
+  }, [selectedAdSetId, dispatch])
+
+  const handleDeleteAd = async (adId) => {
+    try {
+      const response = await axios.delete(`/api/ads/${adId}`)
+      if (response.data.status === 'success') {
+        dispatch({ type: 'DELETE_AD', payload: adId })
+      }
+    } catch (err) {
+      console.error('Failed to delete ad', err)
+    }
+  }
+
+  const handleToggleAdStatus = async (adId) => {
+    try {
+      const response = await axios.patch(`/api/ads/${adId}/toggle-status`)
+      if (response.data.status === 'success') {
+        dispatch({ type: 'TOGGLE_AD_STATUS', payload: adId })
+      }
+    } catch (err) {
+      // Inline error toast for 422 if not approved
+      if (err.response && err.response.status === 422) {
+        alert(err.response.data.message || 'Ad must be approved before it can be activated.')
+      }
+      console.error('Failed to toggle ad status', err)
+    }
+  }
+
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
       {/* Header */}
@@ -68,7 +109,7 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
                       <AdStatusBadge ad={ad} />
                       {(ad.status === 'Active' || ad.status === 'Paused') && ad.review_status === 'APPROVED' && (
                         <button 
-                          onClick={() => dispatch({ type: 'TOGGLE_AD_STATUS', payload: ad.id })}
+                          onClick={() => handleToggleAdStatus(ad.id)}
                           className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${ad.status === 'Active' ? 'bg-green-500' : 'bg-slate-300'}`}
                         >
                           <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${ad.status === 'Active' ? 'translate-x-3' : 'translate-x-0.5'}`} />
@@ -114,7 +155,11 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
                   Edit
                 </button>
                 <button
-                  onClick={() => dispatch({ type: 'OPEN_CONFIRM', payload: { type: 'DELETE_AD', id: ad.id, title: 'Delete Ad', message: 'Are you sure you want to delete this ad? This action cannot be undone.' } })}
+                  onClick={() => {
+                    if(window.confirm('Are you sure you want to delete this ad? This action cannot be undone.')) {
+                      handleDeleteAd(ad.id)
+                    }
+                  }}
                   className="bg-white border border-[#E2E8F0] hover:bg-red-50 text-[#94A3B8] hover:text-red-500 px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm"
                 >
                   <TrashIcon className="w-4 h-4 stroke-[1.5]" />

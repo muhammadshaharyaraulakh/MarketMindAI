@@ -10,6 +10,7 @@ class AdSetTargeting extends Model
     /** @use HasFactory<\Database\Factories\AdSetTargetingFactory> */
     use HasFactory;
 
+    protected $table = 'ad_set_targeting';
     protected $guarded = [];
 
     public function adSet()
