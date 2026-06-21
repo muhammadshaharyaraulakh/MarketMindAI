@@ -88,4 +88,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/resubmit', [\App\Http\Controllers\Api\CampaignManagement\AdController::class, 'resubmit']);
         Route::post('/{id}/metrics', [\App\Http\Controllers\Api\CampaignManagement\AdController::class, 'recordMetrics']);
     });
+
+    // Insights & Alerts
+    Route::prefix('insights')->group(function () {
+        Route::get('/alerts', [\App\Http\Controllers\Api\InsightsController::class, 'index']);
+        Route::post('/refresh', [\App\Http\Controllers\Api\InsightsController::class, 'refresh']);
+        Route::patch('/alerts/{id}/dismiss', [\App\Http\Controllers\Api\InsightsController::class, 'dismiss']);
+        Route::patch('/recommendations/{id}/apply', [\App\Http\Controllers\Api\InsightsController::class, 'applyRecommendation']);
+        Route::patch('/recommendations/{id}/dismiss', [\App\Http\Controllers\Api\InsightsController::class, 'dismissRecommendation']);
+    });
 });

@@ -6,5 +6,6 @@ return [
     App\Providers\ContentGenerationServiceProvider::class,
     App\Providers\DataIngestionServiceProvider::class,
     App\Providers\FortifyServiceProvider::class,
+    App\Providers\InsightsServiceProvider::class,
     App\Providers\ReportServiceProvider::class,
 ];

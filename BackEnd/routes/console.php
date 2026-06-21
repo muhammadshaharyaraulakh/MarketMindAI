@@ -22,3 +22,9 @@ Schedule::job(new DeleteExpiredGenerationsJob())
     ->at('03:00')
     ->onOneServer()
     ->withoutOverlapping();
+
+use App\Jobs\DetectAnomaliesJob;
+Schedule::job(new DetectAnomaliesJob(null))
+    ->dailyAt('06:00')
+    ->onOneServer()
+    ->withoutOverlapping();
