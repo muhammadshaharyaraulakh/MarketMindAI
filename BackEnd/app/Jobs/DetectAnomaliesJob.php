@@ -17,7 +17,7 @@ class DetectAnomaliesJob implements ShouldQueue
     public function __construct(
         public ?int $userId = null
     ) {
-        $this->onQueue('insights');
+        $this->onQueue('default');
     }
 
     public function handle(

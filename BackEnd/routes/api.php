@@ -104,4 +104,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/sessions/{sessionId}/messages', [\App\Http\Controllers\Api\ChatbotController::class, 'history']);
         Route::delete('/sessions/{sessionId}', [\App\Http\Controllers\Api\ChatbotController::class, 'deleteSession']);
     });
+
+    // Integrations (Ad Accounts)
+    Route::prefix('integrations')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\IntegrationController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\IntegrationController::class, 'store']);
+        Route::delete('/{id}', [\App\Http\Controllers\Api\IntegrationController::class, 'destroy']);
+    });
 });

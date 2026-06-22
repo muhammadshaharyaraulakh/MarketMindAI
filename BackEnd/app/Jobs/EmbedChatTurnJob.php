@@ -17,7 +17,7 @@ class EmbedChatTurnJob implements ShouldQueue
         public int $assistantMessageId,
         public int $userId
     ) {
-        $this->onQueue('chatbot');
+        $this->onQueue('default');
     }
 
     public function handle(\Domain\ChatbotGeneral\Contracts\Services\GeneralEmbeddingServiceInterface $embeddingService): void

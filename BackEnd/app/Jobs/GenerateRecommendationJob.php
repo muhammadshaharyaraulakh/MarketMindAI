@@ -17,7 +17,7 @@ class GenerateRecommendationJob implements ShouldQueue
     public function __construct(
         public int $alertId
     ) {
-        $this->onQueue('insights');
+        $this->onQueue('default');
     }
 
     public function handle(

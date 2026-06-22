@@ -134,6 +134,10 @@ function reducer(state, action) {
     case 'SET_OAUTH_STEP':
       return { ...state, ui: { ...state.ui, oauthStep: action.payload } }
 
+    // Integrations
+    case 'SET_INTEGRATIONS':
+      return { ...state, integrations: action.payload }
+
     // Campaigns CRUD
     case 'SET_CAMPAIGNS':
       return { ...state, campaigns: action.payload }

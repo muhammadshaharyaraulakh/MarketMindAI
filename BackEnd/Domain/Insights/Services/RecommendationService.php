@@ -32,7 +32,7 @@ Plain text only, no markdown, no asterisks, no bullet points.";
                 throw new \Exception("GEMINI_API_KEY is not set");
             }
 
-            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}", [
+            $response = Http::post("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={$apiKey}", [
                 'contents' => [
                     [
                         'parts' => [
