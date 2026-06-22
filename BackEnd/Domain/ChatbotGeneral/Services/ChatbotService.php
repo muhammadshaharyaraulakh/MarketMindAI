@@ -68,7 +68,7 @@ Answer the user's question using the retrieved context above when relevant. If t
         $isFallback = true;
 
         if ($apiKey) {
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={$apiKey}";
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}";
             
             try {
                 $response = Http::post($url, [
@@ -141,7 +141,7 @@ Answer the user's question using the retrieved context above when relevant. If t
         $title = substr($userMessage, 0, 40) . '...';
 
         if ($apiKey) {
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={$apiKey}";
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}";
             try {
                 $response = Http::post($url, [
                     'contents' => [

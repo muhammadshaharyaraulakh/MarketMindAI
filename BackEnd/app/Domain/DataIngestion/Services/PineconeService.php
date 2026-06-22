@@ -35,7 +35,7 @@ class PineconeService implements PineconeServiceInterface
         $ctr = $impressions > 0 ? round(($clicks / $impressions) * 100, 2) : 0;
         $dateRange = ($stats->min_date ?? 'N/A') . ' to ' . ($stats->max_date ?? 'N/A');
 
-        return "{$campaign->name} is a {$campaign->platform} campaign with objective {$campaign->objective}. Over {$dateRange}, it spent \${$spend} with a {$roas}x ROAS, {$clicks} clicks, and {$conversions} conversions. Average CTR was {$ctr}%. Status: completed (CSV import).";
+        return "{$campaign->name} is a {$campaign->platform} campaign with objective {$campaign->objective}. Over {$dateRange}, it spent \${$spend} with a {$roas}x ROAS, {$clicks} clicks, and {$conversions} conversions. Average CTR was {$ctr}%. Status: {$campaign->status}.";
     }
 
     public function embedText(string $text): array
@@ -104,7 +104,7 @@ class PineconeService implements PineconeServiceInterface
                         'user_id' => $userId,
                         'campaign_name' => $campaign->name,
                         'platform' => $campaign->platform,
-                        'status' => 'completed',
+                        'status' => $campaign->status,
                         'summary' => $summaryText
                     ]
                 ]],
