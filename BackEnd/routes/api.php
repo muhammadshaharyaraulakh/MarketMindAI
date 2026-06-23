@@ -111,4 +111,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [\App\Http\Controllers\Api\IntegrationController::class, 'store']);
         Route::delete('/{id}', [\App\Http\Controllers\Api\IntegrationController::class, 'destroy']);
     });
+    
+    // Stripe Payments
+    Route::prefix('stripe')->group(function () {
+        Route::post('/payment-intent', [\App\Http\Controllers\Api\StripeController::class, 'createPaymentIntent']);
+    });
 });
+
+// Stripe Webhook (No auth:sanctum)
+Route::post('/stripe/webhook', [\App\Http\Controllers\Api\StripeController::class, 'handleWebhook']);

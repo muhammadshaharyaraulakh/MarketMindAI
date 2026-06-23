@@ -70,7 +70,7 @@ import {
   revenueData, trendData, trafficData, campaigns, heroStats, plans, testimonials, faqs, fadeUp, fadeIn, scaleIn, staggerContainer, float, useScrollAnimation, useCounter, CustomTooltip, SectionLabel, IconBox, FeatureCheck
 } from './shared';
 
-export default function PricingSection() {
+export default function PricingSection({ onSelectPlan }) {
   const [ref, inView] = useScrollAnimation()
   const [billing, setBilling] = useState('monthly')
 
@@ -204,15 +204,15 @@ export default function PricingSection() {
                 {/* Bottom CTA Button */}
                 <div className="mt-6">
                   {isEnterprise ? (
-                    <button className="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-colors duration-150">
+                    <button onClick={() => onSelectPlan && onSelectPlan(plan, displayPrice)} className="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-colors duration-150">
                       {plan.cta}
                     </button>
                   ) : plan.popular ? (
-                    <button className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-colors duration-150">
+                    <button onClick={() => onSelectPlan && onSelectPlan(plan, displayPrice)} className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-colors duration-150">
                       {plan.cta}
                     </button>
                   ) : (
-                    <button className="w-full bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-all duration-150">
+                    <button onClick={() => onSelectPlan && onSelectPlan(plan, displayPrice)} className="w-full bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-all duration-150">
                       {plan.cta}
                     </button>
                   )}

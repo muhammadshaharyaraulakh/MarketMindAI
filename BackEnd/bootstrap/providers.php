@@ -9,4 +9,5 @@ return [
     App\Providers\InsightsServiceProvider::class,
     App\Providers\ReportServiceProvider::class,
     App\Providers\ChatbotGeneralServiceProvider::class,
+    App\Providers\BillingServiceProvider::class,
 ];

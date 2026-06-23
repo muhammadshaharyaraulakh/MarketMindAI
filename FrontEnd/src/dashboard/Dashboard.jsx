@@ -17,6 +17,7 @@ import AIInsights from './AIInsights/AIInsights'
 import AIAdvisorChat from './AIAdvisor/AIAdvisorChat'
 import ReportsExport from './ReportsExport/ReportsExport'
 import ContentStudio from './studio/ContentStudio'
+import BillingView from './Billing/BillingView'
 import {
   BoltIcon,
   BeakerIcon,
@@ -31,7 +32,8 @@ import {
   ChatBubbleBottomCenterIcon,
   VideoCameraIcon,
   AtSymbolIcon,
-  UserCircleIcon
+  UserCircleIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline'
 // ==========================================
 // RELATIONAL INITIAL MOCK DATA
@@ -290,6 +292,7 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
                       : location.pathname.includes('/studio') ? 'studio'
                       : location.pathname.includes('/reports') ? 'reports' 
                       : location.pathname.includes('/integrations') ? 'integrations' 
+                      : location.pathname.includes('/billing') ? 'billing' 
                       : 'dashboard'
 
   // Extract params via matchPath since we are keeping the massive inline code intact 
@@ -559,7 +562,8 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
               { id: 'advisor', path: '/advisor', label: 'AI Advisor Chat', icon: SparklesIcon },
               { id: 'studio', path: '/studio', label: 'Content Studio', icon: SparklesIcon },
               { id: 'reports', path: '/reports', label: 'Reports Export', icon: BoltIcon },
-              { id: 'integrations', path: '/integrations', label: 'Platform Integrations', icon: PuzzlePieceIcon }
+              { id: 'integrations', path: '/integrations', label: 'Platform Integrations', icon: PuzzlePieceIcon },
+              { id: 'billing', path: '/billing', label: 'Billing & Plans', icon: CreditCardIcon }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -664,6 +668,7 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
             <Route path="/reports" element={<ReportsExport state={state} dispatch={dispatch} />} />
             <Route path="/integrations" element={<IntegrationsView state={state} dispatch={dispatch} />} />
             <Route path="/studio" element={<ContentStudio state={state} dispatch={dispatch} />} />
+            <Route path="/billing" element={<BillingView />} />
           </Routes>
         </div>
       </main>
