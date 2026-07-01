@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\DataIngestion\DTOs;
+namespace App\App\Domain\DataIngestion\DTOs;
 
 class CampaignSummaryDTO
 {

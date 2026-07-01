@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Overview\Contracts\Services;
+namespace App\App\Domain\Overview\Contracts\Services;
 
 interface OverviewServiceInterface
 {

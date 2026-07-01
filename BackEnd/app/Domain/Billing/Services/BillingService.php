@@ -1,8 +1,8 @@
 <?php
-namespace App\Domain\Billing\Services;
+namespace App\App\Domain\Billing\Services;
 
-use App\Domain\Billing\Contracts\Services\BillingServiceInterface;
-use App\Domain\Billing\Contracts\Repositories\StripeRepositoryInterface;
+use App\App\Domain\Billing\Contracts\Services\BillingServiceInterface;
+use App\App\Domain\Billing\Contracts\Repositories\StripeRepositoryInterface;
 use App\Models\User;
 use Stripe\PaymentIntent;
 use Stripe\Event;

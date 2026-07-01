@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\DataIngestion\Services;
+namespace App\App\Domain\DataIngestion\Services;
 
-use App\Domain\DataIngestion\Contracts\Services\PineconeServiceInterface;
+use App\App\Domain\DataIngestion\Contracts\Services\PineconeServiceInterface;
 use App\Models\Campaign;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;

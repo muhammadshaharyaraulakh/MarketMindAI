@@ -1,5 +1,5 @@
 <?php
-namespace App\Domain\Billing\Contracts\Services;
+namespace App\App\Domain\Billing\Contracts\Services;
 
 use App\Models\User;
 use Stripe\PaymentIntent;

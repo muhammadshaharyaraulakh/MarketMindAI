@@ -1,7 +1,7 @@
 <?php
-namespace App\Domain\Billing\Repositories;
+namespace App\App\Domain\Billing\Repositories;
 
-use App\Domain\Billing\Contracts\Repositories\StripeRepositoryInterface;
+use App\App\Domain\Billing\Contracts\Repositories\StripeRepositoryInterface;
 use App\Models\User;
 use Stripe\Stripe;
 use Stripe\Customer;

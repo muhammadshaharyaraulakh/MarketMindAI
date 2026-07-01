@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\DataIngestion\Contracts\Services;
+namespace App\App\Domain\DataIngestion\Contracts\Services;
 
 interface CsvParsingServiceInterface
 {

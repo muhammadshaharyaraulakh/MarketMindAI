@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\DataIngestion\Contracts\Repositories;
+namespace App\App\Domain\DataIngestion\Contracts\Repositories;
 
 use Illuminate\Support\Collection;
 

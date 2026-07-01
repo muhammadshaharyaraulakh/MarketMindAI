@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Domain\DataIngestion\Services;
+namespace App\App\Domain\DataIngestion\Services;
 
-use App\Domain\DataIngestion\Contracts\Services\CsvParsingServiceInterface;
-use App\Domain\DataIngestion\DTOs\CsvRowDTO;
+use App\App\Domain\DataIngestion\Contracts\Services\CsvParsingServiceInterface;
+use App\App\Domain\DataIngestion\DTOs\CsvRowDTO;
 use App\Models\Campaign;
 use App\Models\AdSet;
 use App\Models\AdSetTargeting;
