@@ -1,8 +1,8 @@
 <?php
-namespace App\App\Domain\ContentGeneration\Contracts\Services;
+namespace App\Domain\ContentGeneration\Contracts\Services;
 
-use App\App\Domain\ContentGeneration\DTOs\GeneratedContentDTO;
-use App\App\Domain\ContentGeneration\Requests\GenerateContentRequest;
+use App\Domain\ContentGeneration\DTOs\GeneratedContentDTO;
+use App\Domain\ContentGeneration\Requests\GenerateContentRequest;
 
 interface ContentGenerationServiceInterface
 {

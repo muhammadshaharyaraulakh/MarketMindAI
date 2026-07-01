@@ -1,8 +1,8 @@
 <?php
-namespace App\App\Domain\ContentGeneration\Contracts\Repositories;
+namespace App\Domain\ContentGeneration\Contracts\Repositories;
 
 use App\Models\ContentGeneration;
-use App\App\Domain\ContentGeneration\DTOs\SavedGenerationDTO;
+use App\Domain\ContentGeneration\DTOs\SavedGenerationDTO;
 use Illuminate\Support\Collection;
 
 interface ContentGenerationRepositoryInterface

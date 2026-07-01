@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Domain\ChatbotGeneral\Contracts\Repositories\ChatMessageRepositoryInterface;
-use Domain\ChatbotGeneral\Contracts\Repositories\ChatSessionRepositoryInterface;
-use Domain\ChatbotGeneral\Contracts\Services\ChatbotServiceInterface;
-use Domain\ChatbotGeneral\Requests\SendMessageRequest;
+use App\Domain\ChatbotGeneral\Contracts\Repositories\ChatMessageRepositoryInterface;
+use App\Domain\ChatbotGeneral\Contracts\Repositories\ChatSessionRepositoryInterface;
+use App\Domain\ChatbotGeneral\Contracts\Services\ChatbotServiceInterface;
+use App\Domain\ChatbotGeneral\Requests\SendMessageRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

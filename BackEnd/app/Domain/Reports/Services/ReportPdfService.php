@@ -1,8 +1,8 @@
 <?php
 
-namespace App\App\Domain\Reports\Services;
+namespace App\Domain\Reports\Services;
 
-use App\App\Domain\Reports\Contracts\Services\ReportPdfServiceInterface;
+use App\Domain\Reports\Contracts\Services\ReportPdfServiceInterface;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 

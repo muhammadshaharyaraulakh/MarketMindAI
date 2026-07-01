@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\ChatbotGeneral\Contracts\Services;
+namespace App\Domain\ChatbotGeneral\Contracts\Services;
 
 use App\Models\ChatMessage;
 

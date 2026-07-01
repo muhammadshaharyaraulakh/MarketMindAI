@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
-use Domain\Reports\Contracts\Repositories\ReportRepositoryInterface;
-use Domain\Reports\Contracts\Services\ReportDataServiceInterface;
-use Domain\Reports\Contracts\Services\ReportAiServiceInterface;
-use Domain\Reports\Contracts\Services\ReportPdfServiceInterface;
-use Domain\Reports\DTOs\ReportJobDTO;
+use App\Domain\Reports\Contracts\Repositories\ReportRepositoryInterface;
+use App\Domain\Reports\Contracts\Services\ReportDataServiceInterface;
+use App\Domain\Reports\Contracts\Services\ReportAiServiceInterface;
+use App\Domain\Reports\Contracts\Services\ReportPdfServiceInterface;
+use App\Domain\Reports\DTOs\ReportJobDTO;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

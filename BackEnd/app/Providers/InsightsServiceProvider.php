@@ -12,28 +12,28 @@ class InsightsServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            \Domain\Insights\Contracts\Services\AnomalyDetectionServiceInterface::class,
-            \Domain\Insights\Services\AnomalyDetectionService::class
+            \App\Domain\Insights\Contracts\Services\AnomalyDetectionServiceInterface::class,
+            \App\Domain\Insights\Services\AnomalyDetectionService::class
         );
 
         $this->app->bind(
-            \Domain\Insights\Contracts\Services\RecommendationServiceInterface::class,
-            \Domain\Insights\Services\RecommendationService::class
+            \App\Domain\Insights\Contracts\Services\RecommendationServiceInterface::class,
+            \App\Domain\Insights\Services\RecommendationService::class
         );
 
         $this->app->bind(
-            \Domain\Insights\Contracts\Services\InsightsPineconeServiceInterface::class,
-            \Domain\Insights\Services\InsightsPineconeService::class
+            \App\Domain\Insights\Contracts\Services\InsightsPineconeServiceInterface::class,
+            \App\Domain\Insights\Services\InsightsPineconeService::class
         );
 
         $this->app->bind(
-            \Domain\Insights\Contracts\Repositories\AlertRepositoryInterface::class,
-            \Domain\Insights\Repositories\AlertRepository::class
+            \App\Domain\Insights\Contracts\Repositories\AlertRepositoryInterface::class,
+            \App\Domain\Insights\Repositories\AlertRepository::class
         );
 
         $this->app->bind(
-            \Domain\Insights\Contracts\Repositories\RecommendationRepositoryInterface::class,
-            \Domain\Insights\Repositories\RecommendationRepository::class
+            \App\Domain\Insights\Contracts\Repositories\RecommendationRepositoryInterface::class,
+            \App\Domain\Insights\Repositories\RecommendationRepository::class
         );
     }
 

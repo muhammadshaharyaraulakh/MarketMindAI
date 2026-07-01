@@ -13,30 +13,30 @@ class CampaignManagementServiceProvider extends ServiceProvider
     {
         // Repositories
         $this->app->bind(
-            \Domain\CampaignManagement\Contracts\Repositories\CampaignRepositoryInterface::class,
-            \Domain\CampaignManagement\Repositories\CampaignRepository::class
+            \App\Domain\CampaignManagement\Contracts\Repositories\CampaignRepositoryInterface::class,
+            \App\Domain\CampaignManagement\Repositories\CampaignRepository::class
         );
         $this->app->bind(
-            \Domain\CampaignManagement\Contracts\Repositories\AdSetRepositoryInterface::class,
-            \Domain\CampaignManagement\Repositories\AdSetRepository::class
+            \App\Domain\CampaignManagement\Contracts\Repositories\AdSetRepositoryInterface::class,
+            \App\Domain\CampaignManagement\Repositories\AdSetRepository::class
         );
         $this->app->bind(
-            \Domain\CampaignManagement\Contracts\Repositories\AdRepositoryInterface::class,
-            \Domain\CampaignManagement\Repositories\AdRepository::class
+            \App\Domain\CampaignManagement\Contracts\Repositories\AdRepositoryInterface::class,
+            \App\Domain\CampaignManagement\Repositories\AdRepository::class
         );
 
         // Services
         $this->app->bind(
-            \Domain\CampaignManagement\Contracts\Services\CampaignServiceInterface::class,
-            \Domain\CampaignManagement\Services\CampaignService::class
+            \App\Domain\CampaignManagement\Contracts\Services\CampaignServiceInterface::class,
+            \App\Domain\CampaignManagement\Services\CampaignService::class
         );
         $this->app->bind(
-            \Domain\CampaignManagement\Contracts\Services\AdSetServiceInterface::class,
-            \Domain\CampaignManagement\Services\AdSetService::class
+            \App\Domain\CampaignManagement\Contracts\Services\AdSetServiceInterface::class,
+            \App\Domain\CampaignManagement\Services\AdSetService::class
         );
         $this->app->bind(
-            \Domain\CampaignManagement\Contracts\Services\AdServiceInterface::class,
-            \Domain\CampaignManagement\Services\AdService::class
+            \App\Domain\CampaignManagement\Contracts\Services\AdServiceInterface::class,
+            \App\Domain\CampaignManagement\Services\AdService::class
         );
     }
 

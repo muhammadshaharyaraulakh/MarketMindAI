@@ -1,10 +1,10 @@
 <?php
 
-namespace App\App\Domain\Insights\Repositories;
+namespace App\Domain\Insights\Repositories;
 
 use App\Models\Alert;
-use App\App\Domain\Insights\Contracts\Repositories\AlertRepositoryInterface;
-use App\App\Domain\Insights\DTOs\AlertDTO;
+use App\Domain\Insights\Contracts\Repositories\AlertRepositoryInterface;
+use App\Domain\Insights\DTOs\AlertDTO;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 

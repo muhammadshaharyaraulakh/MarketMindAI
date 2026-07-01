@@ -16,7 +16,10 @@ export default function CheckoutForm({ onSuccess, onCancel }) {
 
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
-      redirect: 'if_required', // Avoids full page redirect if possible
+      confirmParams: {
+        return_url: window.location.origin + '/dashboard',
+      },
+      redirect: 'if_required',
     });
 
     if (error) {
@@ -32,7 +35,18 @@ export default function CheckoutForm({ onSuccess, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
+      <PaymentElement options={{ 
+        layout: 'tabs',
+        paymentMethodOrder: ['card'],
+        wallets: { applePay: 'never', googlePay: 'never' },
+        paymentMethodOptions: {
+          card: {
+            link: {
+              enabled: false
+            }
+          }
+        }
+      }} />
       
       {errorMessage && (
         <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">

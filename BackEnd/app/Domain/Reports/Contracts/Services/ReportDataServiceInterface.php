@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\Reports\Contracts\Services;
+namespace App\Domain\Reports\Contracts\Services;
 
 interface ReportDataServiceInterface
 {

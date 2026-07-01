@@ -1,9 +1,9 @@
 <?php
 
-namespace App\App\Domain\ChatbotGeneral\Contracts\Repositories;
+namespace App\Domain\ChatbotGeneral\Contracts\Repositories;
 
 use App\Models\ChatMessage;
-use App\App\Domain\ChatbotGeneral\DTOs\ChatMessageDTO;
+use App\Domain\ChatbotGeneral\DTOs\ChatMessageDTO;
 use Illuminate\Database\Eloquent\Collection;
 
 interface ChatMessageRepositoryInterface

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\App\Domain\Insights\Contracts\Services;
+namespace App\Domain\Insights\Contracts\Services;
 
 use App\Models\Alert;
-use App\App\Domain\Insights\DTOs\RecommendationDTO;
+use App\Domain\Insights\DTOs\RecommendationDTO;
 
 interface RecommendationServiceInterface
 {

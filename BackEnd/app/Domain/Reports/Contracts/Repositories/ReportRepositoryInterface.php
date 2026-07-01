@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\Reports\Contracts\Repositories;
+namespace App\Domain\Reports\Contracts\Repositories;
 
 use App\Models\Report;
 use Illuminate\Database\Eloquent\Collection;

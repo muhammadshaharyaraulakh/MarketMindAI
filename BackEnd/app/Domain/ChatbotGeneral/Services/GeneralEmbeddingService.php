@@ -1,9 +1,9 @@
 <?php
 
-namespace App\App\Domain\ChatbotGeneral\Services;
+namespace App\Domain\ChatbotGeneral\Services;
 
 use App\Models\ChatMessage;
-use App\App\Domain\ChatbotGeneral\Contracts\Services\GeneralEmbeddingServiceInterface;
+use App\Domain\ChatbotGeneral\Contracts\Services\GeneralEmbeddingServiceInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 

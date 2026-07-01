@@ -67,8 +67,40 @@ export default function BillingView() {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF2D20]"></div>
                 </div>
               ) : clientSecret ? (
-                <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+                <Elements stripe={stripePromise} options={{ 
+                  clientSecret, 
+                  appearance: { 
+                    theme: 'stripe',
+                    variables: {
+                      fontFamily: '"Poppins", "Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+                      fontWeightNormal: '300',
+                      fontWeightMedium: '400',
+                      fontWeightBold: '500',
+                      colorText: '#0F172A',
+                      colorPrimary: '#FF2D20',
+                    },
+                    rules: {
+                      '.TabIcon': { display: 'none' },
+                      '.AccordionItemIcon': { display: 'none' },
+                      '.BlockIcon': { display: 'none' },
+                      '.Icon': { display: 'none' },
+                      '.p-Icon': { display: 'none' },
+                      '.Label': {
+                        fontFamily: '"Poppins", "Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+                        fontWeight: '300',
+                      },
+                      '.Input': {
+                        fontFamily: '"Poppins", "Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+                        fontWeight: '300',
+                      },
+                      '.Block': {
+                        fontFamily: '"Poppins", "Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+                      }
+                    }
+                  } 
+                }}>
                   <CheckoutForm 
+                    clientSecret={clientSecret}
                     onSuccess={handleSuccess} 
                     onCancel={() => setSelectedPlan(null)} 
                   />

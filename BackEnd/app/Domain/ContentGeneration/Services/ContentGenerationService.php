@@ -1,9 +1,9 @@
 <?php
-namespace App\App\Domain\ContentGeneration\Services;
+namespace App\Domain\ContentGeneration\Services;
 
-use App\App\Domain\ContentGeneration\Contracts\Services\ContentGenerationServiceInterface;
-use App\App\Domain\ContentGeneration\DTOs\GeneratedContentDTO;
-use App\App\Domain\ContentGeneration\Requests\GenerateContentRequest;
+use App\Domain\ContentGeneration\Contracts\Services\ContentGenerationServiceInterface;
+use App\Domain\ContentGeneration\DTOs\GeneratedContentDTO;
+use App\Domain\ContentGeneration\Requests\GenerateContentRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 

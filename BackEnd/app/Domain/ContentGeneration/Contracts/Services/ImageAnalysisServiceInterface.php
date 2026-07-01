@@ -1,7 +1,7 @@
 <?php
-namespace App\App\Domain\ContentGeneration\Contracts\Services;
+namespace App\Domain\ContentGeneration\Contracts\Services;
 
-use App\App\Domain\ContentGeneration\DTOs\ImageAnalysisDTO;
+use App\Domain\ContentGeneration\DTOs\ImageAnalysisDTO;
 use Illuminate\Http\UploadedFile;
 
 interface ImageAnalysisServiceInterface

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\App\Domain\DataIngestion\Repositories;
+namespace App\Domain\DataIngestion\Repositories;
 
-use App\App\Domain\DataIngestion\Contracts\Repositories\CsvUploadRepositoryInterface;
+use App\Domain\DataIngestion\Contracts\Repositories\CsvUploadRepositoryInterface;
 use App\Models\CsvUpload;
 
 class CsvUploadRepository implements CsvUploadRepositoryInterface

@@ -1,5 +1,5 @@
 <?php
-namespace App\App\Domain\ContentGeneration\DTOs;
+namespace App\Domain\ContentGeneration\DTOs;
 
 class ImageAnalysisDTO
 {

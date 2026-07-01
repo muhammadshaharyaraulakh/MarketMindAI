@@ -1,8 +1,8 @@
 <?php
 
-namespace App\App\Domain\CampaignManagement\Repositories;
+namespace App\Domain\CampaignManagement\Repositories;
 
-use App\App\Domain\CampaignManagement\Contracts\Repositories\AdSetRepositoryInterface;
+use App\Domain\CampaignManagement\Contracts\Repositories\AdSetRepositoryInterface;
 use App\Models\AdSet;
 use App\Models\Campaign;
 use App\Models\AdSetTargeting;
@@ -141,7 +141,7 @@ class AdSetRepository implements AdSetRepositoryInterface
             
         if (!$stats || $stats->spend === null) return;
         
-        $derived = \App\App\Domain\CampaignManagement\Services\MetricsCalculator::calculateDerived(
+        $derived = \App\Domain\CampaignManagement\Services\MetricsCalculator::calculateDerived(
             (float)$stats->spend, 
             (float)$stats->conversion_value, 
             (int)$stats->impressions, 
@@ -185,7 +185,7 @@ class AdSetRepository implements AdSetRepositoryInterface
             
         if (!$stats || $stats->spend === null) return;
         
-        $derived = \App\App\Domain\CampaignManagement\Services\MetricsCalculator::calculateDerived(
+        $derived = \App\Domain\CampaignManagement\Services\MetricsCalculator::calculateDerived(
             (float)$stats->spend, 
             (float)$stats->conversion_value, 
             (int)$stats->impressions, 

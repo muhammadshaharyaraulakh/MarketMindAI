@@ -1,11 +1,11 @@
 <?php
 
-namespace App\App\Domain\Insights\Repositories;
+namespace App\Domain\Insights\Repositories;
 
 use App\Models\Recommendation;
 use App\Models\Alert;
-use App\App\Domain\Insights\Contracts\Repositories\RecommendationRepositoryInterface;
-use App\App\Domain\Insights\DTOs\RecommendationDTO;
+use App\Domain\Insights\Contracts\Repositories\RecommendationRepositoryInterface;
+use App\Domain\Insights\DTOs\RecommendationDTO;
 
 class RecommendationRepository implements RecommendationRepositoryInterface
 {

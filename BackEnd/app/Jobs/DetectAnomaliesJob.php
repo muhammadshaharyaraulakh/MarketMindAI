@@ -21,8 +21,8 @@ class DetectAnomaliesJob implements ShouldQueue
     }
 
     public function handle(
-        \Domain\Insights\Contracts\Services\AnomalyDetectionServiceInterface $detectionService,
-        \Domain\Insights\Contracts\Repositories\AlertRepositoryInterface $alertRepository
+        \App\Domain\Insights\Contracts\Services\AnomalyDetectionServiceInterface $detectionService,
+        \App\Domain\Insights\Contracts\Repositories\AlertRepositoryInterface $alertRepository
     ): void {
         $usersToProcess = $this->userId ? collect([$this->userId]) : \App\Models\User::whereHas('campaigns', function ($query) {
             $query->where('status', 'active');

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Domain\Overview\Contracts\Services\OverviewServiceInterface;
+use App\Domain\Overview\Contracts\Services\OverviewServiceInterface;
 use Illuminate\Http\JsonResponse;
 
 class OverviewController extends Controller

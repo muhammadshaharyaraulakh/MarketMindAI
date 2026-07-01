@@ -1,12 +1,12 @@
 <?php
 
-namespace App\App\Domain\ChatbotGeneral\Services;
+namespace App\Domain\ChatbotGeneral\Services;
 
-use App\App\Domain\ChatbotGeneral\Contracts\Repositories\ChatMessageRepositoryInterface;
-use App\App\Domain\ChatbotGeneral\Contracts\Repositories\ChatSessionRepositoryInterface;
-use App\App\Domain\ChatbotGeneral\Contracts\Services\ChatbotServiceInterface;
-use App\App\Domain\ChatbotGeneral\Contracts\Services\GeneralEmbeddingServiceInterface;
-use App\App\Domain\ChatbotGeneral\DTOs\ChatMessageDTO;
+use App\Domain\ChatbotGeneral\Contracts\Repositories\ChatMessageRepositoryInterface;
+use App\Domain\ChatbotGeneral\Contracts\Repositories\ChatSessionRepositoryInterface;
+use App\Domain\ChatbotGeneral\Contracts\Services\ChatbotServiceInterface;
+use App\Domain\ChatbotGeneral\Contracts\Services\GeneralEmbeddingServiceInterface;
+use App\Domain\ChatbotGeneral\DTOs\ChatMessageDTO;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 

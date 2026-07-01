@@ -1,8 +1,8 @@
 <?php
 
-namespace App\App\Domain\CampaignManagement\Repositories;
+namespace App\Domain\CampaignManagement\Repositories;
 
-use App\App\Domain\CampaignManagement\Contracts\Repositories\AdRepositoryInterface;
+use App\Domain\CampaignManagement\Contracts\Repositories\AdRepositoryInterface;
 use App\Models\Ad;
 use App\Models\AdSet;
 use App\Models\Campaign;
@@ -167,7 +167,7 @@ class AdRepository implements AdRepositoryInterface
 
         $date = $data['date'] ?? Carbon::today()->toDateString();
         
-        $derived = \App\App\Domain\CampaignManagement\Services\MetricsCalculator::calculateDerived(
+        $derived = \App\Domain\CampaignManagement\Services\MetricsCalculator::calculateDerived(
             $data['spend'], 
             $data['revenue'] ?? 0, 
             $data['impressions'], 
@@ -195,7 +195,7 @@ class AdRepository implements AdRepositoryInterface
         );
 
         // Aggregate up to AdSet and Campaign level
-        $adSetRepository = app(\App\App\Domain\CampaignManagement\Contracts\Repositories\AdSetRepositoryInterface::class);
+        $adSetRepository = app(\App\Domain\CampaignManagement\Contracts\Repositories\AdSetRepositoryInterface::class);
         $adSetRepository->aggregateMetricsFromAds($ad->ad_set_id, $date);
 
         return ['status' => 'success', 'message' => 'Metrics recorded successfully.'];

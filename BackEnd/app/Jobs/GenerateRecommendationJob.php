@@ -21,9 +21,9 @@ class GenerateRecommendationJob implements ShouldQueue
     }
 
     public function handle(
-        \Domain\Insights\Contracts\Services\RecommendationServiceInterface $recommendationService,
-        \Domain\Insights\Contracts\Repositories\RecommendationRepositoryInterface $recommendationRepository,
-        \Domain\Insights\Contracts\Services\InsightsPineconeServiceInterface $pineconeService
+        \App\Domain\Insights\Contracts\Services\RecommendationServiceInterface $recommendationService,
+        \App\Domain\Insights\Contracts\Repositories\RecommendationRepositoryInterface $recommendationRepository,
+        \App\Domain\Insights\Contracts\Services\InsightsPineconeServiceInterface $pineconeService
     ): void {
         $alert = \App\Models\Alert::find($this->alertId);
         if (!$alert) return;

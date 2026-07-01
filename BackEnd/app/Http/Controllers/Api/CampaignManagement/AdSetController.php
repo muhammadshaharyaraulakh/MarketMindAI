@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\CampaignManagement;
 
 use App\Http\Controllers\Controller;
-use Domain\CampaignManagement\Contracts\Services\AdSetServiceInterface;
-use Domain\CampaignManagement\Requests\StoreAdSetRequest;
-use Domain\CampaignManagement\Requests\UpdateAdSetRequest;
+use App\Domain\CampaignManagement\Contracts\Services\AdSetServiceInterface;
+use App\Domain\CampaignManagement\Requests\StoreAdSetRequest;
+use App\Domain\CampaignManagement\Requests\UpdateAdSetRequest;
 use Illuminate\Http\JsonResponse;
 
 class AdSetController extends Controller

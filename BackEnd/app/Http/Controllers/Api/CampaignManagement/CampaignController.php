@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api\CampaignManagement;
 
 use App\Http\Controllers\Controller;
-use Domain\CampaignManagement\Contracts\Services\CampaignServiceInterface;
-use Domain\CampaignManagement\Requests\StoreCampaignRequest;
-use Domain\CampaignManagement\Requests\UpdateCampaignRequest;
-use Domain\CampaignManagement\Requests\RecordDailyLogRequest;
+use App\Domain\CampaignManagement\Contracts\Services\CampaignServiceInterface;
+use App\Domain\CampaignManagement\Requests\StoreCampaignRequest;
+use App\Domain\CampaignManagement\Requests\UpdateCampaignRequest;
+use App\Domain\CampaignManagement\Requests\RecordDailyLogRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

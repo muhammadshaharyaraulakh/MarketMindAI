@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\CampaignManagement\Contracts\Repositories;
+namespace App\Domain\CampaignManagement\Contracts\Repositories;
 
 use Illuminate\Support\Collection;
 use App\Models\Ad;

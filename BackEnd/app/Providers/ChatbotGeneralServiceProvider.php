@@ -2,14 +2,14 @@
 
 namespace App\Providers;
 
-use Domain\ChatbotGeneral\Contracts\Repositories\ChatMessageRepositoryInterface;
-use Domain\ChatbotGeneral\Contracts\Repositories\ChatSessionRepositoryInterface;
-use Domain\ChatbotGeneral\Contracts\Services\ChatbotServiceInterface;
-use Domain\ChatbotGeneral\Contracts\Services\GeneralEmbeddingServiceInterface;
-use Domain\ChatbotGeneral\Repositories\ChatMessageRepository;
-use Domain\ChatbotGeneral\Repositories\ChatSessionRepository;
-use Domain\ChatbotGeneral\Services\ChatbotService;
-use Domain\ChatbotGeneral\Services\GeneralEmbeddingService;
+use App\Domain\ChatbotGeneral\Contracts\Repositories\ChatMessageRepositoryInterface;
+use App\Domain\ChatbotGeneral\Contracts\Repositories\ChatSessionRepositoryInterface;
+use App\Domain\ChatbotGeneral\Contracts\Services\ChatbotServiceInterface;
+use App\Domain\ChatbotGeneral\Contracts\Services\GeneralEmbeddingServiceInterface;
+use App\Domain\ChatbotGeneral\Repositories\ChatMessageRepository;
+use App\Domain\ChatbotGeneral\Repositories\ChatSessionRepository;
+use App\Domain\ChatbotGeneral\Services\ChatbotService;
+use App\Domain\ChatbotGeneral\Services\GeneralEmbeddingService;
 use Illuminate\Support\ServiceProvider;
 
 class ChatbotGeneralServiceProvider extends ServiceProvider

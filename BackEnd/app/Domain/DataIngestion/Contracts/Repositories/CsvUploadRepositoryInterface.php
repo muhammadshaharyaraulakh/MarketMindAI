@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\DataIngestion\Contracts\Repositories;
+namespace App\Domain\DataIngestion\Contracts\Repositories;
 
 use App\Models\CsvUpload;
 

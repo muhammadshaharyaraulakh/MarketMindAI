@@ -1,11 +1,11 @@
 <?php
 
-namespace App\App\Domain\Insights\Services;
+namespace App\Domain\Insights\Services;
 
 use App\Models\AdAnalytic;
 use App\Models\Campaign;
-use App\App\Domain\Insights\Contracts\Services\AnomalyDetectionServiceInterface;
-use App\App\Domain\Insights\DTOs\AlertDTO;
+use App\Domain\Insights\Contracts\Services\AnomalyDetectionServiceInterface;
+use App\Domain\Insights\DTOs\AlertDTO;
 use Illuminate\Support\Carbon;
 
 class AnomalyDetectionService implements AnomalyDetectionServiceInterface

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\App\Domain\CampaignManagement\Services;
+namespace App\Domain\CampaignManagement\Services;
 
-use App\App\Domain\CampaignManagement\Contracts\Repositories\AdRepositoryInterface;
-use App\App\Domain\CampaignManagement\Contracts\Services\AdServiceInterface;
+use App\Domain\CampaignManagement\Contracts\Repositories\AdRepositoryInterface;
+use App\Domain\CampaignManagement\Contracts\Services\AdServiceInterface;
 use App\Models\Ad;
 use Illuminate\Support\Collection;
 use App\Jobs\SimulateSyncStatusJob;

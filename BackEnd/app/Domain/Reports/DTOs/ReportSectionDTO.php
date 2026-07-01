@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\Reports\DTOs;
+namespace App\Domain\Reports\DTOs;
 
 class ReportSectionDTO
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\App\Domain\Reports\Repositories;
+namespace App\Domain\Reports\Repositories;
 
 use App\Models\Report;
-use App\App\Domain\Reports\Contracts\Repositories\ReportRepositoryInterface;
+use App\Domain\Reports\Contracts\Repositories\ReportRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 
 class ReportRepository implements ReportRepositoryInterface

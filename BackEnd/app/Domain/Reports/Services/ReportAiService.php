@@ -1,8 +1,8 @@
 <?php
 
-namespace App\App\Domain\Reports\Services;
+namespace App\Domain\Reports\Services;
 
-use App\App\Domain\Reports\Contracts\Services\ReportAiServiceInterface;
+use App\Domain\Reports\Contracts\Services\ReportAiServiceInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 

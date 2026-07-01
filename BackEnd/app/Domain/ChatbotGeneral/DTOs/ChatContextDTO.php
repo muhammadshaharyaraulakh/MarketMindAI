@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\ChatbotGeneral\DTOs;
+namespace App\Domain\ChatbotGeneral\DTOs;
 
 class ChatContextDTO
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\App\Domain\Overview\Services;
+namespace App\Domain\Overview\Services;
 
-use App\App\Domain\Overview\Contracts\Services\OverviewServiceInterface;
+use App\Domain\Overview\Contracts\Services\OverviewServiceInterface;
 use App\Models\Campaign;
 use App\Models\AdAnalytic;
 use Illuminate\Support\Facades\DB;

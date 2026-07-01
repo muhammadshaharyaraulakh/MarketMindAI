@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\Insights\DTOs;
+namespace App\Domain\Insights\DTOs;
 
 class AlertDTO
 {

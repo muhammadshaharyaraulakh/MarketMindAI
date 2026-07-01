@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\CampaignManagement\Services;
+namespace App\Domain\CampaignManagement\Services;
 
 class MetricsCalculator
 {

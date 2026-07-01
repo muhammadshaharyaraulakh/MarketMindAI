@@ -1,9 +1,9 @@
 <?php
 
-namespace App\App\Domain\Insights\Contracts\Repositories;
+namespace App\Domain\Insights\Contracts\Repositories;
 
 use App\Models\Recommendation;
-use App\App\Domain\Insights\DTOs\RecommendationDTO;
+use App\Domain\Insights\DTOs\RecommendationDTO;
 
 interface RecommendationRepositoryInterface
 {

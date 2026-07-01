@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Domain\Reports\Requests\GenerateReportRequest;
-use Domain\Reports\Contracts\Repositories\ReportRepositoryInterface;
-use Domain\Reports\DTOs\ReportJobDTO;
+use App\Domain\Reports\Requests\GenerateReportRequest;
+use App\Domain\Reports\Contracts\Repositories\ReportRepositoryInterface;
+use App\Domain\Reports\DTOs\ReportJobDTO;
 use App\Jobs\GenerateReportJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

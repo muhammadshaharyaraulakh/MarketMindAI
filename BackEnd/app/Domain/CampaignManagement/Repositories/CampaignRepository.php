@@ -1,11 +1,11 @@
 <?php
 
-namespace App\App\Domain\CampaignManagement\Repositories;
+namespace App\Domain\CampaignManagement\Repositories;
 
-use App\App\Domain\CampaignManagement\Contracts\Repositories\CampaignRepositoryInterface;
+use App\Domain\CampaignManagement\Contracts\Repositories\CampaignRepositoryInterface;
 use App\Models\Campaign;
 use App\Models\AdAnalytic;
-use App\App\Domain\CampaignManagement\Services\MetricsCalculator;
+use App\Domain\CampaignManagement\Services\MetricsCalculator;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 

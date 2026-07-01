@@ -1,9 +1,9 @@
 <?php
 
-namespace App\App\Domain\CampaignManagement\Services;
+namespace App\Domain\CampaignManagement\Services;
 
-use App\App\Domain\CampaignManagement\Contracts\Repositories\AdSetRepositoryInterface;
-use App\App\Domain\CampaignManagement\Contracts\Services\AdSetServiceInterface;
+use App\Domain\CampaignManagement\Contracts\Repositories\AdSetRepositoryInterface;
+use App\Domain\CampaignManagement\Contracts\Services\AdSetServiceInterface;
 use App\Models\AdSet;
 use Illuminate\Support\Collection;
 

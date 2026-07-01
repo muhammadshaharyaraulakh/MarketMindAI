@@ -1,8 +1,8 @@
 <?php
 
-namespace App\App\Domain\Reports\Services;
+namespace App\Domain\Reports\Services;
 
-use App\App\Domain\Reports\Contracts\Services\ReportDataServiceInterface;
+use App\Domain\Reports\Contracts\Services\ReportDataServiceInterface;
 use Illuminate\Support\Facades\DB;
 
 class ReportDataService implements ReportDataServiceInterface

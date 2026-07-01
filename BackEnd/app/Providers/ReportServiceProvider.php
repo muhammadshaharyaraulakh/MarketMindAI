@@ -3,14 +3,14 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Domain\Reports\Contracts\Repositories\ReportRepositoryInterface;
-use Domain\Reports\Repositories\ReportRepository;
-use Domain\Reports\Contracts\Services\ReportDataServiceInterface;
-use Domain\Reports\Services\ReportDataService;
-use Domain\Reports\Contracts\Services\ReportPdfServiceInterface;
-use Domain\Reports\Services\ReportPdfService;
-use Domain\Reports\Contracts\Services\ReportAiServiceInterface;
-use Domain\Reports\Services\ReportAiService;
+use App\Domain\Reports\Contracts\Repositories\ReportRepositoryInterface;
+use App\Domain\Reports\Repositories\ReportRepository;
+use App\Domain\Reports\Contracts\Services\ReportDataServiceInterface;
+use App\Domain\Reports\Services\ReportDataService;
+use App\Domain\Reports\Contracts\Services\ReportPdfServiceInterface;
+use App\Domain\Reports\Services\ReportPdfService;
+use App\Domain\Reports\Contracts\Services\ReportAiServiceInterface;
+use App\Domain\Reports\Services\ReportAiService;
 
 class ReportServiceProvider extends ServiceProvider
 {

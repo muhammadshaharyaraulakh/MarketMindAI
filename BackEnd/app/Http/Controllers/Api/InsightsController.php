@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Alert;
 use App\Models\Recommendation;
-use Domain\Insights\Contracts\Repositories\AlertRepositoryInterface;
-use Domain\Insights\Contracts\Repositories\RecommendationRepositoryInterface;
+use App\Domain\Insights\Contracts\Repositories\AlertRepositoryInterface;
+use App\Domain\Insights\Contracts\Repositories\RecommendationRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

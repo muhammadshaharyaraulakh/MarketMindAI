@@ -1,8 +1,8 @@
 <?php
-namespace App\App\Domain\ContentGeneration\Services;
+namespace App\Domain\ContentGeneration\Services;
 
-use App\App\Domain\ContentGeneration\Contracts\Services\ImageAnalysisServiceInterface;
-use App\App\Domain\ContentGeneration\DTOs\ImageAnalysisDTO;
+use App\Domain\ContentGeneration\Contracts\Services\ImageAnalysisServiceInterface;
+use App\Domain\ContentGeneration\DTOs\ImageAnalysisDTO;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;

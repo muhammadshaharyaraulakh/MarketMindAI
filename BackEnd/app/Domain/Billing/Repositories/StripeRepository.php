@@ -1,7 +1,7 @@
 <?php
-namespace App\App\Domain\Billing\Repositories;
+namespace App\Domain\Billing\Repositories;
 
-use App\App\Domain\Billing\Contracts\Repositories\StripeRepositoryInterface;
+use App\Domain\Billing\Contracts\Repositories\StripeRepositoryInterface;
 use App\Models\User;
 use Stripe\Stripe;
 use Stripe\Customer;
@@ -36,9 +36,7 @@ class StripeRepository implements StripeRepositoryInterface
             'amount' => $amount,
             'currency' => $currency,
             'customer' => $customerId,
-            'automatic_payment_methods' => [
-                'enabled' => true,
-            ],
+            'payment_method_types' => ['card'],
         ]);
     }
 

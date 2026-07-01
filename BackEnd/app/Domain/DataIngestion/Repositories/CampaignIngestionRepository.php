@@ -1,12 +1,12 @@
 <?php
 
-namespace App\App\Domain\DataIngestion\Repositories;
+namespace App\Domain\DataIngestion\Repositories;
 
-use App\App\Domain\DataIngestion\Contracts\Repositories\CampaignIngestionRepositoryInterface;
+use App\Domain\DataIngestion\Contracts\Repositories\CampaignIngestionRepositoryInterface;
 use App\Models\Campaign;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use App\App\Domain\DataIngestion\DTOs\CampaignSummaryDTO;
+use App\Domain\DataIngestion\DTOs\CampaignSummaryDTO;
 
 class CampaignIngestionRepository implements CampaignIngestionRepositoryInterface
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\App\Domain\Insights\Services;
+namespace App\Domain\Insights\Services;
 
 use App\Models\Alert;
 use App\Models\Recommendation;
-use App\App\Domain\Insights\Contracts\Services\InsightsPineconeServiceInterface;
+use App\Domain\Insights\Contracts\Services\InsightsPineconeServiceInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 

@@ -20,7 +20,7 @@ class EmbedChatTurnJob implements ShouldQueue
         $this->onQueue('default');
     }
 
-    public function handle(\Domain\ChatbotGeneral\Contracts\Services\GeneralEmbeddingServiceInterface $embeddingService): void
+    public function handle(\App\Domain\ChatbotGeneral\Contracts\Services\GeneralEmbeddingServiceInterface $embeddingService): void
     {
         try {
             $userMessage = \App\Models\ChatMessage::find($this->userMessageId);

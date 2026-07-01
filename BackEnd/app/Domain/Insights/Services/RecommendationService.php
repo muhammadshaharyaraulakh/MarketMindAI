@@ -1,10 +1,10 @@
 <?php
 
-namespace App\App\Domain\Insights\Services;
+namespace App\Domain\Insights\Services;
 
 use App\Models\Alert;
-use App\App\Domain\Insights\Contracts\Services\RecommendationServiceInterface;
-use App\App\Domain\Insights\DTOs\RecommendationDTO;
+use App\Domain\Insights\Contracts\Services\RecommendationServiceInterface;
+use App\Domain\Insights\DTOs\RecommendationDTO;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 

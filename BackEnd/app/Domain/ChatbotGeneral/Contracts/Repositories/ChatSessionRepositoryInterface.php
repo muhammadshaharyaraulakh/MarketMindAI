@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\ChatbotGeneral\Contracts\Repositories;
+namespace App\Domain\ChatbotGeneral\Contracts\Repositories;
 
 use App\Models\ChatSession;
 use Illuminate\Database\Eloquent\Collection;

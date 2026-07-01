@@ -1,9 +1,9 @@
 <?php
 
-namespace App\App\Domain\ChatbotGeneral\Repositories;
+namespace App\Domain\ChatbotGeneral\Repositories;
 
 use App\Models\ChatSession;
-use App\App\Domain\ChatbotGeneral\Contracts\Repositories\ChatSessionRepositoryInterface;
+use App\Domain\ChatbotGeneral\Contracts\Repositories\ChatSessionRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 
 class ChatSessionRepository implements ChatSessionRepositoryInterface

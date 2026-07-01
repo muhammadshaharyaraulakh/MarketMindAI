@@ -1,6 +1,6 @@
 <?php
 
-namespace App\App\Domain\Insights\Contracts\Services;
+namespace App\Domain\Insights\Contracts\Services;
 
 interface AnomalyDetectionServiceInterface
 {

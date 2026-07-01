@@ -1,10 +1,10 @@
 <?php
-namespace App\App\Domain\ContentGeneration\Repositories;
+namespace App\Domain\ContentGeneration\Repositories;
 
 use App\Models\ContentGeneration;
 use Carbon\Carbon;
-use App\App\Domain\ContentGeneration\Contracts\Repositories\ContentGenerationRepositoryInterface;
-use App\App\Domain\ContentGeneration\DTOs\SavedGenerationDTO;
+use App\Domain\ContentGeneration\Contracts\Repositories\ContentGenerationRepositoryInterface;
+use App\Domain\ContentGeneration\DTOs\SavedGenerationDTO;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 

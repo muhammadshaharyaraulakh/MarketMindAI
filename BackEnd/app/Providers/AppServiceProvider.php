@@ -18,12 +18,12 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            \Domain\Overview\Contracts\Services\OverviewServiceInterface::class,
-            \Domain\Overview\Services\OverviewService::class
+            \App\Domain\Overview\Contracts\Services\OverviewServiceInterface::class,
+            \App\Domain\Overview\Services\OverviewService::class
         );
         $this->app->bind(
-            \Domain\CampaignManagement\Contracts\Services\CampaignServiceInterface::class,
-            \Domain\CampaignManagement\Services\CampaignService::class
+            \App\Domain\CampaignManagement\Contracts\Services\CampaignServiceInterface::class,
+            \App\Domain\CampaignManagement\Services\CampaignService::class
         );
     }
 

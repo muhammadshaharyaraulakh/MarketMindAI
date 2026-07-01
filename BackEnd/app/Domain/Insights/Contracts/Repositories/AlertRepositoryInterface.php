@@ -1,9 +1,9 @@
 <?php
 
-namespace App\App\Domain\Insights\Contracts\Repositories;
+namespace App\Domain\Insights\Contracts\Repositories;
 
 use App\Models\Alert;
-use App\App\Domain\Insights\DTOs\AlertDTO;
+use App\Domain\Insights\DTOs\AlertDTO;
 use Illuminate\Database\Eloquent\Collection;
 
 interface AlertRepositoryInterface
