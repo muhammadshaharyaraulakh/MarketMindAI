@@ -124,12 +124,7 @@ export default function Navbar({ onSignIn, onSignUp, onShowDashboard }) {
           >
             Sign In
           </button>
-          <button 
-            onClick={onShowDashboard}
-            className="text-[14px] font-bold text-[#FF2D20] hover:text-[#E5261A] transition-colors cursor-pointer"
-          >
-            Dashboard
-          </button>
+
           <button 
             onClick={onSignUp}
             className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[15px] font-semibold tracking-tight px-5 py-2.5 rounded-lg inline-flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.05)] cursor-pointer transition-colors duration-150"
@@ -196,12 +191,7 @@ export default function Navbar({ onSignIn, onSignUp, onShowDashboard }) {
             </a>
 
             <div className="flex flex-col gap-4 mt-2">
-              <button 
-                onClick={() => { setIsOpen(false); onShowDashboard(); }}
-                className="text-[16px] font-bold text-[#FF2D20] hover:bg-[#FFF1F0] py-3 text-center rounded-lg cursor-pointer"
-              >
-                Go to Dashboard
-              </button>
+
               <button 
                 onClick={() => { setIsOpen(false); onSignIn(); }}
                 className="text-[16px] font-semibold text-[#475569] hover:text-[#0F172A] py-3 text-center rounded-lg border border-[#E2E8F0] cursor-pointer"

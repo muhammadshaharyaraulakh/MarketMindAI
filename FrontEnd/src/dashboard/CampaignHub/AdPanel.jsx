@@ -39,6 +39,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
 
   const [isUtmExpanded, setIsUtmExpanded] = useState(false)
   const [error, setError] = useState(null)
+  const [fieldErrors, setFieldErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -54,10 +55,15 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
+    setFieldErrors({})
     setIsSubmitting(true)
     try {
       await onSave({
         ...formData,
+        ad_format: formData.format ? formData.format.toLowerCase() : '',
+        ad_set_id: item?.adSetId || adSetId,
+        destination_url: formData.destinationUrl,
+        cta_type: formData.ctaType,
         brand_name: formData.brandName,
         id: item?.id || Date.now(),
         adSetId: item?.adSetId || adSetId,
@@ -66,8 +72,10 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
     } catch (err) {
       if (err.response?.status === 422) {
         setError(err.response.data.message || 'Validation failed. Please check your inputs.')
+        setFieldErrors(err.response.data.errors || {})
       } else {
         setError(err.response?.data?.message || 'An unexpected error occurred while saving.')
+        setFieldErrors({})
       }
     } finally {
       setIsSubmitting(false)
@@ -77,6 +85,13 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
   const generatedUrl = formData.destinationUrl 
     ? `${formData.destinationUrl}?utm_source=${formData.utmSource}&utm_medium=${formData.utmMedium}&utm_campaign=${formData.utmCampaign}`
     : ''
+
+  const renderFieldError = (field) => {
+    if (fieldErrors[field]) {
+      return <span className="text-red-500 text-[10px] mt-1 block font-medium">{fieldErrors[field][0]}</span>
+    }
+    return null
+  }
 
   // Array handlers for Google RSA
   const handleArrayChange = (field, index, value) => {
@@ -106,11 +121,14 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
             </div>
             <div className="space-y-2">
               {formData.headlines.map((hl, i) => (
-                <input 
-                  key={`hl-${i}`} type="text" value={hl} onChange={e => handleArrayChange('headlines', i, e.target.value)}
-                  placeholder={`Headline ${i + 1}`} maxLength={30}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
-                />
+                <div key={`hl-${i}`}>
+                  <input 
+                    type="text" value={hl} onChange={e => handleArrayChange('headlines', i, e.target.value)}
+                    placeholder={`Headline ${i + 1}`} maxLength={30}
+                    className={`w-full px-3 py-2 border ${fieldErrors[`headlines.${i}`] ? 'border-red-500' : 'border-[#E2E8F0]'} rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none`}
+                  />
+                  {renderFieldError(`headlines.${i}`)}
+                </div>
               ))}
             </div>
           </div>
@@ -126,11 +144,14 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
             </div>
             <div className="space-y-2">
               {formData.descriptions.map((desc, i) => (
-                <input 
-                  key={`desc-${i}`} type="text" value={desc} onChange={e => handleArrayChange('descriptions', i, e.target.value)}
-                  placeholder={`Description ${i + 1}`} maxLength={90}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
-                />
+                <div key={`desc-${i}`}>
+                  <input 
+                    type="text" value={desc} onChange={e => handleArrayChange('descriptions', i, e.target.value)}
+                    placeholder={`Description ${i + 1}`} maxLength={90}
+                    className={`w-full px-3 py-2 border ${fieldErrors[`descriptions.${i}`] ? 'border-red-500' : 'border-[#E2E8F0]'} rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none`}
+                  />
+                  {renderFieldError(`descriptions.${i}`)}
+                </div>
               ))}
             </div>
           </div>
@@ -320,7 +341,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 bg-[#F8FAFC]/50">
+        <div className="flex-1 overflow-y-auto p-6 bg-[#F8FAFC]/50 no-scrollbar">
           {error && (
             <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl flex flex-col gap-1">
               <span className="text-xs font-semibold text-red-800">Unable to save ad</span>
@@ -351,8 +372,9 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
                 <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Ad Name</label>
                 <input 
                   type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
+                  className={`w-full px-3 py-2 border ${fieldErrors.name ? 'border-red-500' : 'border-[#E2E8F0]'} rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none`}
                 />
+                {renderFieldError('name')}
               </div>
             </div>
 
@@ -392,8 +414,9 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
                 <input 
                   type="url" required value={formData.destinationUrl} onChange={e => setFormData({...formData, destinationUrl: e.target.value})}
                   placeholder="https://"
-                  className="w-full px-3 py-2 border border-[#E2E8F0] rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none"
+                  className={`w-full px-3 py-2 border ${fieldErrors.destinationUrl ? 'border-red-500' : 'border-[#E2E8F0]'} rounded-lg text-sm font-semibold placeholder:font-light focus:border-[#FF2D20] focus:outline-none`}
                 />
+                {renderFieldError('destinationUrl')}
               </div>
               <div>
                 <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Call to Action</label>
@@ -485,7 +508,7 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             )}
-            {item ? 'Save Ad' : 'Create Ad'}
+            {item ? 'Save Ad' : formData.platform === 'Google' ? 'Google Ads Live' : 'Create Ad'}
           </button>
         </div>
       </motion.div>

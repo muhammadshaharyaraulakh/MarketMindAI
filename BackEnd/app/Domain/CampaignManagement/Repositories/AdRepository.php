@@ -190,7 +190,6 @@ class AdRepository implements AdRepositoryInterface
                 'cpc' => $derived['cpc'],
                 'cpm' => $derived['cpm'],
                 'roas' => $derived['roas'],
-                'currency' => 'USD',
             ]
         );
 

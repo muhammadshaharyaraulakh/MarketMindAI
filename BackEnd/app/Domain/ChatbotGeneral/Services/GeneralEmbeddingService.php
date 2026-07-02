@@ -66,7 +66,10 @@ class GeneralEmbeddingService implements GeneralEmbeddingServiceInterface
                 'vector' => $queryVector,
                 'topK' => $topK,
                 'includeMetadata' => true,
-                'namespace' => "user_{$userId}"
+                'namespace' => "user_{$userId}",
+                'filter' => [
+                    'type' => ['$ne' => 'conversation']
+                ]
             ]);
 
             if ($response->successful()) {

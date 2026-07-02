@@ -15,7 +15,7 @@ class ReportAiService implements ReportAiServiceInterface
     private function callGemini(string $prompt, int $maxTokens = 600): string
     {
         $apiKey = env('GEMINI_REPORTING_API_KEY', env('GEMINI_API_KEY'));
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={$apiKey}";
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}";
         $maxRetries = 3;
         $attempt = 0;
 
@@ -44,7 +44,9 @@ class ReportAiService implements ReportAiServiceInterface
                 if ($status === 503 || $status === 429) {
                     $attempt++;
                     if ($attempt < $maxRetries) {
-                        sleep(pow(2, $attempt)); // Exponential backoff: 2s, 4s
+                        // Sleep much longer for rate limits (15 RPM free tier)
+                        // 15 seconds, then 30 seconds
+                        sleep(15 * $attempt); 
                         continue;
                     }
                 }

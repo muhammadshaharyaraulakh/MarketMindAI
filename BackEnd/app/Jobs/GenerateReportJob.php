@@ -77,41 +77,41 @@ class GenerateReportJob implements ShouldQueue
             if ($this->dto->reportType === 'performance_summary' || $this->dto->reportType === 'full_analytics') {
                 $aiData['executive_summary'] = $aiService->generateExecutiveSummary($kpiScorecard, $topPerformers, $campaignName, $platform);
                 $this->markSectionComplete($reportRepo, $reportId, 'ai_executive_summary', 30);
-                sleep(5); // Delay to prevent spam
+                sleep(10); // Delay to prevent spam
             }
 
             if ($this->dto->reportType === 'ai_insights' || $this->dto->reportType === 'full_analytics') {
                 $aiData['insight_narrative'] = $aiService->generateInsightNarrative($allData, $campaignName);
                 $this->markSectionComplete($reportRepo, $reportId, 'ai_insight_narrative', 40);
-                sleep(5);
+                sleep(10);
 
                 $aiData['insight_audience'] = $aiService->generateInsightBlock('audience_behavior', $platformBreakdown, $campaignName);
                 $this->markSectionComplete($reportRepo, $reportId, 'ai_insight_audience', 50);
-                sleep(5);
+                sleep(10);
 
                 $aiData['insight_creative'] = $aiService->generateInsightBlock('creative_performance', $adCreativeBreakdown, $campaignName);
                 $this->markSectionComplete($reportRepo, $reportId, 'ai_insight_creative', 60);
-                sleep(5);
+                sleep(10);
 
                 $aiData['insight_budget'] = $aiService->generateInsightBlock('budget_intelligence', $adSetBreakdown, $campaignName);
                 $this->markSectionComplete($reportRepo, $reportId, 'ai_insight_budget', 70);
-                sleep(5);
+                sleep(10);
 
                 $aiData['personas'] = $aiService->generatePersonas($adSetBreakdown, $adSetBreakdown);
                 $this->markSectionComplete($reportRepo, $reportId, 'ai_personas', 80);
-                sleep(5);
+                sleep(10);
             }
 
             if ($this->dto->reportType === 'campaign_breakdown' || $this->dto->reportType === 'full_analytics') {
                 $aiData['key_learnings'] = $aiService->generateKeyLearnings($allData, $this->dto->reportType);
                 $this->markSectionComplete($reportRepo, $reportId, 'ai_key_learnings', 90);
-                sleep(5);
+                sleep(10);
             }
 
             if ($this->dto->reportType === 'full_analytics') {
                 $aiData['final_recommendations'] = $aiService->generateFinalRecommendations($allData);
                 $this->markSectionComplete($reportRepo, $reportId, 'ai_final_recommendations', 95);
-                sleep(5);
+                sleep(10);
             }
 
             // Step 4: Assemble report data

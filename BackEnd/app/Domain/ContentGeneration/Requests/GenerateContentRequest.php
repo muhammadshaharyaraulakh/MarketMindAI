@@ -27,7 +27,7 @@ class GenerateContentRequest extends FormRequest
 
             'platform' => [
                 'required',
-                'in:google,meta,snapchat',
+                'in:google,meta,snapchat,email',
             ],
 
             'question_answers' => ['required', 'array'],

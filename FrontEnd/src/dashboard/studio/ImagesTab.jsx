@@ -55,7 +55,7 @@ export default function ImagesTab({ state }) {
         </div>
         <h4 className="text-xl font-bold text-gray-800 mb-2">Premium Feature Locked</h4>
         <p className="text-sm text-gray-600 max-w-lg leading-relaxed">
-          The AI Content Generation module is <strong className="text-gray-800">available under the PRO Account only</strong> and is not accessible during the free trial. Upgrade to PRO in the future to magically transform standard product photos into premium, platform-native ad creatives and full video storyboards in seconds!
+          This feature is only available under the <strong className="text-gray-800">custom pro mode</strong>. We are currently working on it and it will be available in the future.
         </p>
       </div>
 

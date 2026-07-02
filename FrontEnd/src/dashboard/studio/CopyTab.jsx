@@ -231,6 +231,30 @@ export default function CopyTab({ platform, aiAnalysis, generatedContent }) {
     </>
   )
 
+  const renderEmail = () => (
+    <>
+      <CopyCard title="Subject Lines" copyText={(copy.subject_lines || []).join('\n')}>
+        <ul className="list-disc pl-5 space-y-2">
+          {(copy.subject_lines || []).map((s, i) => (
+            <li key={i} className="text-sm text-gray-800 font-semibold">{s}</li>
+          ))}
+        </ul>
+      </CopyCard>
+
+      <CopyCard title="Email Body" copyText={copy.email_body || ''}>
+        <div className="whitespace-pre-wrap text-sm text-gray-700 p-4 bg-gray-50 rounded-lg border border-gray-100">
+          {copy.email_body}
+        </div>
+      </CopyCard>
+
+      <CopyCard title="Call to Action (CTA)" copyText={copy.cta_text || ''}>
+        <div className="inline-block bg-[#FF2D20] text-white font-bold px-6 py-2 rounded-lg text-center mt-2">
+          {copy.cta_text || 'Click Here'}
+        </div>
+      </CopyCard>
+    </>
+  )
+
   const normalizedPlatform = platform?.toLowerCase();
 
   return (
@@ -238,6 +262,7 @@ export default function CopyTab({ platform, aiAnalysis, generatedContent }) {
       {normalizedPlatform === 'google' && renderGoogle()}
       {normalizedPlatform === 'meta' && renderMeta()}
       {normalizedPlatform === 'snapchat' && renderSnapchat()}
+      {normalizedPlatform === 'email' && renderEmail()}
     </div>
   )
 }

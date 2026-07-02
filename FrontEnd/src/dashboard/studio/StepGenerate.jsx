@@ -250,13 +250,15 @@ export default function StepGenerate({ state, dispatch, appState }) {
       <div className="mt-8 pt-6 border-t border-gray-100">
         <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between relative">
           <div className="flex gap-3">
-            <button 
-              onClick={handleSave}
-              className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200 transition-colors"
-            >
-              <BookmarkIcon className="w-4 h-4" />
-              Save to Library
-            </button>
+            {state.selectedPlatform?.toLowerCase() !== 'email' && (
+              <button 
+                onClick={handleSave}
+                className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-200 transition-colors"
+              >
+                <BookmarkIcon className="w-4 h-4" />
+                Save to Library
+              </button>
+            )}
           </div>
           
           <button 

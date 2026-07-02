@@ -309,6 +309,65 @@ export default function StepQuestions({ state, dispatch }) {
     </div>
   )
 
+  const renderEmailQuestions = () => (
+    <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Campaign Goal</label>
+        <PillGroup 
+          options={[{label:'Sales',value:'Sales'}, {label:'Newsletter',value:'Newsletter'}, {label:'Announcement',value:'Announcement'}, {label:'Re-engagement',value:'Re-engagement'}]}
+          selected={questionAnswers.emailGoal}
+          onChange={val => handleChange('emailGoal', val)}
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Offer / Discount?</label>
+        <ToggleSwitch 
+          value={questionAnswers.emailHasOffer || false}
+          onChange={val => handleChange('emailHasOffer', val)}
+        />
+        <AnimatePresence>
+          {questionAnswers.emailHasOffer && (
+            <motion.div
+              initial={{ height: 0, opacity: 0, marginTop: 0 }}
+              animate={{ height: 'auto', opacity: 1, marginTop: 12 }}
+              exit={{ height: 0, opacity: 0, marginTop: 0 }}
+              className="overflow-hidden"
+            >
+              <input 
+                type="text" 
+                placeholder="What's the offer? e.g. 20% Off"
+                value={questionAnswers.emailOfferDetails || ''} 
+                onChange={e => handleChange('emailOfferDetails', e.target.value)}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Target Audience</label>
+        <input 
+          type="text" 
+          placeholder="e.g. Existing Customers, New Subscribers"
+          value={questionAnswers.emailAudience || ''} 
+          onChange={e => handleChange('emailAudience', e.target.value)}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 capitalize"
+        />
+      </div>
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <label className="block text-sm font-medium text-gray-700">Brand Tone</label>
+          <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded text-[10px] font-semibold">AI suggested this — change if needed</span>
+        </div>
+        <PillGroup 
+          options={[{label:'Casual',value:'Casual'}, {label:'Professional',value:'Professional'}, {label:'Friendly',value:'Friendly'}, {label:'Urgent',value:'Urgent'}]}
+          selected={questionAnswers.emailTone || 'Friendly'}
+          onChange={val => handleChange('emailTone', val)}
+        />
+      </div>
+    </div>
+  )
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
@@ -322,6 +381,7 @@ export default function StepQuestions({ state, dispatch }) {
         {selectedPlatform === 'Google' && renderGoogleQuestions()}
         {selectedPlatform === 'Meta' && renderMetaQuestions()}
         {selectedPlatform === 'Snapchat' && renderSnapchatQuestions()}
+        {selectedPlatform === 'Email' && renderEmailQuestions()}
       </div>
     </div>
   )

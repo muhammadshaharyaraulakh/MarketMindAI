@@ -12,7 +12,7 @@ class SaveToLibraryRequest extends FormRequest
         return [
             'image_path'       => ['nullable', 'string'],
             'ai_analysis'      => ['required', 'array'],
-            'platform'         => ['required', 'in:google,meta,snapchat'],
+            'platform'         => ['required', 'in:google,meta,snapchat,email'],
             'question_answers' => ['required', 'array'],
             'generated_copy'   => ['required', 'array'],
         ];

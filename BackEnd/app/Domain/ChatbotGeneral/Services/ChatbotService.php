@@ -34,11 +34,15 @@ class ChatbotService implements ChatbotServiceInterface
         // 2. Fetch last 10 messages
         $history = $this->messageRepo->getRecentForSession($sessionId, 10);
 
-        // 3. Embed query
-        $queryVector = $this->embeddingService->embedQuery($userMessage);
+        // 3. Stop "Blind" Embedding (Query Routing)
+        $isGreeting = preg_match('/^(hi|hello|hey|thanks|thank you|ok|okay|yes|no|good morning|good evening|good afternoon)\b/i', trim($userMessage)) && strlen(trim($userMessage)) < 30;
 
-        // 4. Search Pinecone
-        $retrievedMatches = $this->embeddingService->searchUserNamespace($queryVector, $userId, 8);
+        $retrievedMatches = [];
+        if (!$isGreeting) {
+            // 4. Embed query & Search Pinecone
+            $queryVector = $this->embeddingService->embedQuery($userMessage);
+            $retrievedMatches = $this->embeddingService->searchUserNamespace($queryVector, $userId, 8);
+        }
 
         // 5. Build system prompt
         $retrievedContextStr = "";
@@ -52,15 +56,33 @@ class ChatbotService implements ChatbotServiceInterface
             $historyStr .= "{$role}: {$msg->content}\n";
         }
 
-        $systemPrompt = "You are MarketMind AI Advisor, an expert digital marketing analyst assistant. You have access to retrieved context about this user's campaigns, performance history, and past alerts.
+        $campaigns = \App\Models\Campaign::where('user_id', $userId)->get();
+        $liveCampaignsStr = "";
+        if ($campaigns->isNotEmpty()) {
+            foreach ($campaigns as $camp) {
+                $totalSpend = \App\Models\AdAnalytic::where('entity_type', 'campaign')->where('entity_id', $camp->id)->sum('spend');
+                $totalConversions = \App\Models\AdAnalytic::where('entity_type', 'campaign')->where('entity_id', $camp->id)->sum('conversions');
+                $avgRoas = \App\Models\AdAnalytic::where('entity_type', 'campaign')->where('entity_id', $camp->id)->avg('roas');
+                $roasFmt = number_format((float)$avgRoas, 2);
+                
+                $liveCampaignsStr .= "- Campaign: {$camp->name} (Platform: {$camp->platform}, Budget: {$camp->total_budget}, Status: {$camp->status}, Objective: {$camp->objective}, Total Spend: \${$totalSpend}, Conversions: {$totalConversions}, Avg ROAS: {$roasFmt})\n";
+            }
+        } else {
+            $liveCampaignsStr = "No active or past campaigns found for this user.";
+        }
 
-RETRIEVED CONTEXT:
+        $systemPrompt = "You are MarketMind AI Advisor, an expert digital marketing analyst assistant. You have access to retrieved context about this user's past alerts and the following live campaign data.
+
+LIVE CAMPAIGN DATA:
+{$liveCampaignsStr}
+
+RETRIEVED CONTEXT (Alerts & Reports):
 {$retrievedContextStr}
 
 CONVERSATION HISTORY:
 {$historyStr}
 
-Answer the user's question using the retrieved context above when relevant. If the retrieved context does not contain information relevant to the question, say so honestly rather than inventing campaign details. Be concise, specific, and reference actual numbers and campaign names from the context when available. Write in plain conversational text, no markdown formatting, no asterisks, no bullet points.";
+Answer the user's question using the retrieved context and live campaign data above when relevant. If the context does not contain information relevant to the question, say so honestly rather than inventing campaign details. Be concise, specific, and reference actual numbers and campaign names from the context when available. Write in plain conversational text, no markdown formatting, no asterisks, no bullet points.";
 
         // 6. Call Gemini
         $apiKey = config('services.chatbot.key');
@@ -68,7 +90,7 @@ Answer the user's question using the retrieved context above when relevant. If t
         $isFallback = true;
 
         if ($apiKey) {
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}";
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}";
             
             try {
                 $response = Http::post($url, [
@@ -128,10 +150,8 @@ Answer the user's question using the retrieved context above when relevant. If t
             $this->generateTitle($sessionId, $userMessage, $apiKey);
         }
 
-        // 11. Dispatch embedding job
-        if (!$isFallback) {
-            dispatch(new \App\Jobs\EmbedChatTurnJob($userMessageModel->id, $assistantMessageModel->id, $userId));
-        }
+        // 11. (Removed Turn-by-Turn Embedding to prevent DB bloat)
+        // Instead, a scheduled job (SummarizeChatSessionJob) should handle session summarization.
 
         return $assistantMsgDto;
     }
@@ -141,7 +161,7 @@ Answer the user's question using the retrieved context above when relevant. If t
         $title = substr($userMessage, 0, 40) . '...';
 
         if ($apiKey) {
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}";
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}";
             try {
                 $response = Http::post($url, [
                     'contents' => [

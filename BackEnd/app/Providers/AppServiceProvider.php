@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
             'campaign' => \App\Models\Campaign::class,
             'ad_set'   => \App\Models\AdSet::class,
             'ad'       => \App\Models\Ad::class,
+            'user'     => \App\Models\User::class,
         ]);
 
         VerifyEmail::createUrlUsing(function ($notifiable) {

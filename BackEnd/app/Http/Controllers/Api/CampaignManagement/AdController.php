@@ -29,23 +29,23 @@ class AdController extends Controller
         ]);
     }
 
-    private function getPlatformFields(): array
+    private function getPlatformFields(string $platform): array
     {
-        return [
-            'headlines', 'descriptions', 
-            'primary_text', 'headline', 'link_description', 'page_id', 'instagram_placement',
-            'brand_name', 'attachment_url'
-        ];
+        if ($platform === 'google') return ['headlines', 'descriptions'];
+        if ($platform === 'meta') return ['primary_text', 'headline', 'link_description', 'page_id', 'instagram_placement'];
+        if ($platform === 'snapchat') return ['brand_name', 'headline', 'attachment_url'];
+        return [];
     }
 
     public function store(StoreAdRequest $request): JsonResponse
     {
-        $platformFields = $this->getPlatformFields();
-        $data = $request->only(['ad_set_id', 'name', 'status', 'ad_format', 'headline', 'description', 'destination_url', 'cta_type', 'ab_test_group', 'url_custom_parameters', 'sync_status']);
-        $platformData = $request->only($platformFields);
-        
         $adSet = AdSet::with('campaign')->find($request->ad_set_id);
         $platform = strtolower($adSet->campaign->platform);
+
+        $platformFields = $this->getPlatformFields($platform);
+        $data = $request->only(['ad_set_id', 'name', 'status', 'ad_format', 'headline', 'description', 'destination_url', 'cta_type', 'ab_test_group', 'url_custom_parameters', 'sync_status']);
+        $platformData = $request->only($platformFields);
+
 
         // Normalize platform data
         if ($platform === 'google') {
@@ -74,12 +74,12 @@ class AdController extends Controller
 
     public function update(UpdateAdRequest $request, int $id): JsonResponse
     {
-        $platformFields = $this->getPlatformFields();
-        $data = $request->only(['ad_set_id', 'name', 'status', 'ad_format', 'headline', 'description', 'destination_url', 'cta_type', 'ab_test_group', 'url_custom_parameters', 'sync_status']);
-        $platformData = $request->only($platformFields);
-        
         $ad = \App\Models\Ad::with('adSet.campaign')->find($id);
         $platform = strtolower($ad->adSet->campaign->platform);
+
+        $platformFields = $this->getPlatformFields($platform);
+        $data = $request->only(['ad_set_id', 'name', 'status', 'ad_format', 'headline', 'description', 'destination_url', 'cta_type', 'ab_test_group', 'url_custom_parameters', 'sync_status']);
+        $platformData = $request->only($platformFields);
 
         if ($platform === 'google') {
             if (isset($platformData['headlines'])) {
@@ -120,12 +120,12 @@ class AdController extends Controller
 
     public function resubmit(UpdateAdRequest $request, int $id): JsonResponse
     {
-        $platformFields = $this->getPlatformFields();
-        $data = $request->except($platformFields);
-        $platformData = $request->only($platformFields);
-        
         $ad = \App\Models\Ad::with('adSet.campaign')->find($id);
         $platform = strtolower($ad->adSet->campaign->platform);
+
+        $platformFields = $this->getPlatformFields($platform);
+        $data = $request->except($platformFields);
+        $platformData = $request->only($platformFields);
 
         if ($platform === 'google') {
             if (isset($platformData['headlines'])) {

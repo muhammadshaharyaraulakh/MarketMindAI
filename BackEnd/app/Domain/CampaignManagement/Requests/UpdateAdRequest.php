@@ -15,16 +15,16 @@ class UpdateAdRequest extends FormRequest
     protected function prepareForValidation()
     {
         $mergeData = [];
-        if ($this->has('format')) $mergeData['ad_format'] = strtolower($this->format);
-        if ($this->has('destinationUrl')) $mergeData['destination_url'] = $this->destinationUrl;
-        if ($this->has('ctaType')) $mergeData['cta_type'] = strtolower($this->ctaType);
-        if ($this->has('abTestGroup')) $mergeData['ab_test_group'] = $this->abTestGroup;
-        if ($this->has('utmSource')) $mergeData['utm_source'] = $this->utmSource;
-        if ($this->has('utmMedium')) $mergeData['utm_medium'] = $this->utmMedium;
-        if ($this->has('utmCampaign')) $mergeData['utm_campaign'] = $this->utmCampaign;
-        if ($this->has('primaryText')) $mergeData['primary_text'] = $this->primaryText;
-        if ($this->has('linkDescription')) $mergeData['link_description'] = $this->linkDescription;
-        if ($this->has('instagram')) $mergeData['instagram_placement'] = $this->instagram;
+        if ($this->has('format')) $mergeData['ad_format'] = strtolower($this->input('format'));
+        if ($this->has('destinationUrl')) $mergeData['destination_url'] = $this->input('destinationUrl');
+        if ($this->has('ctaType')) $mergeData['cta_type'] = strtolower($this->input('ctaType'));
+        if ($this->has('abTestGroup')) $mergeData['ab_test_group'] = $this->input('abTestGroup');
+        if ($this->has('utmSource')) $mergeData['utm_source'] = $this->input('utmSource');
+        if ($this->has('utmMedium')) $mergeData['utm_medium'] = $this->input('utmMedium');
+        if ($this->has('utmCampaign')) $mergeData['utm_campaign'] = $this->input('utmCampaign');
+        if ($this->has('primaryText')) $mergeData['primary_text'] = $this->input('primaryText');
+        if ($this->has('linkDescription')) $mergeData['link_description'] = $this->input('linkDescription');
+        if ($this->has('instagram')) $mergeData['instagram_placement'] = $this->input('instagram');
 
         $this->merge($mergeData);
     }

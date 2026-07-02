@@ -1,12 +1,13 @@
 import React from 'react'
-import { MagnifyingGlassIcon, ChatBubbleBottomCenterIcon, VideoCameraIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, ChatBubbleBottomCenterIcon, VideoCameraIcon, InformationCircleIcon, EnvelopeIcon } from '@heroicons/react/24/outline'
 import ClickableCardGroup from '../CampaignHub/ClickableCardGroup'
 
 export default function StepPlatform({ state, dispatch }) {
   const platformOptions = [
     { label: 'Google Ads', value: 'Google', description: 'Search & Display', icon: <MagnifyingGlassIcon className="w-5 h-5" /> },
     { label: 'Meta Ads', value: 'Meta', description: 'Facebook & Instagram', icon: <ChatBubbleBottomCenterIcon className="w-5 h-5" /> },
-    { label: 'Snapchat Ads', value: 'Snapchat', description: 'Story & Video', icon: <VideoCameraIcon className="w-5 h-5" /> }
+    { label: 'Snapchat Ads', value: 'Snapchat', description: 'Story & Video', icon: <VideoCameraIcon className="w-5 h-5" /> },
+    { label: 'Email Marketing', value: 'Email', description: 'Subject & Body', icon: <EnvelopeIcon className="w-5 h-5" /> }
   ]
 
   return (

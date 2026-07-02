@@ -46,9 +46,43 @@ class ContentGenerationService
             'google' => $this->buildGooglePrompt($analysisText, $answers),
             'meta'   => $this->buildMetaPrompt($analysisText, $answers),
             'snapchat' => $this->buildSnapchatPrompt($analysisText, $answers),
+            'email'    => $this->buildEmailPrompt($analysisText, $answers),
         ];
 
         return $platformPrompts[$platform];
+    }
+
+    private function buildEmailPrompt(
+        string $analysisText,
+        array  $answers
+    ): string {
+        return "You are an Email Marketing expert copywriter.
+
+{$analysisText}
+
+BUSINESS CONTEXT (from advertiser):
+- Campaign Goal: " . ($answers['campaign_goal'] ?? 'Sales') . "
+- Offer/Discount: " . ($answers['offer'] ?? 'none') . "
+- Target Audience: " . ($answers['audience'] ?? 'General') . "
+- Brand Tone: " . ($answers['brand_tone'] ?? 'Professional') . "
+
+Generate a COMPLETE Email Marketing copy package.
+Return ONLY valid JSON, no markdown, no backticks:
+
+{
+  \"subject_lines\": [
+    \"Subject option 1\",
+    \"Subject option 2\",
+    \"Subject option 3\"
+  ],
+  \"email_body\": \"The full text email body here. Use multiple paragraphs.\",
+  \"cta_text\": \"Call to Action Button Text\"
+}
+
+CRITICAL RULES:
+- Return ONLY valid JSON.
+- Subject lines should be catchy and optimize for open rates.
+- The email body should be persuasive, engaging, and match the brand tone.";
     }
 
     private function buildGooglePrompt(
@@ -386,6 +420,13 @@ CRITICAL RULES:
                 'video_scripts'  => [],
                 '_fallback' => true,
                 '_message'  => 'AI generation failed. Please retry.',
+            ],
+            'email' => [
+                'subject_lines' => ['Special Offer Just For You', "Don't Miss Out"],
+                'email_body'    => "Hello,\n\nWe have an exclusive offer for you. Shop now to get the best deals.\n\nBest,\nYour Brand",
+                'cta_text'      => 'Shop Now',
+                '_fallback'     => true,
+                '_message'      => 'AI generation failed. Please retry.',
             ],
             default => ['_fallback' => true],
         };

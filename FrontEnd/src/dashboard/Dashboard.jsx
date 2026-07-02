@@ -33,7 +33,8 @@ import {
   VideoCameraIcon,
   AtSymbolIcon,
   UserCircleIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'
 // ==========================================
 // RELATIONAL INITIAL MOCK DATA
@@ -563,11 +564,12 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
               { id: 'studio', path: '/studio', label: 'Content Studio', icon: SparklesIcon },
               { id: 'reports', path: '/reports', label: 'Reports Export', icon: BoltIcon },
               { id: 'integrations', path: '/integrations', label: 'Platform Integrations', icon: PuzzlePieceIcon },
-              { id: 'billing', path: '/billing', label: 'Billing & Plans', icon: CreditCardIcon }
+              { id: 'billing', path: '/billing', label: 'Billing & Plans', icon: CreditCardIcon },
+              { id: 'horizon', path: 'http://127.0.0.1:8000/horizon', label: 'View Failed Jobs', icon: ExclamationTriangleIcon, external: true }
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => navigate(tab.path)}
+                onClick={() => tab.external ? window.open(tab.path, '_blank') : navigate(tab.path)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all cursor-pointer border ${
                   sidebarActive === tab.id 
                     ? 'bg-[#FFF1F0] border-[#FF2D20]/20 text-[#FF2D20] font-semibold' 
@@ -772,6 +774,7 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
                 dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: null } })
               } catch (e) {
                 console.error("Failed to save ad", e)
+                throw e
               }
             }}
           />

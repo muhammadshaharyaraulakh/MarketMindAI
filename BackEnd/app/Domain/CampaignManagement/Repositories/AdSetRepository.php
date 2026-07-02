@@ -164,7 +164,6 @@ class AdSetRepository implements AdSetRepositoryInterface
                 'cpc' => $derived['cpc'],
                 'cpm' => $derived['cpm'],
                 'roas' => $derived['roas'],
-                'currency' => 'USD',
             ]
         );
         
@@ -208,7 +207,6 @@ class AdSetRepository implements AdSetRepositoryInterface
                 'cpc' => $derived['cpc'],
                 'cpm' => $derived['cpm'],
                 'roas' => $derived['roas'],
-                'currency' => 'USD',
             ]
         );
     }

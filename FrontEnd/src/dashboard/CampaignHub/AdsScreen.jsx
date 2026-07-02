@@ -64,7 +64,13 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
           </div>
         </div>
         <button
-          onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })}
+          onClick={() => {
+            if (selectedCampaign?.platform === 'Meta' || selectedCampaign?.platform === 'Snapchat') {
+              alert('Creation of ads for Facebook/Meta and Snapchat is not available. You can only access Google Ads live.')
+            } else {
+              dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })
+            }
+          }}
           className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-medium px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
         >
           <PlusIcon className="w-4 h-4 shrink-0" />
@@ -177,7 +183,13 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
           <h3 className="text-sm font-medium text-[#0F172A] font-mona mb-1">No Ads Created</h3>
           <p className="text-xs font-semibold text-[#94A3B8] max-w-xs mb-6">Start building your creative variations for this ad set.</p>
           <button
-            onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })}
+            onClick={() => {
+              if (selectedCampaign?.platform === 'Meta' || selectedCampaign?.platform === 'Snapchat') {
+                alert('Creation of ads for Facebook/Meta and Snapchat is not available. You can only access Google Ads live.')
+              } else {
+                dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })
+              }
+            }}
             className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-medium px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
           >
             Create First Ad
