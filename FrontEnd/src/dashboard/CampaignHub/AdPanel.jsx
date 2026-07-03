@@ -391,15 +391,80 @@ export default function AdPanel({ item, adSetId, platform, onClose, onSave }) {
 
             {/* Media Upload */}
             <div>
-              <label className="block text-[10px] font-medium text-[#94A3B8] uppercase mb-1.5">Creative Media</label>
-              <div className="border-2 border-dashed border-[#E2E8F0] rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
-                <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <DocumentArrowUpIcon className="w-5 h-5 stroke-2" />
-                </div>
-                <p className="text-sm font-medium text-[#0F172A]">Click to upload or drag & drop</p>
-                <p className="text-[11px] font-semibold text-[#94A3B8] mt-1">SVG, PNG, JPG or GIF (max. 5MB)</p>
-                <input type="file" className="hidden" />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[10px] font-medium text-[#94A3B8] uppercase">Creative Media ({formData.format})</label>
+                {formData.mediaFiles?.length > 0 && (
+                  <button type="button" onClick={() => setFormData({...formData, mediaFiles: []})} className="text-[10px] font-medium text-red-500 hover:text-red-600 cursor-pointer">
+                    Clear Selection
+                  </button>
+                )}
               </div>
+              
+              {(!formData.mediaFiles || formData.mediaFiles.length === 0) ? (
+                <label className="border-2 border-dashed border-[#E2E8F0] rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-[#F8FAFC] transition-colors cursor-pointer group">
+                  <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <DocumentArrowUpIcon className="w-5 h-5 stroke-2" />
+                  </div>
+                  <p className="text-sm font-medium text-[#0F172A]">Click to upload or drag & drop</p>
+                  <p className="text-[11px] font-semibold text-[#94A3B8] mt-1">
+                    {formData.format === 'Video' ? 'MP4, MOV (max. 100MB)' : 'SVG, PNG, JPG or GIF (max. 5MB)'}
+                    {formData.format === 'Carousel' && ' • Multiple files allowed'}
+                  </p>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    multiple={formData.format === 'Carousel'}
+                    accept={formData.format === 'Video' ? 'video/*' : 'image/*'}
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        const filesArray = Array.from(e.target.files);
+                        setFormData({...formData, mediaFiles: formData.format === 'Carousel' ? filesArray : [filesArray[0]]});
+                      }
+                    }}
+                  />
+                </label>
+              ) : (
+                <div className={`grid gap-3 ${formData.format === 'Carousel' ? 'grid-cols-3' : 'grid-cols-1'}`}>
+                  {formData.mediaFiles.map((file, idx) => (
+                    <div key={idx} className="relative rounded-lg overflow-hidden border border-[#E2E8F0] bg-gray-50 aspect-video flex items-center justify-center group">
+                      {file.type.startsWith('image/') ? (
+                        <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <video src={URL.createObjectURL(file)} className="w-full h-full object-cover" />
+                      )}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span className="text-white text-xs font-medium truncate px-2">{file.name}</span>
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newFiles = [...formData.mediaFiles];
+                          newFiles.splice(idx, 1);
+                          setFormData({...formData, mediaFiles: newFiles});
+                        }}
+                        className="absolute top-1 right-1 bg-white/90 rounded-full p-1 text-red-500 hover:bg-red-50 hover:text-red-600 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <XMarkIcon className="w-3 h-3 stroke-2" />
+                      </button>
+                    </div>
+                  ))}
+                  {formData.format === 'Carousel' && formData.mediaFiles.length < 10 && (
+                    <label className="rounded-lg border-2 border-dashed border-[#E2E8F0] bg-gray-50 aspect-video flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
+                      <PlusIcon className="w-5 h-5 text-gray-400 mb-1 stroke-2" />
+                      <span className="text-[10px] font-medium text-gray-500">Add Image</span>
+                      <input 
+                        type="file" className="hidden" accept="image/*" multiple
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            const newFiles = [...formData.mediaFiles, ...Array.from(e.target.files)].slice(0, 10);
+                            setFormData({...formData, mediaFiles: newFiles});
+                          }
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Copy Fields */}

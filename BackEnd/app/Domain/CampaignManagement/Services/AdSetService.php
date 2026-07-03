@@ -19,7 +19,23 @@ class AdSetService implements AdSetServiceInterface
     public function create(array $data, array $targetingData, int $userId): AdSet
     {
         $data['status'] = 'draft';
-        return $this->adSetRepository->create($data, $targetingData);
+        $adSet = $this->adSetRepository->create($data, $targetingData);
+        
+        // --- Demo Logging for Presentation ---
+        \Illuminate\Support\Facades\Log::info("Initiating API Request for Ad Set Creation", [
+            'endpoint' => "https://api.sandbox.platform.com/v1/ad_sets",
+            'payload' => array_merge($data, $targetingData)
+        ]);
+        
+        \Illuminate\Support\Facades\Log::info("API Response (Simulated 200 OK)", [
+            'status' => 200,
+            'results' => ['id' => rand(100000, 999999), 'status' => 'ACTIVE']
+        ]);
+        // -------------------------------------
+        
+        \App\Jobs\SimulateSyncStatusJob::dispatch('ad_set', $adSet->id)->delay(now()->addSeconds(rand(5, 10)));
+        
+        return $adSet;
     }
 
     public function update(int $id, array $data, array $targetingData, int $userId): AdSet

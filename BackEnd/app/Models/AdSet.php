@@ -18,6 +18,12 @@ class AdSet extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'placements' => 'array',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+    ];
+
     public function campaign()
     {
         return $this->belongsTo(Campaign::class);

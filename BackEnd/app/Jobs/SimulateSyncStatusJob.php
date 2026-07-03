@@ -30,15 +30,17 @@ class SimulateSyncStatusJob implements ShouldQueue
             $modelClass = $this->entityType === 'campaign' ? \App\Models\Campaign::class : \App\Models\AdSet::class;
             $entity = $modelClass::find($this->entityId);
             
-            if ($entity && $entity->sync_status === 'PENDING') {
-                $entity->sync_status = 'SYNCED';
+            if ($entity && strtolower($entity->sync_status) === 'pending') {
+                $entity->sync_status = 'synced';
                 $entity->save();
             }
         } elseif ($this->entityType === 'ad') {
             $ad = \App\Models\Ad::find($this->entityId);
             
-            if ($ad && $ad->review_status === 'PENDING') {
+            if ($ad && strtolower($ad->review_status) === 'pending') {
+                $ad->sync_status = 'synced';
                 $ad->review_status = 'APPROVED';
+                $ad->status = 'Active'; // Automatically activate it once approved
                 $ad->save();
             }
         }

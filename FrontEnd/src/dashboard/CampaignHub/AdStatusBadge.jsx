@@ -1,4 +1,5 @@
-export default function AdStatusBadge({ ad }) {
+export default function AdStatusBadge({ ad, isCompleted }) {
+  if (isCompleted) return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border bg-purple-50 text-purple-700 border-purple-200">Completed</span>
   if (ad.review_status === 'REJECTED') return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border bg-red-50 text-red-700 border-red-200">Rejected</span>
   if (ad.review_status === 'IN_REVIEW') return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border bg-blue-50 text-blue-700 border-blue-200">Pending Review</span>
   if (ad.sync_status === 'PENDING') return <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border bg-slate-50 text-slate-500 border-slate-200">Syncing...</span>

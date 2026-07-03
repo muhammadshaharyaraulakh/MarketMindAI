@@ -54,5 +54,17 @@ return [
     'chatbot' => [
         'key' => env('CHATBOT_API_KEY'),
     ],
+    'gemini_report' => [
+        'keys' => [
+            env('GEMINI_REPORT_KEY_1'),
+            env('GEMINI_REPORT_KEY_2'),
+            env('GEMINI_REPORT_KEY_3'),
+            env('GEMINI_REPORT_KEY_4'),
+            env('GEMINI_REPORT_KEY_5'),
+            env('GEMINI_REPORT_KEY_6'),
+            env('GEMINI_REPORT_KEY_7'),
+            env('GEMINI_REPORT_KEY_8'),
+        ],
+    ],
 
 ];

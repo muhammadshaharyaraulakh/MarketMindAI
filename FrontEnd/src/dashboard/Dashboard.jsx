@@ -349,10 +349,10 @@ export default function Dashboard({ user, onLogout, onOpenProfile }) {
 
   // Poll for PENDING sync status
   useEffect(() => {
-    const hasPending = activeCampaigns.some(c => c.sync_status === 'PENDING') || 
-                       activeAdSets.some(a => a.sync_status === 'PENDING') ||
-                       activeAds.some(a => a.sync_status === 'PENDING') ||
-                       activeAds.some(a => a.review_status === 'PENDING')
+    const hasPending = activeCampaigns.some(c => c.sync_status?.toUpperCase() === 'PENDING') || 
+                       activeAdSets.some(a => a.sync_status?.toUpperCase() === 'PENDING') ||
+                       activeAds.some(a => a.sync_status?.toUpperCase() === 'PENDING') ||
+                       activeAds.some(a => a.review_status?.toUpperCase() === 'PENDING')
     
     if (!hasPending) return
 

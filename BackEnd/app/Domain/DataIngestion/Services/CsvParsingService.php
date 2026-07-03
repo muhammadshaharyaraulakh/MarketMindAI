@@ -115,6 +115,7 @@ class CsvParsingService implements CsvParsingServiceInterface
                         'uuid' => (string) Str::uuid(),
                         'objective' => $row->campaignObjective,
                         'status' => 'completed',
+                        'is_imported' => true,
                         'budget_type' => in_array($row->campaignBudgetType, ['daily', 'lifetime']) ? $row->campaignBudgetType : 'daily',
                         'budget_amount' => $row->campaignBudgetAmount,
                         'currency' => $row->campaignCurrency ?: 'USD',

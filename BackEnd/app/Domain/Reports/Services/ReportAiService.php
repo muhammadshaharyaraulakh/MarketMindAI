@@ -14,8 +14,10 @@ class ReportAiService implements ReportAiServiceInterface
 
     private function callGemini(string $prompt, int $maxTokens = 600): string
     {
-        $apiKey = env('GEMINI_REPORTING_API_KEY', env('GEMINI_API_KEY'));
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={$apiKey}";
+        $keys = config('services.gemini_report.keys', []);
+        $apiKey = !empty($keys) && $keys[0] !== null ? $keys[array_rand($keys)] : env('GEMINI_API_KEY');
+        
+        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}";
         $maxRetries = 3;
         $attempt = 0;
 

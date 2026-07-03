@@ -20,12 +20,18 @@ class StoreAdRequest extends FormRequest
         if ($this->has('destinationUrl')) $mergeData['destination_url'] = $this->input('destinationUrl');
         if ($this->has('ctaType')) $mergeData['cta_type'] = strtolower($this->input('ctaType'));
         if ($this->has('abTestGroup')) $mergeData['ab_test_group'] = $this->input('abTestGroup');
-        if ($this->has('utmSource')) $mergeData['utm_source'] = $this->input('utmSource');
-        if ($this->has('utmMedium')) $mergeData['utm_medium'] = $this->input('utmMedium');
-        if ($this->has('utmCampaign')) $mergeData['utm_campaign'] = $this->input('utmCampaign');
         if ($this->has('primaryText')) $mergeData['primary_text'] = $this->input('primaryText');
         if ($this->has('linkDescription')) $mergeData['link_description'] = $this->input('linkDescription');
         if ($this->has('instagram')) $mergeData['instagram_placement'] = $this->input('instagram');
+
+        $urlCustomParams = $this->input('url_custom_parameters', []);
+        if ($this->has('utmSource')) $urlCustomParams['utm_source'] = $this->input('utmSource');
+        if ($this->has('utmMedium')) $urlCustomParams['utm_medium'] = $this->input('utmMedium');
+        if ($this->has('utmCampaign')) $urlCustomParams['utm_campaign'] = $this->input('utmCampaign');
+        
+        if (!empty($urlCustomParams)) {
+            $mergeData['url_custom_parameters'] = $urlCustomParams;
+        }
 
         $this->merge($mergeData);
     }
@@ -48,9 +54,10 @@ class StoreAdRequest extends FormRequest
             'destination_url' => 'required|url',
             'cta_type' => 'required|in:shop_now,learn_more,sign_up,contact_us,book_now,download,subscribe',
             'ab_test_group' => 'nullable|in:A,B,C',
-            'utm_source' => 'nullable|string',
-            'utm_medium' => 'nullable|string',
-            'utm_campaign' => 'nullable|string',
+            'url_custom_parameters' => 'nullable|array',
+            'url_custom_parameters.utm_source' => 'nullable|string',
+            'url_custom_parameters.utm_medium' => 'nullable|string',
+            'url_custom_parameters.utm_campaign' => 'nullable|string',
             'initial_spend' => 'nullable|numeric|min:0',
             'initial_impressions' => 'nullable|integer|min:0',
             'initial_clicks' => 'nullable|integer|min:0',

@@ -24,7 +24,19 @@ class AdService implements AdServiceInterface
         
         $ad = $this->adRepository->create($data, $platformData, $platform);
         
-        SimulateSyncStatusJob::dispatch('ad', $ad->id)->delay(now()->addSeconds(rand(20, 40)));
+        // --- Demo Logging for Presentation ---
+        \Illuminate\Support\Facades\Log::info("Initiating {$platform} API Request for Ad Creation", [
+            'endpoint' => "https://api.sandbox.{$platform}.com/v1/ad_accounts/act_demo/ads",
+            'payload' => array_merge($data, $platformData)
+        ]);
+        
+        \Illuminate\Support\Facades\Log::info("{$platform} API Response (Simulated 200 OK)", [
+            'status' => 200,
+            'results' => ['id' => rand(100000, 999999), 'status' => 'PENDING_REVIEW']
+        ]);
+        // -------------------------------------
+
+        SimulateSyncStatusJob::dispatch('ad', $ad->id)->delay(now()->addSeconds(rand(5, 10)));
 
         return $ad;
     }

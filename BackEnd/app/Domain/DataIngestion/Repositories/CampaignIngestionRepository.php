@@ -14,6 +14,7 @@ class CampaignIngestionRepository implements CampaignIngestionRepositoryInterfac
     {
         $campaigns = Campaign::where('user_id', $userId)
             ->where('status', 'completed')
+            ->where('is_imported', true)
             ->orderBy('created_at', 'desc')
             ->get();
 

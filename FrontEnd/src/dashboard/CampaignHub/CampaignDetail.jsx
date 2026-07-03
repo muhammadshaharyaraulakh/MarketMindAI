@@ -18,6 +18,7 @@ import CustomTooltip from '../components/CustomTooltip'
 import KPICard from '../components/KPICard'
 
 export default function CampaignDetail({ state, dispatch, navigate, selectedCampaign, selectedCampaignId, activeAdSets }) {
+  const isCompleted = selectedCampaign?.status?.toLowerCase() === 'completed'
   const [workspaceTab, setWorkspaceTab] = useState('analytics')
   
   // Snapshots form
@@ -304,20 +305,24 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
 
           <div className="flex items-center gap-2">
             <StatusBadge status={selectedCampaign?.status} />
-            <SyncBadge sync_status={selectedCampaign?.sync_status} />
-            <button 
-              onClick={handleToggleCampaignStatus}
-              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${selectedCampaign?.status?.toLowerCase() === 'active' ? 'bg-green-500' : 'bg-slate-300'}`}
-            >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${selectedCampaign?.status?.toLowerCase() === 'active' ? 'translate-x-4' : 'translate-x-1'}`} />
-            </button>
-            <button
-              onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'campaign', item: selectedCampaign } })}
-              className="bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-semibold px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm inline-flex items-center gap-1"
-            >
-              <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
-              Edit Settings
-            </button>
+            {!isCompleted && (
+              <>
+                <SyncBadge sync_status={selectedCampaign?.sync_status} />
+                <button 
+                  onClick={handleToggleCampaignStatus}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${selectedCampaign?.status?.toLowerCase() === 'active' ? 'bg-green-500' : 'bg-slate-300'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${selectedCampaign?.status?.toLowerCase() === 'active' ? 'translate-x-4' : 'translate-x-1'}`} />
+                </button>
+                <button
+                  onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'campaign', item: selectedCampaign } })}
+                  className="bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-semibold px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm inline-flex items-center gap-1"
+                >
+                  <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
+                  Edit Settings
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -391,13 +396,15 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
               <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-[#E2E8F0] flex items-center justify-between">
                   <span className="text-xs font-medium text-[#0F172A] block font-mona">Daily Relational Entries</span>
-                  <button
-                    onClick={() => setIsSnapModalOpen(true)}
-                    className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[10px] font-medium px-3 py-1.5 rounded-xl cursor-pointer shadow-sm transition-all inline-flex items-center gap-1"
-                  >
-                    <PlusIcon className="w-3.5 h-3.5" />
-                    Record Daily Log
-                  </button>
+                  {!isCompleted && (
+                    <button
+                      onClick={() => setIsSnapModalOpen(true)}
+                      className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[10px] font-medium px-3 py-1.5 rounded-xl cursor-pointer shadow-sm transition-all inline-flex items-center gap-1"
+                    >
+                      <PlusIcon className="w-3.5 h-3.5" />
+                      Record Daily Log
+                    </button>
+                  )}
                 </div>
 
                 {state.analytics.filter(a => a.campaignId === selectedCampaign?.id).length > 0 ? (
@@ -411,7 +418,7 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                         <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase font-mona">ROAS</th>
                         <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase font-mona">Clicks / Imps</th>
                         <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase font-mona">Leads</th>
-                        <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase pr-6 text-right font-mona">Actions</th>
+                        {!isCompleted && <th className="p-4 text-[10px] font-medium text-[#0F172A] uppercase pr-6 text-right font-mona">Actions</th>}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E2E8F0]">
@@ -483,39 +490,41 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                   />
                                 ) : snap.leads.toLocaleString()}
                               </td>
-                              <td className="p-4 pr-6 text-right">
-                                {isEditing ? (
-                                  <div className="inline-flex gap-1">
-                                    <button 
-                                      onClick={saveEditedSnapshot}
-                                      className="bg-green-600 hover:bg-green-700 text-white font-medium text-[10px] uppercase px-2.5 py-1.5 rounded-lg cursor-pointer"
-                                    >
-                                      Save
-                                    </button>
-                                    <button 
-                                      onClick={() => setEditingSnapshotId(null)}
-                                      className="bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-slate-100 text-[#475569] font-medium text-[10px] uppercase px-2.5 py-1.5 rounded-lg cursor-pointer"
-                                    >
-                                      Cancel
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <div className="inline-flex items-center gap-1">
-                                    <button
-                                      onClick={() => startEditSnapshot(snap)}
-                                      className="p-1 hover:bg-[#F8FAFC] border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-blue-500 cursor-pointer transition-all"
-                                    >
-                                      <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
-                                    </button>
-                                    <button
-                                      onClick={() => dispatch({ type: 'OPEN_CONFIRM', payload: { type: 'DELETE_SNAPSHOT', id: snap.id, title: 'Delete Daily Log', message: 'Are you sure you want to delete this daily log? This action cannot be undone.' } })}
-                                      className="p-1 hover:bg-[#F8FAFC] border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-red-500 cursor-pointer transition-all"
-                                    >
-                                      <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
-                                    </button>
-                                  </div>
-                                )}
-                              </td>
+                              {!isCompleted && (
+                                <td className="p-4 pr-6 text-right">
+                                  {isEditing ? (
+                                    <div className="inline-flex gap-1">
+                                      <button 
+                                        onClick={saveEditedSnapshot}
+                                        className="bg-green-600 hover:bg-green-700 text-white font-medium text-[10px] uppercase px-2.5 py-1.5 rounded-lg cursor-pointer"
+                                      >
+                                        Save
+                                      </button>
+                                      <button 
+                                        onClick={() => setEditingSnapshotId(null)}
+                                        className="bg-[#F8FAFC] border border-[#E2E8F0] hover:bg-slate-100 text-[#475569] font-medium text-[10px] uppercase px-2.5 py-1.5 rounded-lg cursor-pointer"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="inline-flex items-center gap-1">
+                                      <button
+                                        onClick={() => startEditSnapshot(snap)}
+                                        className="p-1 hover:bg-[#F8FAFC] border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-blue-500 cursor-pointer transition-all"
+                                      >
+                                        <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
+                                      </button>
+                                      <button
+                                        onClick={() => dispatch({ type: 'OPEN_CONFIRM', payload: { type: 'DELETE_SNAPSHOT', id: snap.id, title: 'Delete Daily Log', message: 'Are you sure you want to delete this daily log? This action cannot be undone.' } })}
+                                        className="p-1 hover:bg-[#F8FAFC] border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-red-500 cursor-pointer transition-all"
+                                      >
+                                        <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
+                                      </button>
+                                    </div>
+                                  )}
+                                </td>
+                              )}
                             </tr>
                           )
                         })}
@@ -646,13 +655,15 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                   <span className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider block mb-0.5">Campaign Audiences</span>
                   <span className="text-sm font-medium text-[#0F172A] block font-mona">Ad Sets Management</span>
                 </div>
-                <button
-                  onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset' } })}
-                  className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-medium px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-                >
-                  <PlusIcon className="w-4 h-4 shrink-0" />
-                  Create Ad Set
-                </button>
+                {!isCompleted && (
+                  <button
+                    onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset' } })}
+                    className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-medium px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  >
+                    <PlusIcon className="w-4 h-4 shrink-0" />
+                    Create Ad Set
+                  </button>
+                )}
               </div>
               
               <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
@@ -680,24 +691,28 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                                 <span className="block text-[10px] font-light text-[#94A3B8] mt-0.5">{adSet.platform}</span>
                               </td>
                               <td className="p-4 text-xs font-light text-[#475569]">{adSet.audienceType}</td>
-                              <td className="p-4"><StatusBadge status={adSet.status} /><SyncBadge sync_status={adSet.sync_status} /></td>
+                              <td className="p-4"><StatusBadge status={isCompleted ? 'Completed' : adSet.status} /><SyncBadge sync_status={adSet.sync_status} /></td>
                               <td className="p-4 text-xs font-light text-[#0F172A]">${adSet.budget.toLocaleString()}</td>
                               <td className="p-4 text-xs font-light text-[#FF2D20]">${adSet.spendToday.toLocaleString()}</td>
                               <td className="p-4 text-[10px] font-light text-[#94A3B8] uppercase tracking-wider">{adSet.goal}</td>
                               <td className="p-4 pr-6 text-right">
                                 <div className="inline-flex items-center gap-1.5 transition-opacity">
-                                  <button
-                                    onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset', item: adSet } })}
-                                    className="p-1.5 hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-blue-500 cursor-pointer transition-all shadow-sm"
-                                  >
-                                    <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
-                                  </button>
-                                  <button
-                                    onClick={() => dispatch({ type: 'OPEN_CONFIRM', payload: { type: 'DELETE_ADSET', id: adSet.id, title: 'Delete Ad Set', message: 'Are you sure you want to delete this Ad Set? This action cannot be undone.' } })}
-                                    className="p-1.5 hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-red-500 cursor-pointer transition-all shadow-sm"
-                                  >
-                                    <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
-                                  </button>
+                                  {!isCompleted && (
+                                    <>
+                                      <button
+                                        onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset', item: adSet } })}
+                                        className="p-1.5 hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-blue-500 cursor-pointer transition-all shadow-sm"
+                                      >
+                                        <PencilIcon className="w-3.5 h-3.5 stroke-[1.5]" />
+                                      </button>
+                                      <button
+                                        onClick={() => dispatch({ type: 'OPEN_CONFIRM', payload: { type: 'DELETE_ADSET', id: adSet.id, title: 'Delete Ad Set', message: 'Are you sure you want to delete this Ad Set? This action cannot be undone.' } })}
+                                        className="p-1.5 hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-red-500 cursor-pointer transition-all shadow-sm"
+                                      >
+                                        <TrashIcon className="w-3.5 h-3.5 stroke-[1.5]" />
+                                      </button>
+                                    </>
+                                  )}
                                   <button
                                     onClick={() => navigate(`/campaigns/${selectedCampaign?.id}/adsets/${adSet.id}/ads`)}
                                     className="p-1.5 hover:bg-white border border-transparent hover:border-[#E2E8F0] rounded-lg text-[#94A3B8] hover:text-[#0F172A] cursor-pointer transition-all shadow-sm"
@@ -718,12 +733,14 @@ export default function CampaignDetail({ state, dispatch, navigate, selectedCamp
                     </div>
                     <h3 className="text-sm font-medium text-[#0F172A] font-mona mb-1">No Ad Sets Configured</h3>
                     <p className="text-xs font-semibold text-[#94A3B8] max-w-xs mb-6">Create an ad set to define audience targeting, platform networks, and daily optimization goals.</p>
-                    <button
-                      onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset' } })}
-                      className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-medium px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
-                    >
-                      Create First Ad Set
-                    </button>
+                    {!isCompleted && (
+                      <button
+                        onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'adset' } })}
+                        className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-medium px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
+                      >
+                        Create First Ad Set
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

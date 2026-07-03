@@ -4,14 +4,14 @@ namespace App\Jobs;
 
 use App\Domain\Reports\Contracts\Repositories\ReportRepositoryInterface;
 use App\Domain\Reports\Contracts\Services\ReportDataServiceInterface;
-use App\Domain\Reports\Contracts\Services\ReportAiServiceInterface;
-use App\Domain\Reports\Contracts\Services\ReportPdfServiceInterface;
 use App\Domain\Reports\DTOs\ReportJobDTO;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class GenerateReportJob implements ShouldQueue
@@ -19,8 +19,7 @@ class GenerateReportJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 2;
-    public $timeout = 300;
-    public $backoff = 60;
+    public $timeout = 60; // Just fetching data and dispatching batch, so it's fast
 
     protected ReportJobDTO $dto;
     protected float $startTime;
@@ -32,9 +31,7 @@ class GenerateReportJob implements ShouldQueue
 
     public function handle(
         ReportRepositoryInterface $reportRepo,
-        ReportDataServiceInterface $dataService,
-        ReportAiServiceInterface $aiService,
-        ReportPdfServiceInterface $pdfService
+        ReportDataServiceInterface $dataService
     ) {
         $this->startTime = microtime(true);
         $reportId = $this->dto->reportId;
@@ -68,74 +65,62 @@ class GenerateReportJob implements ShouldQueue
                 'conversion_funnel' => $conversionFunnel,
             ];
 
-            // Step 3: Generate AI text sections based on report type
+            // Store raw data in cache for the section jobs and the compile job
+            Cache::put("report_{$reportId}_data", $allData, 3600);
+
             $campaignName = $overview['name'] ?? 'Unknown Campaign';
             $platform = $overview['platform'] ?? 'Unknown Platform';
-            
-            $aiData = [];
+
+            // Step 3: Build the jobs for the batch based on the report type
+            $jobs = [];
 
             if ($this->dto->reportType === 'performance_summary' || $this->dto->reportType === 'full_analytics') {
-                $aiData['executive_summary'] = $aiService->generateExecutiveSummary($kpiScorecard, $topPerformers, $campaignName, $platform);
-                $this->markSectionComplete($reportRepo, $reportId, 'ai_executive_summary', 30);
-                sleep(10); // Delay to prevent spam
+                $jobs[] = new GenerateReportSectionJob($reportId, 'ai_executive_summary', $campaignName, $platform, $allData, $this->dto->reportType);
             }
 
             if ($this->dto->reportType === 'ai_insights' || $this->dto->reportType === 'full_analytics') {
-                $aiData['insight_narrative'] = $aiService->generateInsightNarrative($allData, $campaignName);
-                $this->markSectionComplete($reportRepo, $reportId, 'ai_insight_narrative', 40);
-                sleep(10);
-
-                $aiData['insight_audience'] = $aiService->generateInsightBlock('audience_behavior', $platformBreakdown, $campaignName);
-                $this->markSectionComplete($reportRepo, $reportId, 'ai_insight_audience', 50);
-                sleep(10);
-
-                $aiData['insight_creative'] = $aiService->generateInsightBlock('creative_performance', $adCreativeBreakdown, $campaignName);
-                $this->markSectionComplete($reportRepo, $reportId, 'ai_insight_creative', 60);
-                sleep(10);
-
-                $aiData['insight_budget'] = $aiService->generateInsightBlock('budget_intelligence', $adSetBreakdown, $campaignName);
-                $this->markSectionComplete($reportRepo, $reportId, 'ai_insight_budget', 70);
-                sleep(10);
-
-                $aiData['personas'] = $aiService->generatePersonas($adSetBreakdown, $adSetBreakdown);
-                $this->markSectionComplete($reportRepo, $reportId, 'ai_personas', 80);
-                sleep(10);
+                $jobs[] = new GenerateReportSectionJob($reportId, 'ai_insight_narrative', $campaignName, $platform, $allData, $this->dto->reportType);
+                $jobs[] = new GenerateReportSectionJob($reportId, 'ai_insight_audience', $campaignName, $platform, $allData, $this->dto->reportType);
+                $jobs[] = new GenerateReportSectionJob($reportId, 'ai_insight_creative', $campaignName, $platform, $allData, $this->dto->reportType);
+                $jobs[] = new GenerateReportSectionJob($reportId, 'ai_insight_budget', $campaignName, $platform, $allData, $this->dto->reportType);
+                $jobs[] = new GenerateReportSectionJob($reportId, 'ai_personas', $campaignName, $platform, $allData, $this->dto->reportType);
             }
 
             if ($this->dto->reportType === 'campaign_breakdown' || $this->dto->reportType === 'full_analytics') {
-                $aiData['key_learnings'] = $aiService->generateKeyLearnings($allData, $this->dto->reportType);
-                $this->markSectionComplete($reportRepo, $reportId, 'ai_key_learnings', 90);
-                sleep(10);
+                $jobs[] = new GenerateReportSectionJob($reportId, 'ai_key_learnings', $campaignName, $platform, $allData, $this->dto->reportType);
             }
 
             if ($this->dto->reportType === 'full_analytics') {
-                $aiData['final_recommendations'] = $aiService->generateFinalRecommendations($allData);
-                $this->markSectionComplete($reportRepo, $reportId, 'ai_final_recommendations', 95);
-                sleep(10);
+                $jobs[] = new GenerateReportSectionJob($reportId, 'ai_final_recommendations', $campaignName, $platform, $allData, $this->dto->reportType);
             }
 
-            // Step 4: Assemble report data
-            $reportData = [
-                'data' => $allData,
-                'ai' => $aiData,
-            ];
-
-            // Step 5: Generate PDF
-            $pdfResult = $pdfService->generatePdf($reportData, $this->dto->reportType, $reportId);
-            
-            // Step 6: Complete
-            $elapsed = (int) (microtime(true) - $this->startTime);
-            
-            $reportRepo->update($reportId, [
-                'status' => 'completed',
-                'progress_percent' => 100,
-                'pdf_path' => $pdfResult['path'],
-                'pdf_size_bytes' => $pdfResult['size'],
-                'generation_time_seconds' => $elapsed,
-            ]);
+            // Step 4: Dispatch the Batch
+            if (!empty($jobs)) {
+                $reportType = $this->dto->reportType;
+                $startTime = $this->startTime;
+                
+                Bus::batch($jobs)
+                    ->name("Generate Report Sections: {$reportId}")
+                    ->then(function ($batch) use ($reportId, $reportType, $startTime) {
+                        // All section jobs completed successfully
+                        dispatch(new \App\Jobs\CompileReportPdfJob($reportId, $reportType, $startTime));
+                    })
+                    ->catch(function ($batch, \Throwable $e) use ($reportId) {
+                        // Handle batch failure
+                        Log::error("Batch failed for report {$reportId}: " . $e->getMessage());
+                        app(ReportRepositoryInterface::class)->update($reportId, [
+                            'status' => 'failed',
+                            'error_message' => 'One or more sections failed to generate.'
+                        ]);
+                    })
+                    ->dispatch();
+            } else {
+                // If there are no AI sections (e.g. data only), compile PDF directly
+                dispatch(new CompileReportPdfJob($reportId, $this->dto->reportType, $this->startTime));
+            }
 
         } catch (\Exception $e) {
-            Log::error('Report generation failed: ' . $e->getMessage());
+            Log::error('Report master job failed: ' . $e->getMessage());
             $reportRepo->update($reportId, [
                 'status' => 'failed',
                 'error_message' => $e->getMessage()

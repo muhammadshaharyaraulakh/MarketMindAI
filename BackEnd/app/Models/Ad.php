@@ -18,6 +18,10 @@ class Ad extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'url_custom_parameters' => 'array',
+    ];
+
     public function adSet()
     {
         return $this->belongsTo(AdSet::class);

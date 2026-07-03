@@ -8,8 +8,7 @@ export default function IntegrationsView({ state, dispatch }) {
   const [selectedPlatform, setSelectedPlatform] = useState(null);
   
   const [accountName, setAccountName] = useState('');
-  const [accountId, setAccountId] = useState('');
-  const [accessToken, setAccessToken] = useState('');
+  const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [connectError, setConnectError] = useState('');
 
@@ -34,23 +33,21 @@ export default function IntegrationsView({ state, dispatch }) {
   const openConnectModal = (platformKey) => {
     setSelectedPlatform(platformKey);
     setAccountName('');
-    setAccountId('');
-    setAccessToken('');
+    setFormData({});
     setConnectError('');
     setIsConnectModalOpen(true);
   };
 
   const handleConnect = async (e) => {
     e.preventDefault();
-    if (!accountName || !accountId || !accessToken) return;
+    if (!accountName) return;
     
     setIsLoading(true);
     try {
       const res = await axios.post('/api/integrations', {
         platform: selectedPlatform,
         account_name: accountName,
-        platform_account_id: accountId,
-        access_token: accessToken
+        ...formData
       });
       if (res.data.success) {
         setIsConnectModalOpen(false);
@@ -114,7 +111,9 @@ export default function IntegrationsView({ state, dispatch }) {
                     <div key={aIdx} className="bg-[#F8FAFC] border border-[#E2E8F0] p-3 rounded-xl flex items-center justify-between group">
                       <div>
                         <p className="text-xs font-bold text-[#0F172A]">{acc.name}</p>
-                        <p className="text-[10px] font-semibold text-[#94A3B8] mt-0.5">ID: {acc.platform_account_id}</p>
+                        {acc.platform_account_id && (
+                          <p className="text-[10px] font-semibold text-[#94A3B8] mt-0.5">ID: {acc.platform_account_id}</p>
+                        )}
                       </div>
                       <button 
                         onClick={() => confirmDisconnect(acc.id)}
@@ -179,44 +178,75 @@ export default function IntegrationsView({ state, dispatch }) {
                     {connectError}
                   </div>
                 )}
-                <div className="space-y-4">
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                   <div>
                     <label className="block text-xs font-light text-[#0F172A] mb-1.5">Account Name</label>
                     <input 
                       type="text" 
                       value={accountName}
                       onChange={e => setAccountName(e.target.value)}
-                      placeholder="e.g. My Meta Sandbox"
+                      placeholder="e.g. My Sandbox Account"
                       className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10"
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-light text-[#0F172A] mb-1.5">Platform Ad Account ID</label>
-                    <input 
-                      type="text" 
-                      value={accountId}
-                      onChange={e => setAccountId(e.target.value)}
-                      placeholder="e.g. act_123456789"
-                      className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-light text-[#0F172A] mb-1.5">Platform Access Token</label>
-                    <input 
-                      type="password" 
-                      value={accessToken}
-                      onChange={e => setAccessToken(e.target.value)}
-                      placeholder="Paste your OAuth or Sandbox Token here"
-                      className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10"
-                      required
-                    />
-                  </div>
+
+                  {selectedPlatform === 'google' && (
+                    <div>
+                      <label className="block text-xs font-light text-[#0F172A] mb-1.5">Google Developer Token</label>
+                      <input 
+                        type="text" 
+                        value={formData.google_developer_token || ''}
+                        onChange={e => setFormData({...formData, google_developer_token: e.target.value})}
+                        placeholder="Paste your Developer Token here"
+                        className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10"
+                        required
+                      />
+                    </div>
+                  )}
+
+                  {selectedPlatform === 'snapchat' && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-light text-[#0F172A] mb-1.5">Client ID</label>
+                        <input type="text" value={formData.snapchat_client_id || ''} onChange={e => setFormData({...formData, snapchat_client_id: e.target.value})} placeholder="Snapchat Client ID" className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-light text-[#0F172A] mb-1.5">Client Secret</label>
+                        <input type="text" value={formData.snapchat_client_secret || ''} onChange={e => setFormData({...formData, snapchat_client_secret: e.target.value})} placeholder="Snapchat Client Secret" className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-light text-[#0F172A] mb-1.5">Access Token</label>
+                        <input type="text" value={formData.snapchat_access_token || ''} onChange={e => setFormData({...formData, snapchat_access_token: e.target.value})} placeholder="Snapchat Access Token" className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-light text-[#0F172A] mb-1.5">Ad Account ID</label>
+                        <input type="text" value={formData.snapchat_ad_account_id || ''} onChange={e => setFormData({...formData, snapchat_ad_account_id: e.target.value})} placeholder="Snapchat Ad Account ID" className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10" required />
+                      </div>
+                    </>
+                  )}
+
+                  {selectedPlatform === 'meta' && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-light text-[#0F172A] mb-1.5">App ID</label>
+                        <input type="text" value={formData.meta_app_id || ''} onChange={e => setFormData({...formData, meta_app_id: e.target.value})} placeholder="Meta App ID" className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-light text-[#0F172A] mb-1.5">App Secret</label>
+                        <input type="text" value={formData.meta_app_secret || ''} onChange={e => setFormData({...formData, meta_app_secret: e.target.value})} placeholder="Meta App Secret" className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-light text-[#0F172A] mb-1.5">Access Token</label>
+                        <input type="text" value={formData.meta_access_token || ''} onChange={e => setFormData({...formData, meta_access_token: e.target.value})} placeholder="Meta Access Token" className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-light text-[#0F172A] mb-1.5">Ad Account ID</label>
+                        <input type="text" value={formData.meta_ad_account_id || ''} onChange={e => setFormData({...formData, meta_ad_account_id: e.target.value})} placeholder="e.g. act_123456789" className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm font-light placeholder:font-light text-[#0F172A] focus:outline-none focus:border-[#FF2D20] focus:ring-2 focus:ring-red-500/10" required />
+                      </div>
+                    </>
+                  )}
                   
-                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs font-medium text-blue-800">
-                    If you are using a sandbox API for testing, please input your exact Sandbox Account ID here so our backend can map it properly.
-                  </div>
                 </div>
 
                 <div className="mt-8 flex gap-3">
@@ -229,7 +259,7 @@ export default function IntegrationsView({ state, dispatch }) {
                   </button>
                   <button 
                     type="submit"
-                    disabled={isLoading || !accountName || !accountId || !accessToken}
+                    disabled={isLoading || !accountName}
                     className="flex-1 bg-[#FF2D20] hover:bg-[#E5261A] text-white font-bold text-sm px-4 py-2.5 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex justify-center items-center"
                   >
                     {isLoading ? (

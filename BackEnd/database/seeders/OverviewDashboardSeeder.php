@@ -19,9 +19,9 @@ class OverviewDashboardSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::latest()->first();
+        $user = User::find(1);
         if (!$user) {
-            $this->command->error('No user found to seed data for.');
+            $this->command->error('User with ID 1 not found to seed data for.');
             return;
         }
 
@@ -38,15 +38,40 @@ class OverviewDashboardSeeder extends Seeder
         // 3 Ad Accounts
         $googleAccount = AdAccount::updateOrCreate(
             ['user_id' => $user->id, 'platform' => 'google'],
-            ['account_name' => 'Google Ads Main', 'status' => 'active']
+            [
+                'account_name' => 'Google Ads Main', 
+                'status' => 'active',
+                'platform_account_id' => null,
+                'credentials' => [
+                    'developer_token' => 'qCj-KS36uTUC4Sf7vsQXRA'
+                ]
+            ]
         );
         $metaAccount = AdAccount::updateOrCreate(
             ['user_id' => $user->id, 'platform' => 'meta'],
-            ['account_name' => 'Meta Business Main', 'status' => 'active']
+            [
+                'account_name' => 'Meta Business Main', 
+                'status' => 'active',
+                'platform_account_id' => 'act_1759487121891508',
+                'credentials' => [
+                    'app_id' => '1046826207679415',
+                    'app_secret' => '4beefcb5ef661742a18f8f5d8c63f890',
+                    'access_token' => 'EAAO4FThAE7cBR2woceQG0K1xX67FcGuCZADYCNycZCO3w9RUhTDLjUBrrO7QJbTYLf6vZA0T1XSQRvT2pcMmpvzxZBFACS6t4MiYkq4zTmPti7CqMvwPdOaxSsPxgj4EIaJI3RE1YAlSeTMxjsoWOOZBsTj5s3hp2lbZB4jKlwCkEWIh7cZAoSWl7YUqinPjGKOYDy4slXj6bdYoi2LZAFGDkGdq'
+                ]
+            ]
         );
         $snapchatAccount = AdAccount::updateOrCreate(
             ['user_id' => $user->id, 'platform' => 'snapchat'],
-            ['account_name' => 'Snapchat Ads Main', 'status' => 'active']
+            [
+                'account_name' => 'Snapchat Ads Main', 
+                'status' => 'active',
+                'platform_account_id' => 'b41a2daf-9f0c-49c2-8c73-ba9d901b8d94',
+                'credentials' => [
+                    'client_id' => '07289711-d520-4170-bf9d-7e6feb0b3ab4',
+                    'client_secret' => 'd58de301c7bc467e5430',
+                    'access_token' => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRfaWQiOiIwNzI4OTcxMS1kNTIwLTQxNzAtYmY5ZC03ZTZmZWIwYjNhYjQiLCJleHAiOjE3ODMwNjI0NjN9.3c48c25fc572d684208f8502df84c90369f4fec1276f25f3a1dc49a6ab9e783b'
+                ]
+            ]
         );
 
         $now = Carbon::now();
@@ -59,7 +84,7 @@ class OverviewDashboardSeeder extends Seeder
                 'account' => $googleAccount,
                 'name' => 'Summer Search Expansion',
                 'objective' => 'sales',
-                'status' => 'active',
+                            'status' => 'completed',
                 'budget_type' => 'daily',
                 'base_impressions' => 7500, // Google ~56%
                 'ctr_base' => 0.04, // 4%
@@ -74,7 +99,7 @@ class OverviewDashboardSeeder extends Seeder
                 'account' => $metaAccount,
                 'name' => 'Retargeting Core Audience',
                 'objective' => 'leads',
-                'status' => 'active',
+                            'status' => 'completed',
                 'budget_type' => 'daily',
                 'base_impressions' => 15000, // Meta ~28% (cheaper CPC)
                 'ctr_base' => 0.02, // 2%
@@ -89,7 +114,7 @@ class OverviewDashboardSeeder extends Seeder
                 'account' => $snapchatAccount,
                 'name' => 'GenZ Brand Awareness',
                 'objective' => 'awareness',
-                'status' => 'active',
+                            'status' => 'completed',
                 'budget_type' => 'daily',
                 'base_impressions' => 22500, // Snap ~15% (very cheap CPC)
                 'ctr_base' => 0.01, // 1%

@@ -5,6 +5,8 @@ import { PlusIcon, ArrowLeftIcon, PhotoIcon, TrashIcon } from '@heroicons/react/
 import AdStatusBadge from './AdStatusBadge'
 
 export default function AdsScreen({ dispatch, navigate, selectedCampaign, selectedCampaignId, selectedAdSet, selectedAdSetId, activeAds, getPlatformIcon }) {
+  const isCompleted = selectedCampaign?.status?.toLowerCase() === 'completed'
+  
   useEffect(() => {
     if (selectedAdSetId) {
       axios.get(`/api/adsets/${selectedAdSetId}/ads`)
@@ -63,19 +65,21 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
             <p className="text-[11px] font-semibold text-[#94A3B8] mt-0.5">Manage individual ads for this Ad Set.</p>
           </div>
         </div>
-        <button
-          onClick={() => {
-            if (selectedCampaign?.platform === 'Meta' || selectedCampaign?.platform === 'Snapchat') {
-              alert('Creation of ads for Facebook/Meta and Snapchat is not available. You can only access Google Ads live.')
-            } else {
-              dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })
-            }
-          }}
-          className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-medium px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
-        >
-          <PlusIcon className="w-4 h-4 shrink-0" />
-          Create Ad
-        </button>
+        {!isCompleted && (
+          <button
+            onClick={() => {
+              if (selectedCampaign?.platform === 'Meta' || selectedCampaign?.platform === 'Snapchat') {
+                alert('Creation of ads for Facebook/Meta and Snapchat is not available. You can only access Google Ads live.')
+              } else {
+                dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })
+              }
+            }}
+            className="bg-[#FF2D20] hover:bg-[#E5261A] text-white text-[11px] font-medium px-4 py-2 rounded-xl inline-flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+          >
+            <PlusIcon className="w-4 h-4 shrink-0" />
+            Create Ad
+          </button>
+        )}
       </div>
 
       {/* Ads Grid */}
@@ -112,8 +116,8 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
                     </div>
                   </div>
                     <div className="flex flex-col items-end gap-2">
-                      <AdStatusBadge ad={ad} />
-                      {(ad.status === 'Active' || ad.status === 'Paused') && ad.review_status === 'APPROVED' && (
+                      <AdStatusBadge ad={ad} isCompleted={isCompleted} />
+                      {!isCompleted && (ad.status === 'Active' || ad.status === 'Paused') && ad.review_status === 'APPROVED' && (
                         <button 
                           onClick={() => handleToggleAdStatus(ad.id)}
                           className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${ad.status === 'Active' ? 'bg-green-500' : 'bg-slate-300'}`}
@@ -134,43 +138,53 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
                 <div className="grid grid-cols-4 gap-2 mb-4 text-center">
                   <div className="bg-[#FFF1F0] p-2 rounded-lg">
                     <span className="block text-[8px] font-medium text-[#FF2D20] uppercase">Spend</span>
-                    <span className="block text-xs font-semibold text-[#0F172A]">${ad.metrics.spend}</span>
+                    <span className="block text-xs font-semibold text-[#0F172A]">${ad.metrics?.spend || 0}</span>
                   </div>
                   <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
                     <span className="block text-[8px] font-medium text-[#94A3B8] uppercase">Impr.</span>
-                    <span className="block text-xs font-semibold text-[#0F172A]">{ad.metrics.impressions}</span>
+                    <span className="block text-xs font-semibold text-[#0F172A]">{ad.metrics?.impressions || 0}</span>
                   </div>
                   <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
                     <span className="block text-[8px] font-medium text-[#94A3B8] uppercase">Clicks</span>
-                    <span className="block text-xs font-semibold text-[#0F172A]">{ad.metrics.clicks}</span>
+                    <span className="block text-xs font-semibold text-[#0F172A]">{ad.metrics?.clicks || 0}</span>
                   </div>
                   <div className="bg-[#F8FAFC] border border-[#E2E8F0] p-2 rounded-lg">
                     <span className="block text-[8px] font-medium text-[#94A3B8] uppercase">CTR</span>
                     <span className="block text-xs font-semibold text-[#0F172A]">
-                      {ad.metrics.impressions > 0 ? ((ad.metrics.clicks / ad.metrics.impressions) * 100).toFixed(1) : '0.0'}%
+                      {(ad.metrics?.impressions > 0) ? ((ad.metrics.clicks / ad.metrics.impressions) * 100).toFixed(1) : '0.0'}%
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad', item: ad } })}
-                  className="flex-1 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-medium py-2 rounded-xl cursor-pointer transition-all shadow-sm"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => {
-                    if(window.confirm('Are you sure you want to delete this ad? This action cannot be undone.')) {
-                      handleDeleteAd(ad.id)
-                    }
-                  }}
-                  className="bg-white border border-[#E2E8F0] hover:bg-red-50 text-[#94A3B8] hover:text-red-500 px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm"
-                >
-                  <TrashIcon className="w-4 h-4 stroke-[1.5]" />
-                </button>
-              </div>
+              {!isCompleted && (
+                <div className="flex gap-2">
+                  {(ad.status === 'Draft' || ad.review_status === 'REJECTED') && (
+                    <button
+                      onClick={() => dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad', item: ad } })}
+                      className="flex-1 bg-white border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#475569] text-[11px] font-medium py-2 rounded-xl cursor-pointer transition-all shadow-sm"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      dispatch({
+                        type: 'OPEN_CONFIRM',
+                        payload: {
+                          type: 'DELETE_AD',
+                          id: ad.id,
+                          title: 'Delete Ad',
+                          message: 'Are you sure you want to delete this ad? This action cannot be undone.'
+                        }
+                      });
+                    }}
+                    className="bg-white border border-[#E2E8F0] hover:bg-red-50 text-[#94A3B8] hover:text-red-500 px-3 py-2 rounded-xl cursor-pointer transition-all shadow-sm"
+                  >
+                    <TrashIcon className="w-4 h-4 stroke-[1.5]" />
+                  </button>
+                </div>
+              )}
               </div>
             </div>
           ))}
@@ -182,18 +196,20 @@ export default function AdsScreen({ dispatch, navigate, selectedCampaign, select
           </div>
           <h3 className="text-sm font-medium text-[#0F172A] font-mona mb-1">No Ads Created</h3>
           <p className="text-xs font-semibold text-[#94A3B8] max-w-xs mb-6">Start building your creative variations for this ad set.</p>
-          <button
-            onClick={() => {
-              if (selectedCampaign?.platform === 'Meta' || selectedCampaign?.platform === 'Snapchat') {
-                alert('Creation of ads for Facebook/Meta and Snapchat is not available. You can only access Google Ads live.')
-              } else {
-                dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })
-              }
-            }}
-            className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-medium px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
-          >
-            Create First Ad
-          </button>
+          {!isCompleted && (
+            <button
+              onClick={() => {
+                if (selectedCampaign?.platform === 'Meta' || selectedCampaign?.platform === 'Snapchat') {
+                  alert('Creation of ads for Facebook/Meta and Snapchat is not available. You can only access Google Ads live.')
+                } else {
+                  dispatch({ type: 'SET_ACTIVE_PANEL', payload: { type: 'ad' } })
+                }
+              }}
+              className="bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] text-xs font-medium px-4 py-2.5 rounded-xl cursor-pointer transition-all shadow-sm"
+            >
+              Create First Ad
+            </button>
+          )}
         </div>
       )}
     </motion.div>

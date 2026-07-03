@@ -28,3 +28,9 @@ Schedule::job(new DetectAnomaliesJob(null))
     ->dailyAt('06:00')
     ->onOneServer()
     ->withoutOverlapping();
+
+// Fetch daily ad analytics from Google, Meta, Snapchat
+Schedule::command('analytics:fetch')
+    ->dailyAt('00:00')
+    ->onOneServer()
+    ->withoutOverlapping();
