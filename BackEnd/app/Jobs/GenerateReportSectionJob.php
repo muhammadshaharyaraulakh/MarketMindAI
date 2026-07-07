@@ -44,9 +44,26 @@ class GenerateReportSectionJob implements ShouldQueue
             return;
         }
 
+        // Stagger API calls: sleep a few seconds based on section to avoid
+        // all batch jobs hammering Gemini simultaneously
+        $sectionDelays = [
+            'ai_executive_summary' => 0,
+            'ai_insight_narrative' => 4,
+            'ai_insight_audience' => 8,
+            'ai_insight_creative' => 12,
+            'ai_insight_budget' => 16,
+            'ai_personas' => 20,
+            'ai_key_learnings' => 24,
+            'ai_final_recommendations' => 28,
+        ];
+        $delay = $sectionDelays[$this->sectionKey] ?? 0;
+        if ($delay > 0) {
+            sleep($delay);
+        }
+
+        $text = '';
+        
         try {
-            $text = '';
-            
             // Map the section key to the appropriate AI Service method
             switch ($this->sectionKey) {
                 case 'ai_executive_summary':
@@ -74,31 +91,30 @@ class GenerateReportSectionJob implements ShouldQueue
                     $text = $aiService->generateFinalRecommendations($this->allData);
                     break;
             }
-
-            // Save the generated text to Cache
-            Cache::put("report_{$this->reportId}_section_{$this->sectionKey}", $text, 3600); // 1 hour TTL
-
-            // Mark this section as complete in DB to update the frontend progress bar
-            $report = $reportRepo->find($this->reportId);
-            if ($report) {
-                $sections = $report->completed_sections ?? [];
-                if (!in_array($this->sectionKey, $sections)) {
-                    $sections[] = $this->sectionKey;
-                }
-                
-                // Calculate progress
-                $progress = 10 + (count($sections) * (80 / $report->total_sections)); 
-                if ($progress > 90) $progress = 90;
-
-                $reportRepo->update($this->reportId, [
-                    'completed_sections' => $sections,
-                    'progress_percent' => (int) $progress
-                ]);
-            }
-
         } catch (\Exception $e) {
             Log::error("Failed to generate section {$this->sectionKey} for report {$this->reportId}: " . $e->getMessage());
-            throw $e; // Trigger a retry or fail the batch
+            $text = "Analysis unavailable for this section. Please regenerate the report to retry AI content generation.";
+        }
+
+        // Always save the text (even fallback) so the section is never blank in the PDF
+        Cache::put("report_{$this->reportId}_section_{$this->sectionKey}", $text, 3600);
+
+        // Mark this section as complete in DB to update the frontend progress bar
+        $report = $reportRepo->find($this->reportId);
+        if ($report) {
+            $sections = $report->completed_sections ?? [];
+            if (!in_array($this->sectionKey, $sections)) {
+                $sections[] = $this->sectionKey;
+            }
+            
+            // Calculate progress
+            $progress = 10 + (count($sections) * (80 / $report->total_sections)); 
+            if ($progress > 90) $progress = 90;
+
+            $reportRepo->update($this->reportId, [
+                'completed_sections' => $sections,
+                'progress_percent' => (int) $progress
+            ]);
         }
     }
 }

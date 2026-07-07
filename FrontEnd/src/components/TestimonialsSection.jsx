@@ -91,7 +91,6 @@ export default function TestimonialsSection() {
 
         </div>
 
-        {/* Testimonial Cards Grid */}
         <motion.div
           variants={staggerContainer}
           initial="hidden"

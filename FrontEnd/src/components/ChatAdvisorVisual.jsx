@@ -124,7 +124,7 @@ export default function ChatAdvisorVisual({ inView }) {
       </div>
       
       <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-sm text-[#94A3B8] flex items-center justify-between cursor-text">
-        <span className="font-semibold text-xs">Ask about your campaigns...</span>
+        <span className="font-semibold text-xs">Ask about your campaigns</span>
         <SparklesIcon className="w-4 h-4 text-[#FF2D20]" />
       </div>
     </div>

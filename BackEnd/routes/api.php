@@ -120,3 +120,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Stripe Webhook (No auth:sanctum)
 Route::post('/stripe/webhook', [\App\Http\Controllers\Api\StripeController::class, 'handleWebhook']);
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'send']);

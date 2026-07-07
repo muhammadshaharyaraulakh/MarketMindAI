@@ -163,7 +163,7 @@ export default function CTASection({ onGetStarted }) {
           </span>
           <span className="flex items-center gap-1.5">
             <CheckIcon className="w-4 h-4 text-green-400" />
-            Setup in under 5 minutes
+            Setup in under 10 minutes
           </span>
           <span className="flex items-center gap-1.5">
             <CheckIcon className="w-4 h-4 text-green-400" />

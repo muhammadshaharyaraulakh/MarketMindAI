@@ -153,11 +153,11 @@ export const plans = [
     popular: true,
     features: [
       'Unlimited campaigns',
-      'Real-time analytics + alerts',
+      'Real time analytics + alerts',
       '500 AI content generations/mo',
       'AI chatbot advisor',
       'PDF/CSV/Excel export',
-      'Two-factor authentication',
+      'Two factor authentication',
       '2FA + SSO (Google)',
       '5 user seats',
       'Priority support',
@@ -172,7 +172,7 @@ export const plans = [
     features: [
       'Everything in Pro',
       'Custom AI model training',
-      'White-label dashboard',
+      'White label dashboard',
       'Dedicated account manager',
       'SLA guarantee (99.9% uptime)',
       'SSO (Okta, Azure AD)',
@@ -218,22 +218,22 @@ export const faqs = [
   },
   {
     q: 'How does the AI content generation actually work?',
-    a: 'Our content engine is powered by Gemini fine-tuned on 2M+ high-converting ad creatives. You provide your product, audience, and goal, and the AI generates headlines, body copy, CTAs, video scripts, and image captions optimized for each specific platform.',
+    a: 'Our content engine is powered by Gemini fine tuned on 2M+ high converting ad creatives. You provide your product, audience, and goal, and the AI generates headlines, body copy, CTAs, video scripts, and image captions optimized for each specific platform.',
   },
   {
     q: 'Is my campaign data secure and private?',
-    a: 'Yes. All data is encrypted with AES-256 at rest and TLS 1.3 in transit. We are SOC 2 Type II certified and GDPR compliant. Your campaign data is never used to train AI models for other customers.',
+    a: 'Yes. All data is encrypted with AES 256 at rest and TLS 1.3 in transit. We are SOC 2 Type II certified and GDPR compliant. Your campaign data is never used to train AI models for other customers.',
   },
   {
     q: 'Can I export my analytics reports?',
-    a: 'Absolutely. Pro and Enterprise plans support one-click export to PDF (branded), CSV, and Excel. You can also schedule automated weekly or monthly reports delivered to your email.',
+    a: 'Absolutely. Pro and Enterprise plans support one click export to PDF (branded), CSV, and Excel. You can also schedule automated weekly or monthly reports delivered to your email.',
   },
   {
     q: 'Does it integrate with Google Analytics and Meta Ads Manager?',
     a: 'Yes. MarketMind AI connects natively with Google Analytics 4, Google Ads, Meta Ads Manager, and Mailchimp. Enterprise plans also support Salesforce, HubSpot, and custom API integrations.',
   },
   {
-    q: 'What is included in the 14-day free trial?',
+    q: 'What is included in the 14 day free trial?',
     a: 'The free trial gives you full access to all Pro plan features with no credit card required. You can run up to 5 real campaigns, generate 100 content pieces, and use the AI chatbot unlimited times.',
   },
 ]

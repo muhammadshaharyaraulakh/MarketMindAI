@@ -81,7 +81,6 @@ export default function LogoStrip() {
           TRUSTED BY MARKETING TEAMS AT
         </h3>
 
-        {/* Sliding Marquee Track */}
         <div 
           className="relative overflow-hidden flex w-full"
           style={{

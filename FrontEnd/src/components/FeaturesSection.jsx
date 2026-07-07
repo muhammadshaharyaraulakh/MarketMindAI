@@ -237,14 +237,14 @@ function FeaturesSection() {
               Manage Every Campaign From <span className="text-[#FF2D20]">One Command Center</span>
             </motion.h3>
             <motion.p variants={fadeIn} className="text-[#475569] text-[16px] leading-relaxed mb-6 font-medium">
-              Launch, monitor, pause, and optimize campaigns across Google Ads, Meta, TikTok, and Email, all from a single dashboard. Set budget rules, automated A/B tests, and AI-powered auto-optimization triggers that act before you even wake up.
+              Take full control of your marketing efforts with seamless multi-channel campaign management. Leverage AI to generate compelling ad copy, prepare comprehensive reports, and receive real time anomaly alerts, all while an intelligent chatbot provides quick insights on demand.
             </motion.p>
             <motion.ul variants={staggerContainer} className="space-y-3.5 mb-8">
-              <FeatureCheck text="Multi-channel campaign scheduling" />
-              <FeatureCheck text="AI budget auto-reallocation in real time" />
-              <FeatureCheck text="A/B test automation with winner auto-selection" />
-              <FeatureCheck text="Real-time performance anomaly alerts" />
-              <FeatureCheck text="Drag-and-drop campaign calendar" />
+              <FeatureCheck text="Multi channel campaign Management" />
+              <FeatureCheck text="AI Based Ad Copy and Content Generation" />
+              <FeatureCheck text="AI Based Report Preparation" />
+              <FeatureCheck text="Real time performance anomaly alerts" />
+              <FeatureCheck text="AI Chatbot for quick insights" />
             </motion.ul>
             <motion.a 
               variants={fadeUp}
@@ -296,17 +296,17 @@ function FeaturesSection() {
               className="text-2xl md:text-3xl font-semibold text-[#0F172A] tracking-tight leading-tight mb-5 font-mona"
               style={{ fontVariationSettings: "'wdth' 100, 'wght' 550" }}
             >
-              Real-Time Data That Tells You <span className="text-[#FF2D20]">What to Do Next</span>
+              Real Time Data That Tells You <span className="text-[#FF2D20]">What to Do Next</span>
             </motion.h3>
             <motion.p variants={fadeIn} className="text-[#475569] text-[16px] leading-relaxed mb-6 font-medium">
-              Dashboards refresh every 30 seconds. Track CTR, ROAS, CPC, CPM, LTV, and churn risk with AI annotations that automatically explain every performance spike and drop in plain English.
+              Dashboards refresh after specific intervals. Track CTR, ROAS, CPC, CPM, LTV, and churn risk with AI annotations that automatically explain every performance spike and drop in plain English.
             </motion.p>
             <motion.ul variants={staggerContainer} className="space-y-3.5 mb-8">
-              <FeatureCheck text="30-second dashboard data refresh" />
-              <FeatureCheck text="AI anomaly detection with plain-English explanations" />
-              <FeatureCheck text="Custom KPI dashboard builder (drag & drop)" />
-              <FeatureCheck text="Scheduled reports to email (PDF/CSV/Excel)" />
-              <FeatureCheck text="Multi-account comparison view" />
+              <FeatureCheck text="Customizable Dashboard Data Refresh Intervals" />
+              <FeatureCheck text="AI Anomaly detection with plain English explanations" />
+              <FeatureCheck text="Custom KPI dashboard builder" />
+              <FeatureCheck text="Generate and Export Reports in PDF" />
+              <FeatureCheck text="Compare Multiple Campaigns in One View" />
             </motion.ul>
             <motion.a 
               variants={fadeUp}
@@ -341,13 +341,13 @@ function FeaturesSection() {
               Generate Ad Copy, Captions, and Video Scripts <span className="text-[#FF2D20]">in Seconds</span>
             </motion.h3>
             <motion.p variants={fadeIn} className="text-[#475569] text-[16px] leading-relaxed mb-6 font-medium">
-              Powered by Gemini fine-tuned on 2M+ high-converting ad creatives. Generate platform-native content for Meta, Google, TikTok, YouTube, and Email, with each variation fully optimized for the platform's specific algorithm.
+              Powered by Gemini fine tuned on high performing ad creatives. Generate platform native content for Meta, Google, SnapChat and Email, with each variation fully optimized for the platform specific algorithm.
             </motion.p>
             <motion.ul variants={staggerContainer} className="space-y-3.5 mb-8">
-              <FeatureCheck text="Ad copy for Meta, Google, TikTok, LinkedIn" />
+              <FeatureCheck text="Ad copy for Meta, Google, Snapchat and Email" />
               <FeatureCheck text="Product photo caption generation from uploaded images" />
-              <FeatureCheck text="YouTube video hook & full script writer" />
-              <FeatureCheck text="Email subject line A/B variants (50 at once)" />
+              <FeatureCheck text="Ads video hook & full script writer" />
+              <FeatureCheck text="Email subject line A/B variants (3 at once)" />
               <FeatureCheck text="Brand voice profile that learns and matches your tone" />
             </motion.ul>
             <motion.a 
@@ -400,7 +400,7 @@ function FeaturesSection() {
               className="text-2xl md:text-3xl font-semibold text-[#0F172A] tracking-tight leading-tight mb-5 font-mona"
               style={{ fontVariationSettings: "'wdth' 100, 'wght' 550" }}
             >
-              Ask Your Data Anything. Get <span className="text-[#FF2D20]">Plain-English Answers.</span>
+              Ask Your Data Anything. Get <span className="text-[#FF2D20]">Plain English Answers.</span>
             </motion.h3>
             <motion.p variants={fadeIn} className="text-[#475569] text-[16px] leading-relaxed mb-6 font-medium">
               Most analytics tools show you what happened. MarketMind AI tells you WHY it happened and WHAT to do about it. Ask any question about your campaigns in natural language and get expert-level analysis in seconds.
@@ -409,7 +409,7 @@ function FeaturesSection() {
               <FeatureCheck text="Natural language campaign Q&A (no SQL, no formulas)" />
               <FeatureCheck text="Root cause failure analysis with priority scores" />
               <FeatureCheck text="Actionable fix recommendations with effort estimates" />
-              <FeatureCheck text="Cross-channel insight correlation" />
+              <FeatureCheck text="Cross channel insight correlation" />
               <FeatureCheck text="Weekly AI campaign health digest to your inbox" />
             </motion.ul>
             <motion.a 

@@ -130,7 +130,7 @@ export default function Hero({ onGetStarted }) {
             className="text-[#475569] text-lg lg:text-xl font-normal leading-[1.65] mb-8 max-w-xl"
             style={{ fontVariationSettings: "'wdth' 100, 'wght' 400" }}
           >
-            MarketMind AI unifies campaign management, real-time analytics, and AI-driven content generation so you stop guessing and start growing.
+            MarketMind AI unifies campaign management, real time analytics, and AI driven content generation so you stop guessing and start growing.
           </motion.p>
 
           <motion.div 
@@ -151,7 +151,7 @@ export default function Hero({ onGetStarted }) {
               className="border border-[#E2E8F0] text-[#0F172A] px-7 py-3.5 rounded-lg font-semibold text-[15px] hover:border-[#CBD5E1] hover:bg-[#F8FAFC] flex items-center justify-center gap-2 cursor-pointer transition-all duration-150"
             >
               <PlayCircleIcon className="w-5 h-5 text-[#475569]" />
-              Watch 2-min Demo
+              Watch  Demo Video
             </a>
           </motion.div>
 
@@ -163,7 +163,7 @@ export default function Hero({ onGetStarted }) {
             className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-[#94A3B8] font-medium"
           >
             <span className="flex items-center gap-1.5"><CheckIcon className="w-4 h-4 text-[#FF2D20]" /> No credit card</span>
-            <span className="flex items-center gap-1.5"><CheckIcon className="w-4 h-4 text-[#FF2D20]" /> 14-day free trial</span>
+            <span className="flex items-center gap-1.5"><CheckIcon className="w-4 h-4 text-[#FF2D20]" /> 14 days free trial</span>
             <span className="flex items-center gap-1.5"><CheckIcon className="w-4 h-4 text-[#FF2D20]" /> Cancel anytime</span>
           </motion.div>
         </div>

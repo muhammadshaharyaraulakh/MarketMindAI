@@ -91,10 +91,10 @@ export default function SecuritySection() {
             className="text-[28px] md:text-[38px] font-semibold text-[#0F172A] tracking-tight leading-tight mb-5 font-mona"
             style={{ fontVariationSettings: "'wdth' 100, 'wght' 550" }}
           >
-            Bank-Grade Security for <span className="text-[#FF2D20]">Your Marketing Data</span>
+            Secure <span className="text-[#FF2D20]">Marketing Data</span>
           </motion.h2>
           <motion.p variants={fadeIn} className="text-[#475569] text-base md:text-lg leading-relaxed mb-8 font-medium">
-            Two-factor authentication, Single Sign-On (SSO), role-based permissions, and end-to-end data encryption. Every byte of your campaign information is protected by the same infrastructure used by global financial platforms.
+            Two factor authentication, Password hashing,. Every byte of your campaign information is protected by the same infrastructure used by global financial platforms.
           </motion.p>
 
           {/* Security Features List */}
@@ -105,7 +105,7 @@ export default function SecuritySection() {
               <div>
                 <h4 className="text-base font-bold text-[#0F172A] tracking-tight font-mona">Two-Factor Authentication</h4>
                 <p className="text-sm text-[#475569] leading-relaxed mt-0.5">
-                  TOTP app integration (Google Authenticator, Authy) and emergency SMS recovery backups. Mandatory for Pro & Enterprise accounts.
+                  TOTP app integration (Google Authenticator, Authy) and email recovery backups. Mandatory for Enterprise accounts.
                 </p>
               </div>
             </div>
@@ -114,9 +114,9 @@ export default function SecuritySection() {
             <div className="flex gap-4 items-start text-left">
               <IconBox icon={KeyIcon} color="bg-blue-50 text-blue-600" />
               <div>
-                <h4 className="text-base font-bold text-[#0F172A] tracking-tight font-mona">Single Sign-On (SSO)</h4>
+                <h4 className="text-base font-bold text-[#0F172A] tracking-tight font-mona">OAuth Login</h4>
                 <p className="text-sm text-[#475569] leading-relaxed mt-0.5">
-                  Seamless login using Google Workspace, Okta, and Microsoft Azure Active Directory, fully supported on Enterprise accounts.
+                  Seamless login using Google and Github.
                 </p>
               </div>
             </div>
@@ -125,9 +125,9 @@ export default function SecuritySection() {
             <div className="flex gap-4 items-start text-left">
               <IconBox icon={UserGroupIcon} color="bg-purple-50 text-purple-600" />
               <div>
-                <h4 className="text-base font-bold text-[#0F172A] tracking-tight font-mona">Role-Based Access Control (RBAC)</h4>
+                <h4 className="text-base font-bold text-[#0F172A] tracking-tight font-mona">Secure Password reset</h4>
                 <p className="text-sm text-[#475569] leading-relaxed mt-0.5">
-                  Admin, Campaign Manager, Financial Analyst, and Viewer permissions. Restrict access and export controls at team levels.
+                  Password reset through email or two factor authentication.
                 </p>
               </div>
             </div>
@@ -136,9 +136,9 @@ export default function SecuritySection() {
             <div className="flex gap-4 items-start text-left">
               <IconBox icon={ShieldCheckIconSolid} color="bg-amber-50 text-amber-600" />
               <div>
-                <h4 className="text-base font-bold text-[#0F172A] tracking-tight font-mona">AES-256 + TLS 1.3 Encryption</h4>
+                <h4 className="text-base font-bold text-[#0F172A] tracking-tight font-mona">Hashing and Encryption</h4>
                 <p className="text-sm text-[#475569] leading-relaxed mt-0.5">
-                  Your data is encrypted at rest using AES-256 and in transit utilizing TLS 1.3 protocols. Fully SOC 2 Type II and GDPR compliant.
+                  Secure AES-256 encryption at rest and TLS 1.3 in transit. SOC 2 Type II and GDPR compliant data protection.
                 </p>
               </div>
             </div>
@@ -230,7 +230,7 @@ export default function SecuritySection() {
               <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-4 flex items-center gap-2">
                 <ShieldCheckIconSolid className="w-5 h-5 text-green-600 flex-shrink-0" />
                 <span className="text-green-700 text-xs font-bold flex items-center gap-1">
-                  Two-Factor Authentication Enabled <CheckIcon className="w-3.5 h-3.5 text-green-700" />
+                  Two Factor Authentication Enabled <CheckIcon className="w-3.5 h-3.5 text-green-700" />
                 </span>
               </div>
             </div>

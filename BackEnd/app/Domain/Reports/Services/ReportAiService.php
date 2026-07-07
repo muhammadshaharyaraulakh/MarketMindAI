@@ -12,18 +12,40 @@ class ReportAiService implements ReportAiServiceInterface
     
     private string $reminder = "Remember: plain prose only. No asterisks, no bullet points, no numbered lists, no pound signs, no bold markers. If data is missing, provide a detailed hypothetical best-practice suggestion paragraph instead.";
 
+    /**
+     * Counter for round-robin key assignment across calls within a single job lifecycle.
+     */
+    private static int $keyIndex = 0;
+
+    /**
+     * Get the next API key using round-robin rotation, ensuring each call uses a different key.
+     */
+    private function getNextApiKey(): string
+    {
+        $keys = array_values(array_filter(config('services.gemini_report.keys', [])));
+        
+        if (empty($keys)) {
+            return env('GEMINI_API_KEY');
+        }
+
+        $key = $keys[self::$keyIndex % count($keys)];
+        self::$keyIndex++;
+        return $key;
+    }
+
     private function callGemini(string $prompt, int $maxTokens = 600): string
     {
-        $keys = config('services.gemini_report.keys', []);
-        $apiKey = !empty($keys) && $keys[0] !== null ? $keys[array_rand($keys)] : env('GEMINI_API_KEY');
-        
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}";
-        $maxRetries = 3;
+        $maxRetries = 4;
         $attempt = 0;
+        $lastError = '';
 
         while ($attempt < $maxRetries) {
+            // Pick a different key on each attempt (round-robin across retries too)
+            $apiKey = $this->getNextApiKey();
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={$apiKey}";
+
             try {
-                $response = Http::post($url, [
+                $response = Http::timeout(60)->post($url, [
                     'system_instruction' => [
                         'parts' => [['text' => $this->systemPrompt]]
                     ],
@@ -43,12 +65,15 @@ class ReportAiService implements ReportAiServiceInterface
                 }
 
                 $status = $response->status();
-                if ($status === 503 || $status === 429) {
+                $lastError = $response->body();
+
+                if ($status === 429 || $status === 503) {
                     $attempt++;
                     if ($attempt < $maxRetries) {
-                        // Sleep much longer for rate limits (15 RPM free tier)
-                        // 15 seconds, then 30 seconds
-                        sleep(15 * $attempt); 
+                        // Exponential backoff: 10s, 20s, 40s — gives the quota time to reset
+                        $waitSeconds = 10 * pow(2, $attempt - 1);
+                        Log::warning("Gemini rate limited (key ending ...".substr($apiKey, -6)."), waiting {$waitSeconds}s before retry {$attempt}/{$maxRetries}");
+                        sleep($waitSeconds);
                         continue;
                     }
                 }
@@ -58,14 +83,18 @@ class ReportAiService implements ReportAiServiceInterface
                 
             } catch (\Exception $e) {
                 $attempt++;
+                $lastError = $e->getMessage();
                 if ($attempt < $maxRetries) {
-                    sleep(pow(2, $attempt));
+                    $waitSeconds = 10 * pow(2, $attempt - 1);
+                    Log::warning("Gemini exception (attempt {$attempt}): {$e->getMessage()}, retrying in {$waitSeconds}s");
+                    sleep($waitSeconds);
                     continue;
                 }
                 Log::error('Exception in ReportAiService: ' . $e->getMessage());
                 return "Analysis unavailable for this section. Please regenerate the report to retry AI content generation.";
             }
         }
+        Log::error("Gemini failed after all retries. Last error: " . $lastError);
         return "Analysis unavailable for this section. Please regenerate the report to retry AI content generation.";
     }
 

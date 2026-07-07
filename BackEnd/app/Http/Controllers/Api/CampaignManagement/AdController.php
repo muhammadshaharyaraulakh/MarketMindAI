@@ -124,7 +124,7 @@ class AdController extends Controller
         $platform = strtolower($ad->adSet->campaign->platform);
 
         $platformFields = $this->getPlatformFields($platform);
-        $data = $request->except($platformFields);
+        $data = $request->only(['ad_set_id', 'name', 'status', 'ad_format', 'headline', 'description', 'destination_url', 'cta_type', 'ab_test_group', 'url_custom_parameters', 'sync_status']);
         $platformData = $request->only($platformFields);
 
         if ($platform === 'google') {

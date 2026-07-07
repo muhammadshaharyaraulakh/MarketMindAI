@@ -134,7 +134,7 @@ export default function Navbar({ onSignIn, onSignUp, onShowDashboard }) {
           </button>
         </div>
 
-        {/* Mobile Hamburger Button */}
+        {/* Hamburger Button */}
         <button 
           onClick={() => setIsOpen(!isOpen)} 
           className="lg:hidden text-[#0F172A] hover:text-[#FF2D20] p-1.5 cursor-pointer"

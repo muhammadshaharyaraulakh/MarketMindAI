@@ -95,7 +95,7 @@ export default function PricingSection({ onSelectPlan }) {
             animate={inView ? "visible" : "hidden"}
             className="text-[#475569] text-base md:text-lg leading-relaxed max-w-2xl mx-auto font-medium"
           >
-            No hidden implementation fees. No complex user-seat scaling surprises. Adjust or cancel your subscription anytime with one click.
+            No hidden implementation fees. No complex user seat scaling surprises. Adjust or cancel your subscription anytime with one click.
           </motion.p>
         </div>
 
@@ -204,15 +204,15 @@ export default function PricingSection({ onSelectPlan }) {
                 {/* Bottom CTA Button */}
                 <div className="mt-6">
                   {isEnterprise ? (
-                    <button onClick={() => onSelectPlan && onSelectPlan(plan, displayPrice)} className="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-colors duration-150">
+                    <button onClick={() => onSelectPlan && onSelectPlan(plan, billing === 'annual' && displayPrice !== null ? displayPrice * 12 : displayPrice)} className="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-colors duration-150">
                       {plan.cta}
                     </button>
                   ) : plan.popular ? (
-                    <button onClick={() => onSelectPlan && onSelectPlan(plan, displayPrice)} className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-colors duration-150">
+                    <button onClick={() => onSelectPlan && onSelectPlan(plan, billing === 'annual' && displayPrice !== null ? displayPrice * 12 : displayPrice)} className="w-full bg-[#FF2D20] hover:bg-[#E5261A] text-white py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-colors duration-150">
                       {plan.cta}
                     </button>
                   ) : (
-                    <button onClick={() => onSelectPlan && onSelectPlan(plan, displayPrice)} className="w-full bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-all duration-150">
+                    <button onClick={() => onSelectPlan && onSelectPlan(plan, billing === 'annual' && displayPrice !== null ? displayPrice * 12 : displayPrice)} className="w-full bg-white hover:bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] text-[#0F172A] py-3 rounded-lg font-bold text-sm tracking-tight shadow-sm cursor-pointer transition-all duration-150">
                       {plan.cta}
                     </button>
                   )}

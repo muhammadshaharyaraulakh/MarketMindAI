@@ -114,7 +114,7 @@ export default function ProblemSection() {
             className="bg-white border border-[#E2E8F0] rounded-2xl p-8 flex flex-col items-start text-left hover:border-[#CBD5E1] shadow-[0_1px_3px_rgba(0,0,0,0.06),_0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_6px_rgba(0,0,0,0.07),_0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-200"
           >
             <IconBox icon={XCircleIcon} color="bg-red-50 text-red-500" />
-            <h3 className="text-xl font-bold text-[#0F172A] mt-6 mb-3 tracking-tight font-mona">No Real-Time Visibility</h3>
+            <h3 className="text-xl font-bold text-[#0F172A] mt-6 mb-3 tracking-tight font-mona">No Real Time Visibility</h3>
             <p className="text-[#475569] text-[15px] leading-relaxed mb-6 flex-grow">
               You discover campaign failure only after the weekly budget is spent. By then, the damage is done, and the advertising capital is gone forever.
             </p>

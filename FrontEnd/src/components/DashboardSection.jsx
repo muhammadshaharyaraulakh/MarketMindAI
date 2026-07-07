@@ -76,7 +76,6 @@ export default function DashboardSection() {
   return (
     <section id="dashboard" ref={ref} className="bg-[#F8FAFC] py-24 border-b border-[#E2E8F0]">
       <div className="max-w-7xl mx-auto px-6">
-        {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <SectionLabel text="Live Dashboard Preview" color="blue" />
           <motion.h2
